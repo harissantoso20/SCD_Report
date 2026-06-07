@@ -1,0 +1,14 @@
+@import "tailwindcss";
+
+body { overflow-x: hidden; }
+.minimal-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+.minimal-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.minimal-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 10px; }
+.minimal-scrollbar::-webkit-scrollbar-thumb:hover { background-color: #94a3b8; }
+
+.leaflet-container {
+  z-index: 10 !important;
+  border-radius: 0.5rem;
+}
+
+header { z-index: 9999 !important; }
