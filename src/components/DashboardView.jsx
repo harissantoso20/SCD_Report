@@ -5,15 +5,22 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { PROGRAMS, PROGRAM_IMAGES, PROGRAM_DETAILS, MAP_LOCATIONS, CHART_DATA_SALES } from '../data/mockData';
 import { ChevronDown, MapPin, Building, Zap, Users, TrendingUp, FileImage, FileText, TableIcon, CheckCircle, Paperclip, Plus } from './Icons';
 import * as L from 'leaflet';
+import useAppStore from '../store/useAppStore';
 
-export default function DashboardView({ selectedProgram, selectedDate, setSelectedProgram, setSelectedDate }) {
-  const getBannerImage = () => PROGRAM_IMAGES[selectedProgram] || PROGRAM_IMAGES["default"];
-  const getDetails = () => PROGRAM_DETAILS[selectedProgram] || PROGRAM_DETAILS["default"];
-  const isSalesProgram = [
+export default function DashboardView() {
+  const selectedProgram = useAppStore((state) => state.globalProgram);
+  const setSelectedProgram = useAppStore((state) => state.setGlobalProgram);
+  const selectedDate = useAppStore((state) => state.globalDate);
+  const setSelectedDate = useAppStore((state) => state.setGlobalDate);
+
+  const bannerImage = React.useMemo(() => PROGRAM_IMAGES[selectedProgram] || PROGRAM_IMAGES["default"], [selectedProgram]);
+  const details = React.useMemo(() => PROGRAM_DETAILS[selectedProgram] || PROGRAM_DETAILS["default"], [selectedProgram]);
+  
+  const isSalesProgram = React.useMemo(() => [
     "Budidaya Maggot BSF", "Budidaya Ikan Air Tawar", "SIBA Pembibitan", 
     "Budidaya Puyuh Petelur (Seleman)", "Budidaya Puyuh Petelur (Darmo)", 
     "EcoGrow Mom Utun Makmur", "Poktan Cahaya Tani", "Budidaya Itik Petelur"
-  ].includes(selectedProgram);
+  ].includes(selectedProgram), [selectedProgram]);
   
   const mapRef = useRef(null);
 
@@ -47,8 +54,7 @@ export default function DashboardView({ selectedProgram, selectedDate, setSelect
   }, [selectedProgram]);
 
   // Formatter Rupiah untuk LineChart
-  const formatRupiahChart = (value) => `Rp ${(value / 1000000).toFixed(1)} Jt`;
-  const details = getDetails();
+  const formatRupiahChart = React.useCallback((value) => `Rp ${(value / 1000000).toFixed(1)} Jt`, []);
 
   return (
     <div className="flex flex-col gap-10">
@@ -98,7 +104,7 @@ export default function DashboardView({ selectedProgram, selectedDate, setSelect
         </div>
 
         <div className="lg:w-1/2 rounded-md overflow-hidden border border-gray-200 shadow-sm relative min-h-[220px] lg:min-h-0">
-          <img src={getBannerImage()} alt={`Banner ${selectedProgram}`} className="absolute inset-0 w-full h-full object-cover object-center" />
+          <img src={bannerImage} alt={`Banner ${selectedProgram}`} className="absolute inset-0 w-full h-full object-cover object-center" />
         </div>
       </div>
 

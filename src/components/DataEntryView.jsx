@@ -3,13 +3,18 @@
 import React, { useState } from 'react';
 import { PROGRAMS, PROGRAM_IMAGES } from '../data/mockData';
 import { ChevronDown, CheckCircle, Edit2, TableIcon, FileText, TrendingUp, Paperclip, UploadCloud, Save, Plus } from './Icons';
+import useAppStore from '../store/useAppStore';
 
-export default function DataEntryView({ selectedProgram, selectedDate, setSelectedProgram, setSelectedDate }) {
+export default function DataEntryView() {
+  const selectedProgram = useAppStore((state) => state.globalProgram);
+  const setSelectedProgram = useAppStore((state) => state.setGlobalProgram);
+  const selectedDate = useAppStore((state) => state.globalDate);
+  const setSelectedDate = useAppStore((state) => state.setGlobalDate);
   const [showSuccess, setShowSuccess] = useState(false);
   
-  const getMonthNames = (dateString) => {
-    if (!dateString) return { prev: "...", next: "..." };
-    const d = new Date(dateString);
+  const monthLabels = React.useMemo(() => {
+    if (!selectedDate) return { prev: "...", next: "..." };
+    const d = new Date(selectedDate);
     if (isNaN(d)) return { prev: "...", next: "..." };
     const months = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Ags", "Sep", "Okt", "Nov", "Des"];
     const currentMonthIndex = d.getMonth();
@@ -17,8 +22,7 @@ export default function DataEntryView({ selectedProgram, selectedDate, setSelect
       prev: months[currentMonthIndex === 0 ? 11 : currentMonthIndex - 1], 
       next: months[currentMonthIndex === 11 ? 0 : currentMonthIndex + 1] 
     };
-  };
-  const monthLabels = getMonthNames(selectedDate);
+  }, [selectedDate]);
 
   const [contextData, setContextData] = useState({ 
     anggaran: "Rp 1.766.000.000", 
@@ -51,7 +55,7 @@ export default function DataEntryView({ selectedProgram, selectedDate, setSelect
     setShowSuccess(true); 
     setTimeout(() => setShowSuccess(false), 3000); 
   };
-  const getBannerImage = () => PROGRAM_IMAGES[selectedProgram] || PROGRAM_IMAGES["default"];
+  const bannerImage = React.useMemo(() => PROGRAM_IMAGES[selectedProgram] || PROGRAM_IMAGES["default"], [selectedProgram]);
 
   const PltsContextField = ({ label, fieldKey, rows = 1, minHeight = "min-h-[34px]", wrapperClass = "mb-2.5 flex-none" }) => (
     <div className={`${wrapperClass} flex flex-col`}>
@@ -155,7 +159,7 @@ export default function DataEntryView({ selectedProgram, selectedDate, setSelect
           </div>
         </div>
         <div className="lg:w-1/2 rounded-md overflow-hidden border border-gray-200 shadow-sm relative min-h-[200px] lg:min-h-0">
-          <img src={getBannerImage()} alt={`Banner ${selectedProgram}`} className="absolute inset-0 w-full h-full object-cover object-center" />
+          <img src={bannerImage} alt={`Banner ${selectedProgram}`} className="absolute inset-0 w-full h-full object-cover object-center" />
         </div>
       </div>
 

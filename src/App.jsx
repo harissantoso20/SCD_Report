@@ -1,13 +1,14 @@
 // src/App.js
 
-import React, { useState } from 'react';
-import DashboardView from './components/DashboardView';
-import DataEntryView from './components/DataEntryView';
+import React, { Suspense, lazy } from 'react';
+import useAppStore from './store/useAppStore';
+
+const DashboardView = lazy(() => import('./components/DashboardView'));
+const DataEntryView = lazy(() => import('./components/DataEntryView'));
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState("Dashboard");
-  const [globalProgram, setGlobalProgram] = useState("PLTS Irigasi");
-  const [globalDate, setGlobalDate] = useState(new Date().toISOString().split('T')[0]);
+  const activeTab = useAppStore((state) => state.activeTab);
+  const setActiveTab = useAppStore((state) => state.setActiveTab);
 
   return (
     <div className="min-h-screen bg-[#f8f9fa] flex flex-col w-full">
@@ -35,17 +36,13 @@ export default function App() {
       </header>
 
       <main className="flex-1 w-full p-4 md:p-6 lg:max-w-7xl lg:mx-auto">
-        {activeTab === "Dashboard" ? (
-          <DashboardView 
-            selectedProgram={globalProgram} setSelectedProgram={setGlobalProgram}
-            selectedDate={globalDate} setSelectedDate={setGlobalDate}
-          />
-        ) : (
-          <DataEntryView 
-            selectedProgram={globalProgram} setSelectedProgram={setGlobalProgram}
-            selectedDate={globalDate} setSelectedDate={setGlobalDate}
-          />
-        )}
+        <Suspense fallback={
+          <div className="flex items-center justify-center h-64">
+            <div className="w-8 h-8 border-4 border-[#1e3a8a] border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        }>
+          {activeTab === "Dashboard" ? <DashboardView /> : <DataEntryView />}
+        </Suspense>
       </main>
 
       {/* Global Footer (Copyright & Version) */}
