@@ -12,3 +12,16 @@ body { overflow-x: hidden; }
 }
 
 header { z-index: 9999 !important; }
+
+/* Custom Leaflet Tooltip override for infographic look */
+.leaflet-tooltip.custom-infographic-tooltip {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  opacity: 1 !important;
+}
+/* Hide the small triangle pointer */
+.leaflet-tooltip.custom-infographic-tooltip::before {
+  display: none !important;
+}
