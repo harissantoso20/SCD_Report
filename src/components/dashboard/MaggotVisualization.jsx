@@ -11,7 +11,7 @@ const FilterButtons = ({ currentRange, setRange }) => (
     <select
       value={currentRange}
       onChange={(e) => setRange(Number(e.target.value))}
-      className="appearance-none bg-white hover:bg-gray-50 border border-gray-200 text-[#25326a] text-[11px] font-bold rounded-md pl-3 pr-7 py-1.5 cursor-pointer focus:outline-none focus:ring-1 focus:ring-[#1e3a8a] transition-colors shadow-sm"
+      className="appearance-none bg-white hover:bg-slate-50 border border-slate-200 text-[#25326a] text-[11px] font-bold rounded-md pl-3 pr-7 py-1.5 cursor-pointer focus:outline-none focus:ring-1 focus:ring-[#1e3a8a] transition-colors shadow-sm"
     >
       <option value={3}>3 BULAN</option>
       <option value={6}>6 BULAN</option>
@@ -43,7 +43,7 @@ const renderLineLabelRp = (props) => {
   );
 };
 
-export default function MaggotVisualization() {
+const MaggotVisualization = React.memo(function MaggotVisualization() {
   const selectedProgram = useAppStore((state) => state.globalProgram);
   
   const { 
@@ -81,7 +81,6 @@ export default function MaggotVisualization() {
     }
 
     // Find peak sales month
-    const salesDataFiltered = maggotFinancialData.slice(-timeFilter);
     const peakSalesData = [...salesDataFiltered].sort((a, b) => (b.omzet_kasgot + b.omzet_kering + b.omzet_fresh) - (a.omzet_kasgot + a.omzet_kering + a.omzet_fresh))[0];
     let peakSalesStatement = '';
     if (peakSalesData) {
@@ -96,15 +95,15 @@ export default function MaggotVisualization() {
     const salesOverallStatement = ` Dari sisi komersial, total pendapatan dari penjualan produk turunan maggot (fresh, kering, kasgot) menyentuh angka Rp ${(totalSalesOmzet / 1000000).toFixed(1)} Jt.`;
 
     return (
-      <div className="text-slate-600 text-sm leading-relaxed space-y-3">
+      <div className="text-slate-600 text-[13px] leading-relaxed space-y-3">
         {(peakStatement || peakSalesStatement) && (
           <p>
-            {peakStatement && <span className="font-medium text-[#1e3a8a]">{peakStatement}</span>}
-            {peakSalesStatement && <span className="font-medium text-emerald-600">{peakSalesStatement}</span>}
+            {peakStatement && <span className="font-bold text-[#1e3a8a]">{peakStatement}</span>}
+            {peakSalesStatement && <span className="font-bold text-blue-600">{peakSalesStatement}</span>}
           </p>
         )}
         <p>
-          Secara keseluruhan dalam periode <strong className="text-[#1e3a8a]">{startMonth} - {endMonth} {currentYear}</strong>, sebanyak <strong className="text-emerald-600">{new Intl.NumberFormat('id-ID').format(kg)} Kg</strong> sampah organik berhasil terurai. Ini setara dengan mencegah timbunan limbah harian dari <strong>±{households} rumah tangga</strong> serta mencegah pelepasan <strong>±{methane} Kg emisi metana (CH4)</strong> ke atmosfer.{salesOverallStatement}
+          Secara keseluruhan dalam periode <strong className="text-[#1e3a8a]">{startMonth} - {endMonth} {currentYear}</strong>, sebanyak <strong className="text-blue-600">{new Intl.NumberFormat('id-ID').format(kg)} Kg</strong> sampah organik berhasil terurai. Ini setara dengan mencegah timbunan limbah harian dari <strong>±{households} rumah tangga</strong> serta mencegah pelepasan <strong>±{methane} Kg emisi metana (CH4)</strong> ke atmosfer.{salesOverallStatement}
         </p>
         <p>
           Jika dikomparasikan secara *Year-on-Year* (YoY) dengan tahun sebelumnya, tren performa operasional menunjukkan peningkatan berkelanjutan, baik dari sisi kapasitas pengolahan limbah organik maupun optimalisasi monetisasi sirkular ekonominya.
@@ -114,53 +113,51 @@ export default function MaggotVisualization() {
   };
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4">
       
       {/* ----------------- TOP ROW (3 COLUMNS) ----------------- */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         
         {/* 1. Hero Banner */}
-        <div className="min-h-[200px] bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden relative group">
+        <div className="min-h-[200px] bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden relative group">
           <img src={bannerImage} alt={selectedProgram} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000 ease-in-out" />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#1e3a8a]/90 via-[#1e3a8a]/40 to-transparent flex flex-col justify-end p-6">
+          <div className="absolute inset-0 bg-gradient-to-t from-[#1e3a8a]/90 via-[#1e3a8a]/40 to-transparent flex flex-col justify-end p-4 md:p-5">
             <h3 className="text-white font-black text-2xl mb-1 drop-shadow-md">{selectedProgram}</h3>
             <p className="text-white/90 text-xs font-medium line-clamp-3 leading-relaxed drop-shadow-sm">{details.desc}</p>
           </div>
         </div>
 
         {/* 2. Insight Analitik */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex flex-col relative overflow-hidden group hover:-translate-y-1 hover:shadow-md transition-all duration-300">
+        <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 md:p-5 flex flex-col relative overflow-hidden group hover:-translate-y-1 hover:shadow-md transition-all duration-300">
           <div className="flex items-center justify-between mb-4 relative z-10">
-            <h4 className="text-[14px] font-black text-[#25326a] uppercase tracking-wider flex items-center gap-2">
-              <Sparkles size={18} className="text-purple-500" />
+            <h4 className="text-[13px] font-bold text-[#1e3a8a] uppercase tracking-wider flex items-center gap-2">
+              <Sparkles size={16} className="text-blue-500" />
               Insight Analitik
             </h4>
             <FilterButtons currentRange={timeFilter} setRange={setTimeFilter} />
           </div>
           <div className="flex-1 relative z-10">
-            <p className="text-gray-600 font-medium leading-relaxed text-[13px]">
-              {generateSmartAnalogy(selectedWasteManaged)}
-            </p>
+            {generateSmartAnalogy(selectedWasteManaged)}
           </div>
-          <div className="absolute -bottom-6 -right-6 text-purple-50/50 group-hover:scale-110 transition-transform duration-500">
+          <div className="absolute -bottom-6 -right-6 text-blue-50/50 group-hover:scale-110 transition-transform duration-500">
              <Sparkles size={120} />
           </div>
         </div>
 
         {/* 3. Waste Managed YTD */}
-        <div className="bg-green-50 rounded-xl shadow-sm border border-green-100 p-6 flex flex-col justify-center relative overflow-hidden group hover:-translate-y-1 hover:shadow-md transition-all duration-300">
+        <div className="bg-blue-50/50 rounded-lg shadow-sm border border-blue-100 p-4 md:p-5 flex flex-col justify-center relative overflow-hidden group hover:-translate-y-1 hover:shadow-md transition-all duration-300">
           <div className="relative z-10 animate-[pulse_4s_ease-in-out_infinite]">
-            <p className="text-[12px] font-extrabold text-green-700 uppercase tracking-widest mb-2">Waste Managed (YTD)</p>
+            <p className="text-[11px] font-bold text-blue-600 uppercase tracking-widest mb-2">Waste Managed (YTD)</p>
             <div className="flex items-baseline gap-2">
-              <h3 className="text-5xl font-black text-green-900 tracking-tighter">
+              <h3 className="text-4xl lg:text-5xl font-black text-[#1e3a8a] tracking-tighter">
                 {new Intl.NumberFormat('id-ID').format(totalWasteManaged)}
               </h3>
-              <span className="text-xl font-bold text-green-700">Kg</span>
+              <span className="text-xl font-bold text-blue-700">Kg</span>
             </div>
-            <p className="text-sm font-semibold text-green-800 mt-2">Sampah Organik Tereduksi</p>
+            <p className="text-xs font-semibold text-blue-800 mt-2">Sampah Organik Tereduksi</p>
           </div>
           {/* Sparkline decoration */}
-          <div className="absolute -bottom-4 -right-4 text-green-200/50 group-hover:translate-x-2 transition-transform duration-500">
+          <div className="absolute -bottom-4 -right-4 text-blue-200/50 group-hover:translate-x-2 transition-transform duration-500">
               <svg width="150" height="100" viewBox="0 0 100 50" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M0 40 C 20 35, 40 45, 60 20 S 80 0, 100 5" stroke="currentColor" strokeWidth="8" strokeLinecap="round" />
             </svg>
@@ -170,13 +167,13 @@ export default function MaggotVisualization() {
 
 
       {/* ----------------- BOTTOM ROW (3 CHARTS) ----------------- */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         
         {/* CHART 1: Konversi Input-Output */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 flex flex-col">
-          <div className="flex items-center justify-between border-b border-gray-100 pb-3 mb-6">
-            <h2 className="text-[13px] font-black text-[#25326a] uppercase tracking-wider flex items-center gap-2">
-              <Zap size={16} className="text-[#f59e0b]" />
+        <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 md:p-5 flex flex-col">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-2 mb-4">
+            <h2 className="text-[13px] font-bold text-[#1e3a8a] uppercase tracking-wider flex items-center gap-2">
+              <Zap size={16} className="text-blue-500" />
               Konversi Input/Output
             </h2>
           </div>
@@ -188,21 +185,21 @@ export default function MaggotVisualization() {
                 <YAxis tick={{fontSize: 9, fill: '#64748b', fontWeight: 'bold'}} axisLine={false} tickLine={false} tickFormatter={(val) => val >= 1000 ? `${(val/1000).toFixed(1)}k` : val} />
                 <Tooltip cursor={{fill: '#f8fafc'}} contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '12px' }} />
                 <Bar dataKey="sampah" name="Sampah Organik (Kg)" fill="#1e3a8a" barSize={16} radius={[4, 4, 0, 0]} label={renderLabelKg} />
-                <Bar dataKey="maggot" name="Fresh Maggot (Kg)" fill="#f59e0b" barSize={16} radius={[4, 4, 0, 0]} label={renderLabelKg} />
+                <Bar dataKey="maggot" name="Fresh Maggot (Kg)" fill="#3b82f6" barSize={16} radius={[4, 4, 0, 0]} label={renderLabelKg} />
               </BarChart>
             </ResponsiveContainer>
           </div>
           <div className="flex justify-center items-center gap-4 mt-4">
             <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 bg-[#1e3a8a] rounded-sm"></div><span className="text-[9px] font-bold text-gray-600 tracking-wider">SAMPAH (IN)</span></div>
-            <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 bg-[#f59e0b] rounded-sm"></div><span className="text-[9px] font-bold text-gray-600 tracking-wider">MAGGOT (OUT)</span></div>
+            <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 bg-[#3b82f6] rounded-sm"></div><span className="text-[9px] font-bold text-gray-600 tracking-wider">MAGGOT (OUT)</span></div>
           </div>
         </div>
 
         {/* CHART 2: Tren Penjualan (Volume) */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 flex flex-col">
-          <div className="flex items-center justify-between border-b border-gray-100 pb-3 mb-6">
-            <h2 className="text-[13px] font-black text-[#25326a] uppercase tracking-wider flex items-center gap-2">
-              <Box size={16} className="text-[#10b981]" />
+        <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 md:p-5 flex flex-col">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-2 mb-4">
+            <h2 className="text-[13px] font-bold text-[#1e3a8a] uppercase tracking-wider flex items-center gap-2">
+              <Box size={16} className="text-[#1e3a8a]" />
               Tren Volume Penjualan
             </h2>
           </div>
@@ -214,23 +211,23 @@ export default function MaggotVisualization() {
                 <YAxis tick={{fontSize: 9, fill: '#64748b', fontWeight: 'bold'}} axisLine={false} tickLine={false} tickFormatter={(val) => val >= 1000 ? `${(val/1000).toFixed(1)}k` : val} />
                 <Tooltip cursor={{fill: '#f8fafc'}} contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '12px' }} />
                 <Bar dataKey="kasgot" name="Kasgot (Kg)" stackId="a" fill="#1e3a8a" barSize={24} />
-                <Bar dataKey="kering" name="Maggot Kering (Kg)" stackId="a" fill="#f59e0b" barSize={24} />
-                <Bar dataKey="fresh" name="Fresh Maggot (Kg)" stackId="a" fill="#eab308" barSize={24} radius={[4, 4, 0, 0]} label={renderLabelKg} />
+                <Bar dataKey="kering" name="Maggot Kering (Kg)" stackId="a" fill="#f43f5e" barSize={24} />
+                <Bar dataKey="fresh" name="Fresh Maggot (Kg)" stackId="a" fill="#3b82f6" barSize={24} radius={[4, 4, 0, 0]} label={renderLabelKg} />
               </BarChart>
             </ResponsiveContainer>
           </div>
           <div className="flex flex-wrap justify-center items-center gap-x-3 mt-4">
-            <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 bg-[#eab308] rounded-sm"></div><span className="text-[9px] font-bold text-gray-600 tracking-wider">FRESH</span></div>
-            <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 bg-[#f59e0b] rounded-sm"></div><span className="text-[9px] font-bold text-gray-600 tracking-wider">KERING</span></div>
+            <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 bg-[#3b82f6] rounded-sm"></div><span className="text-[9px] font-bold text-gray-600 tracking-wider">FRESH</span></div>
+            <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 bg-[#f43f5e] rounded-sm"></div><span className="text-[9px] font-bold text-gray-600 tracking-wider">KERING</span></div>
             <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 bg-[#1e3a8a] rounded-sm"></div><span className="text-[9px] font-bold text-gray-600 tracking-wider">KASGOT</span></div>
           </div>
         </div>
 
         {/* CHART 3: Tren Omzet (Revenue) */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 flex flex-col">
-          <div className="flex items-center justify-between border-b border-gray-100 pb-3 mb-6">
-            <h2 className="text-[13px] font-black text-[#25326a] uppercase tracking-wider flex items-center gap-2">
-              <DollarSign size={16} className="text-[#3b82f6]" />
+        <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 md:p-5 flex flex-col">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-2 mb-4">
+            <h2 className="text-[13px] font-bold text-[#1e3a8a] uppercase tracking-wider flex items-center gap-2">
+              <DollarSign size={16} className="text-[#f43f5e]" />
               Tren Omzet Produk
             </h2>
           </div>
@@ -242,14 +239,14 @@ export default function MaggotVisualization() {
                 <YAxis tick={{fontSize: 9, fill: '#64748b', fontWeight: 'bold'}} axisLine={false} tickLine={false} tickFormatter={(val) => val >= 1000000 ? `${(val/1000000).toFixed(1)}Jt` : val} width={45} />
                 <Tooltip cursor={{fill: '#f8fafc', strokeWidth: 1, strokeDasharray: '3 3'}} contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '12px' }} formatter={(val) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(val)} />
                 <Line type="monotone" dataKey="omzet_kasgot" name="Omzet Kasgot" stroke="#1e3a8a" strokeWidth={3} dot={{ r: 3 }} activeDot={{ r: 5 }} />
-                <Line type="monotone" dataKey="omzet_kering" name="Omzet Kering" stroke="#f59e0b" strokeWidth={3} dot={{ r: 3 }} activeDot={{ r: 5 }} />
-                <Line type="monotone" dataKey="omzet_fresh" name="Omzet Fresh" stroke="#eab308" strokeWidth={3} dot={{ r: 3 }} activeDot={{ r: 5 }} label={renderLineLabelRp} />
+                <Line type="monotone" dataKey="omzet_kering" name="Omzet Kering" stroke="#f43f5e" strokeWidth={3} dot={{ r: 3 }} activeDot={{ r: 5 }} />
+                <Line type="monotone" dataKey="omzet_fresh" name="Omzet Fresh" stroke="#3b82f6" strokeWidth={3} dot={{ r: 3 }} activeDot={{ r: 5 }} label={renderLineLabelRp} />
               </LineChart>
             </ResponsiveContainer>
           </div>
           <div className="flex flex-wrap justify-center items-center gap-x-3 mt-4">
-            <div className="flex items-center gap-1.5"><div className="w-3 h-0.5 bg-[#eab308]"></div><span className="text-[9px] font-bold text-gray-600 tracking-wider">FRESH</span></div>
-            <div className="flex items-center gap-1.5"><div className="w-3 h-0.5 bg-[#f59e0b]"></div><span className="text-[9px] font-bold text-gray-600 tracking-wider">KERING</span></div>
+            <div className="flex items-center gap-1.5"><div className="w-3 h-0.5 bg-[#3b82f6]"></div><span className="text-[9px] font-bold text-gray-600 tracking-wider">FRESH</span></div>
+            <div className="flex items-center gap-1.5"><div className="w-3 h-0.5 bg-[#f43f5e]"></div><span className="text-[9px] font-bold text-gray-600 tracking-wider">KERING</span></div>
             <div className="flex items-center gap-1.5"><div className="w-3 h-0.5 bg-[#1e3a8a]"></div><span className="text-[9px] font-bold text-gray-600 tracking-wider">KASGOT</span></div>
           </div>
         </div>
@@ -257,4 +254,6 @@ export default function MaggotVisualization() {
       </div>
     </div>
   );
-}
+});
+
+export default MaggotVisualization;

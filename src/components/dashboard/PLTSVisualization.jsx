@@ -1,11 +1,14 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as L from 'leaflet';
+import { Maximize, Minimize } from 'lucide-react';
 import useAppStore from '../../store/useAppStore';
 import { MapPin, Building, Zap, Users } from '../Icons';
 
-export default function PLTSVisualization() {
+const PLTSVisualization = React.memo(function PLTSVisualization() {
   const pltsLocations = useAppStore((state) => state.pltsLocations);
   const mapRef = useRef(null);
+  const mapInstance = useRef(null);
+  const [isFullScreen, setIsFullScreen] = useState(false);
 
   useEffect(() => {
     if (!mapRef.current) return;
@@ -16,8 +19,10 @@ export default function PLTSVisualization() {
     }
 
     const map = L.map(mapRef.current).setView([-3.5, 103.5], 6);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap'
+    mapInstance.current = map;
+    L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+      attribution: '&copy; Google Maps Satellite',
+      maxZoom: 20
     }).addTo(map);
 
     const baseLat = -3.5;
@@ -68,8 +73,20 @@ export default function PLTSVisualization() {
       map.fitBounds(bounds, { padding: [50, 50], maxZoom: 14 });
     }
 
-    return () => map.remove();
+    return () => {
+      map.remove();
+      mapInstance.current = null;
+    };
   }, [pltsLocations]);
+
+  // Handle map resize when toggling full screen
+  useEffect(() => {
+    if (mapInstance.current) {
+      setTimeout(() => {
+        mapInstance.current.invalidateSize();
+      }, 100);
+    }
+  }, [isFullScreen]);
 
   const locs = pltsLocations || [];
 
@@ -89,12 +106,12 @@ export default function PLTSVisualization() {
   const totalPetani = locs.reduce((sum, item) => sum + (parseInt(item.farmers) || 0), 0);
 
   return (
-    <section className="bg-white rounded-md shadow-sm border border-gray-200 p-5 md:p-6">
-      <h2 className="text-[14px] font-bold text-[#25326a] uppercase tracking-wider border-b border-gray-200 pb-2 mb-5 flex items-center gap-2">
+    <section className="bg-white rounded-md shadow-sm border border-gray-200 p-4 md:p-5">
+      <h2 className="text-[14px] font-bold text-[#25326a] uppercase tracking-wider border-b border-gray-200 pb-2 mb-4 flex items-center gap-2">
         <MapPin size={18} className="text-[#1e3a8a]" />
         SEBARAN LOKASI PROGRAM
       </h2>
-      <div className="flex flex-col lg:flex-row gap-6">
+      <div className="flex flex-col lg:flex-row gap-4">
         
         {/* DAFTAR LOKASI (KIRI) */}
         <div className="lg:w-[28%] h-[420px] overflow-y-auto minimal-scrollbar pr-2 flex flex-col gap-4">
@@ -117,7 +134,38 @@ export default function PLTSVisualization() {
         </div>
 
         {/* PETA (TENGAH) */}
-        <div className="lg:w-[48%] h-[420px] w-full border border-gray-300 rounded overflow-hidden" ref={mapRef}></div>
+        <div className={isFullScreen ? "fixed inset-0 z-[9999] bg-slate-900 p-4 md:p-8 flex flex-col" : "lg:w-[48%] h-[420px] w-full border border-gray-300 rounded overflow-hidden relative"}>
+          
+          {isFullScreen && (
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                <MapPin size={24} className="text-white" />
+                SEBARAN LOKASI PLTS (FULL SCREEN)
+              </h2>
+              <button 
+                onClick={() => setIsFullScreen(false)}
+                className="bg-red-500 text-white hover:bg-red-600 px-4 py-2 rounded-md font-bold flex items-center gap-2 transition-colors shadow-sm"
+              >
+                <Minimize size={18} /> Tutup
+              </button>
+            </div>
+          )}
+
+          <div className="relative w-full h-full rounded overflow-hidden shadow-sm" style={{ flex: isFullScreen ? 1 : 'unset' }}>
+            <div className="absolute top-2 right-2 z-[400]">
+              {!isFullScreen && (
+                <button 
+                  onClick={() => setIsFullScreen(true)}
+                  className="bg-white hover:bg-slate-50 text-slate-700 p-2 rounded shadow-md border border-slate-200 transition-colors"
+                  title="Lihat Peta Penuh"
+                >
+                  <Maximize size={18} />
+                </button>
+              )}
+            </div>
+            <div className="w-full h-full bg-slate-100" ref={mapRef}></div>
+          </div>
+        </div>
         
         {/* STATISTIK (KANAN) */}
         <div className="lg:w-[24%] flex flex-col gap-4 justify-center">
@@ -153,4 +201,6 @@ export default function PLTSVisualization() {
       </div>
     </section>
   );
-}
+});
+
+export default PLTSVisualization;

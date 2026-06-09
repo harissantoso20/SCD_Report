@@ -14,7 +14,7 @@ const FilterButtons = ({ currentRange, setRange }) => (
     <select
       value={currentRange}
       onChange={(e) => setRange(Number(e.target.value))}
-      className="appearance-none bg-white hover:bg-gray-50 border border-slate-200 text-[#1e3a8a] text-[10px] font-bold rounded pl-2 pr-6 py-1 cursor-pointer focus:outline-none shadow-sm"
+      className="appearance-none bg-white hover:bg-slate-50 border border-slate-200 text-[#1e3a8a] text-[10px] font-bold rounded pl-2 pr-6 py-1 cursor-pointer focus:outline-none shadow-sm transition-colors"
     >
       <option value={3}>3 BLN</option>
       <option value={6}>6 BLN</option>
@@ -26,7 +26,7 @@ const FilterButtons = ({ currentRange, setRange }) => (
   </div>
 );
 
-export default function TempeAnalytics() {
+const TempeAnalytics = React.memo(function TempeAnalytics() {
   const { tempeOverviewData, tempeYTD, currentYear } = useDashboardData();
   const [timeFilter, setTimeFilter] = useState(12);
 
@@ -42,8 +42,6 @@ export default function TempeAnalytics() {
     }, { mentah: 0, olahan: 0, lainnya: 0, total: 0 });
   }, [filteredOverviewData]);
 
-  // MOCK YTD Comparatives for previous year.
-  // In a real scenario this comes from prev year database. 
   const prevYear = Number(currentYear) - 1;
   const prevYearOmzet = 20000000;
   const prevYearMentah = 300;
@@ -54,8 +52,8 @@ export default function TempeAnalytics() {
   const yoyOlahanPct = ((tempeYTD.total_qty_olahan - prevYearOlahan) / prevYearOlahan) * 100;
 
   const getYoYLabel = (pct) => {
-    if (pct > 0) return <span className="text-emerald-600 font-semibold">▲ +{pct.toFixed(1)}% dibanding tahun lalu</span>;
-    if (pct < 0) return <span className="text-red-500 font-semibold">▼ {pct.toFixed(1)}% dibanding tahun lalu</span>;
+    if (pct > 0) return <span className="text-blue-600 font-semibold">▲ +{pct.toFixed(1)}% dibanding tahun lalu</span>;
+    if (pct < 0) return <span className="text-rose-500 font-semibold">▼ {pct.toFixed(1)}% dibanding tahun lalu</span>;
     return <span className="text-slate-500 font-semibold">- Sama dengan tahun lalu</span>;
   };
 
@@ -65,7 +63,7 @@ export default function TempeAnalytics() {
     { name: 'Pendapatan Lain', value: filteredTotals.lainnya }
   ].filter(item => item.value > 0);
   
-  const COLORS = ['#84cc16', '#15803d', '#94a3b8']; // Light Green, Dark Green, Slate
+  const COLORS = ['#3b82f6', '#1e3a8a', '#f43f5e']; // Soft Blue, Deep Navy, Soft Rose
 
   const renderAIInsight = () => {
     if (filteredOverviewData.length === 0) return <p className="text-slate-500 italic text-sm">Data analitik belum tersedia untuk periode ini.</p>;
@@ -83,25 +81,24 @@ export default function TempeAnalytics() {
     const totalMentah = tempeYTD.total_qty_mentah;
     const totalOlahan = tempeYTD.total_qty_olahan;
     
-    // Average prices calculated securely
     const avgPriceMentah = totalMentah > 0 ? Math.round(tempeYTD.total_omzet_mentah / totalMentah) : 15000;
     const avgPriceOlahan = totalOlahan > 0 ? Math.round(tempeYTD.total_omzet_olahan / totalOlahan) : 120000;
     const isOlahanProfitable = avgPriceOlahan > avgPriceMentah * 2;
 
     return (
-      <div className="text-gray-600 font-medium leading-relaxed text-[13px] space-y-4">
-        {peakStatement && <p><span className="font-bold text-[#15803d]">{peakStatement}</span></p>}
+      <div className="text-slate-600 font-medium leading-relaxed text-[13px] space-y-3">
+        {peakStatement && <p><span className="font-bold text-[#1e3a8a]">{peakStatement}</span></p>}
         <p>
-          Secara keseluruhan dalam periode <span className="font-bold text-[#15803d]">{startMonth} - {endMonth} {currentYear}</span>, volume penjualan Tempe Mentah menyentuh <span className="font-bold text-lime-600">{new Intl.NumberFormat('id-ID').format(totalMentah)} Kg</span>, sementara produk Olahan Tempe terserap pasar sebesar <span className="font-bold text-emerald-700">{new Intl.NumberFormat('id-ID').format(totalOlahan)} Kg</span>. Perpaduan keduanya sukses mencetak akumulasi omzet <span className="font-bold text-emerald-600">{formatRupiah(tempeYTD.total_omzet)}</span>.
+          Secara keseluruhan dalam periode <span className="font-bold text-[#1e3a8a]">{startMonth} - {endMonth} {currentYear}</span>, volume penjualan Tempe Mentah menyentuh <span className="font-bold text-blue-600">{new Intl.NumberFormat('id-ID').format(totalMentah)} Kg</span>, sementara produk Olahan Tempe terserap pasar sebesar <span className="font-bold text-blue-900">{new Intl.NumberFormat('id-ID').format(totalOlahan)} Kg</span>. Perpaduan keduanya sukses mencetak akumulasi omzet <span className="font-bold text-blue-700">{formatRupiah(tempeYTD.total_omzet)}</span>.
         </p>
         <p>
           Jika dikomparasikan secara *Year-on-Year* (YoY), performa komersial mencatat {yoyOmzetPct > 0 ? "pertumbuhan positif" : "terjadinya kontraksi pendapatan"} dibandingkan tahun sebelumnya. Di sisi lain, harga jual Olahan Tempe (rata-rata Rp {new Intl.NumberFormat('id-ID').format(avgPriceOlahan)}/Kg) terbukti jauh lebih tinggi dibandingkan harga Mentah (rata-rata Rp {new Intl.NumberFormat('id-ID').format(avgPriceMentah)}/Kg).
         </p>
-        <div className="mt-4 bg-emerald-50/50 p-3 rounded border border-emerald-100 flex gap-3 items-start relative z-10">
-          <svg className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="mt-3 bg-blue-50/60 p-3 rounded border border-blue-100 flex gap-3 items-start relative z-10 shadow-sm">
+          <svg className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
           </svg>
-          <p className="text-xs italic text-emerald-900">
+          <p className="text-xs italic text-blue-900">
             {isOlahanProfitable 
               ? '"Ibarat menyulap pasir menjadi kaca, mengolah tempe papan menjadi varian turunan mampu mendongkrak margin keuntungan berkali-kali lipat. Fokus pada strategi hilirisasi ini akan sangat krusial bagi ketahanan finansial program."' 
               : '"Meskipun hilirisasi sedang berjalan, manajemen perlu terus menggali inovasi varian olahan dan mengoptimalkan efisiensi produksi agar nilai tambah ekonomi dapat terealisasi secara maksimal di pasaran."'}
@@ -132,46 +129,46 @@ export default function TempeAnalytics() {
   };
 
   return (
-    <div className="w-full flex flex-col gap-6 font-sans text-slate-800">
+    <div className="w-full flex flex-col gap-4 font-sans text-slate-800">
       
       {/* ROW 1: TOP 3 KPIs */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 border-t-4 border-t-emerald-600">
-          <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Total Omzet Keseluruhan YTD</p>
-          <h2 className="text-3xl font-extrabold text-slate-800 mb-2">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-white p-4 md:p-5 rounded-lg shadow-sm border border-slate-200 border-t-4 border-t-blue-600">
+          <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1">Total Omzet Keseluruhan YTD</p>
+          <h2 className="text-2xl lg:text-3xl font-extrabold text-[#1e3a8a] mb-2">
             {formatRupiah(tempeYTD.total_omzet)}
           </h2>
-          <div className="text-xs">
+          <div className="text-[11px]">
             {getYoYLabel(yoyOmzetPct)}
           </div>
         </div>
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 border-t-4 border-t-lime-500">
-          <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Volume Penjualan Tempe Mentah</p>
-          <h2 className="text-3xl font-extrabold text-slate-800 mb-2">
-            {new Intl.NumberFormat('id-ID').format(tempeYTD.total_qty_mentah)} <span className="text-lg text-slate-500 font-semibold">Kg</span>
+        <div className="bg-white p-4 md:p-5 rounded-lg shadow-sm border border-slate-200 border-t-4 border-t-blue-400">
+          <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1">Vol. Jual Tempe Mentah</p>
+          <h2 className="text-2xl lg:text-3xl font-extrabold text-[#1e3a8a] mb-2">
+            {new Intl.NumberFormat('id-ID').format(tempeYTD.total_qty_mentah)} <span className="text-lg text-slate-400 font-semibold">Kg</span>
           </h2>
-          <div className="text-xs">
+          <div className="text-[11px]">
             {getYoYLabel(yoyMentahPct)}
           </div>
         </div>
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 border-t-4 border-t-green-700">
-          <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Volume Penjualan Olahan Tempe</p>
-          <h2 className="text-3xl font-extrabold text-slate-800 mb-2">
-            {new Intl.NumberFormat('id-ID').format(tempeYTD.total_qty_olahan)} <span className="text-lg text-slate-500 font-semibold">Kg</span>
+        <div className="bg-white p-4 md:p-5 rounded-lg shadow-sm border border-slate-200 border-t-4 border-t-blue-900">
+          <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1">Vol. Jual Olahan Tempe</p>
+          <h2 className="text-2xl lg:text-3xl font-extrabold text-[#1e3a8a] mb-2">
+            {new Intl.NumberFormat('id-ID').format(tempeYTD.total_qty_olahan)} <span className="text-lg text-slate-400 font-semibold">Kg</span>
           </h2>
-          <div className="text-xs">
+          <div className="text-[11px]">
             {getYoYLabel(yoyOlahanPct)}
           </div>
         </div>
       </div>
 
       {/* ROW 2: TREN VOLUME & KOMPOSISI */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-stretch">
         
         {/* LEFT COLUMN: TREN VOLUME */}
-        <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-slate-200 p-5 flex flex-col h-[400px]">
-          <div className="flex justify-between items-center border-b border-slate-100 pb-3 mb-5">
-            <h3 className="text-[14px] font-black text-[#15803d] uppercase tracking-widest">
+        <div className="lg:col-span-2 bg-white rounded-lg shadow-sm border border-slate-200 p-4 md:p-5 flex flex-col h-[380px]">
+          <div className="flex justify-between items-center border-b border-slate-100 pb-2 mb-4">
+            <h3 className="text-[13px] font-bold text-[#1e3a8a] uppercase tracking-widest">
               Tren Volume vs. Omzet Kategori
             </h3>
           </div>
@@ -190,21 +187,21 @@ export default function TempeAnalytics() {
                 <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }} />
                 
                 {/* Grouped Bars for Volume */}
-                <Bar yAxisId="left" dataKey="qty_mentah" name="Vol. Tempe Mentah (Kg)" fill="#84cc16" radius={[4, 4, 0, 0]} barSize={16} label={renderLabelKg} />
-                <Bar yAxisId="left" dataKey="qty_olahan" name="Vol. Olahan Tempe (Kg)" fill="#15803d" radius={[4, 4, 0, 0]} barSize={16} label={renderLabelKg} />
+                <Bar yAxisId="left" dataKey="qty_mentah" name="Vol. Tempe Mentah (Kg)" fill="#3b82f6" radius={[4, 4, 0, 0]} barSize={16} label={renderLabelKg} />
+                <Bar yAxisId="left" dataKey="qty_olahan" name="Vol. Olahan Tempe (Kg)" fill="#1e3a8a" radius={[4, 4, 0, 0]} barSize={16} label={renderLabelKg} />
                 
                 {/* Line Charts for Omzet */}
-                <Line yAxisId="right" type="monotone" dataKey="omzet_mentah" name="Omzet Mentah (Rp)" stroke="#84cc16" strokeWidth={3} dot={{ r: 4, fill: '#fff', stroke: '#84cc16', strokeWidth: 2 }} activeDot={{ r: 6 }} label={renderLineLabelRp} />
-                <Line yAxisId="right" type="monotone" dataKey="omzet_olahan" name="Omzet Olahan (Rp)" stroke="#15803d" strokeWidth={3} dot={{ r: 4, fill: '#fff', stroke: '#15803d', strokeWidth: 2 }} activeDot={{ r: 6 }} label={renderLineLabelRp} />
+                <Line yAxisId="right" type="monotone" dataKey="omzet_mentah" name="Omzet Mentah (Rp)" stroke="#3b82f6" strokeWidth={3} dot={{ r: 4, fill: '#fff', stroke: '#3b82f6', strokeWidth: 2 }} activeDot={{ r: 6 }} label={renderLineLabelRp} />
+                <Line yAxisId="right" type="monotone" dataKey="omzet_olahan" name="Omzet Olahan (Rp)" stroke="#1e3a8a" strokeWidth={3} dot={{ r: 4, fill: '#fff', stroke: '#1e3a8a', strokeWidth: 2 }} activeDot={{ r: 6 }} label={renderLineLabelRp} />
               </ComposedChart>
             </ResponsiveContainer>
           </div>
         </div>
 
         {/* RIGHT COLUMN: KOMPOSISI */}
-        <div className="lg:col-span-1 bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex flex-col h-[400px]">
-          <div className="flex justify-between items-center border-b border-slate-100 pb-3 mb-5">
-            <h3 className="text-[14px] font-black text-[#15803d] uppercase tracking-widest">
+        <div className="lg:col-span-1 bg-white p-4 md:p-5 rounded-lg shadow-sm border border-slate-200 flex flex-col h-[380px]">
+          <div className="flex justify-between items-center border-b border-slate-100 pb-2 mb-4">
+            <h3 className="text-[13px] font-bold text-[#1e3a8a] uppercase tracking-widest">
               Komposisi Portofolio
             </h3>
           </div>
@@ -238,8 +235,8 @@ export default function TempeAnalytics() {
             )}
             {pieData.length > 0 && (
               <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none mt-[-15px]">
-                <span className="text-xs text-slate-500 font-semibold">Total Omzet</span>
-                <span className="text-lg font-bold text-[#15803d]">{formatJuta(filteredTotals.total)}</span>
+                <span className="text-[11px] text-slate-500 font-bold uppercase">Total Omzet</span>
+                <span className="text-lg font-black text-[#1e3a8a]">{formatJuta(filteredTotals.total)}</span>
               </div>
             )}
           </div>
@@ -247,10 +244,10 @@ export default function TempeAnalytics() {
       </div>
 
       {/* ROW 3: INSIGHT ANALITIK */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex flex-col relative overflow-hidden group hover:-translate-y-1 hover:shadow-md transition-all duration-300">
+      <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 md:p-5 flex flex-col relative overflow-hidden group hover:-translate-y-1 hover:shadow-md transition-all duration-300">
         <div className="flex justify-between items-center mb-4 relative z-10">
-          <h3 className="text-[14px] font-black text-[#15803d] uppercase tracking-wider flex items-center gap-2">
-            <Sparkles size={18} className="text-emerald-500" />
+          <h3 className="text-[13px] font-bold text-[#1e3a8a] uppercase tracking-widest flex items-center gap-2">
+            <Sparkles size={16} className="text-blue-500" />
             Insight Analitik
           </h3>
           <FilterButtons currentRange={timeFilter} setRange={setTimeFilter} />
@@ -259,9 +256,11 @@ export default function TempeAnalytics() {
         <div className="flex-1 flex flex-col justify-center relative z-10">
           {renderAIInsight()}
         </div>
-        <Sparkles size={120} className="absolute -bottom-10 -right-10 text-emerald-50 opacity-50 group-hover:opacity-70 transition-opacity duration-300 pointer-events-none" />
+        <Sparkles size={140} className="absolute -bottom-10 -right-10 text-blue-50 opacity-40 group-hover:opacity-60 transition-opacity duration-300 pointer-events-none" />
       </div>
 
     </div>
   );
-}
+});
+
+export default TempeAnalytics;
