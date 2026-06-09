@@ -114,15 +114,18 @@ const useAppStore = create((set, get) => ({
       const targetMonthIdx = new Date(globalDate).getMonth();
       const monthNames = getMonthStrings(globalDate);
 
-      // Create a fuzzy keyword to handle data inconsistencies across CSVs 
-      // (e.g. "Budidaya Maggot BSF" vs "BUDIDAYA MAGGOT" vs "Budidaya Maggot")
       let fuzzyKeyword = `%${globalProgram}%`;
       const pLow = globalProgram.toLowerCase();
       if (pLow.includes('maggot')) fuzzyKeyword = '%maggot%';
       else if (pLow.includes('plts')) fuzzyKeyword = '%plts%';
       else if (pLow.includes('ikan')) fuzzyKeyword = '%ikan%';
       else if (pLow.includes('siba')) fuzzyKeyword = '%siba%';
-      else if (pLow.includes('puyuh')) fuzzyKeyword = '%puyuh%';
+      else if (pLow.includes('puyuh')) {
+        if (pLow.includes('seleman')) fuzzyKeyword = '%puyuh%seleman%';
+        else if (pLow.includes('darmo')) fuzzyKeyword = '%puyuh%darmo%';
+        else fuzzyKeyword = '%puyuh%';
+      }
+      else if (pLow.includes('prabumenang')) fuzzyKeyword = '%prabumenang%';
 
       // 4. Fetch Monthly Progress
       const { data: progressData } = await supabase

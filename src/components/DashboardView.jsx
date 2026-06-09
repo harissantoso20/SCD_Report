@@ -6,6 +6,8 @@ import MaggotVisualization from './dashboard/MaggotVisualization';
 import SalesVisualization from './dashboard/SalesVisualization';
 import AdvancedFishAnalytics from './dashboard/AdvancedFishAnalytics';
 import AdvancedPembibitanAnalytics from './dashboard/AdvancedPembibitanAnalytics';
+import QuailAnalytics from './dashboard/QuailAnalytics';
+import TempeAnalytics from './dashboard/TempeAnalytics';
 import ProgramSummary from './dashboard/ProgramSummary';
 import { useDashboardData } from '../hooks/useDashboardData';
 import { FileImage, FileText } from './Icons';
@@ -35,6 +37,10 @@ export default function DashboardView() {
         <AdvancedFishAnalytics />
       ) : p.includes("siba pembibitan") ? (
         <AdvancedPembibitanAnalytics />
+      ) : p.includes("puyuh") ? (
+        <QuailAnalytics />
+      ) : p.includes("prabumenang") ? (
+        <TempeAnalytics />
       ) : isSalesProgram ? (
         <SalesVisualization />
       ) : (
