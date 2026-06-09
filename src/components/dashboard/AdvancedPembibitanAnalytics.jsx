@@ -5,7 +5,7 @@ import {
 } from 'recharts';
 import { useDashboardData } from '../../hooks/useDashboardData';
 import { TrendingUp, AlertTriangle } from '../Icons';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, DollarSign, ShoppingBag, Sprout } from 'lucide-react';
 
 const formatRupiah = (val) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(val);
 const formatJuta = (val) => `${(val / 1000000).toFixed(1)} Jt`;
@@ -164,23 +164,51 @@ const AdvancedPembibitanAnalytics = React.memo(function AdvancedPembibitanAnalyt
       
       {/* ROW 1: TOP 3 KPIs */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white p-4 md:p-5 rounded-lg shadow-sm border border-slate-200 border-t-4 border-t-blue-600">
-          <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1">Total Revenue YTD</p>
-          <h2 className="text-2xl lg:text-3xl font-extrabold text-[#1e3a8a]">
-            {formatRupiah(pembibitanYTD.total_omzet)}
-          </h2>
+        <div className="bg-white p-4 md:p-5 rounded-lg shadow-sm border border-slate-200 border-t-4 border-t-blue-600 hover:-translate-y-1 hover:shadow-md transition-all duration-300 flex items-start gap-4 relative overflow-hidden group">
+          <div className="bg-blue-50/50 p-3 rounded-lg text-blue-600 border border-blue-100 relative z-10"><DollarSign size={24} className="animate-[pulse_2s_ease-in-out_infinite]" /></div>
+          <div className="flex-1 relative z-10">
+            <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1">Total Revenue YTD</p>
+            <h2 className="text-2xl lg:text-3xl font-extrabold text-[#1e3a8a]">
+              {formatRupiah(pembibitanYTD.total_omzet)}
+            </h2>
+          </div>
+          {/* Doodle Art */}
+          <div className="absolute -bottom-4 -right-2 text-blue-100/40 group-hover:scale-110 transition-transform duration-500 pointer-events-none">
+            <svg width="100" height="100" viewBox="0 0 100 100" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+              <path d="M50 20 C 70 20, 80 40, 80 50 C 80 70, 60 80, 50 80 C 30 80, 20 60, 20 50 C 20 30, 40 20, 50 20 Z" opacity="0.6" />
+            </svg>
+          </div>
         </div>
-        <div className="bg-white p-4 md:p-5 rounded-lg shadow-sm border border-slate-200 border-t-4 border-t-blue-400">
-          <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1">Total Penjualan Bibit YTD</p>
-          <h2 className="text-2xl lg:text-3xl font-extrabold text-[#1e3a8a]">
-            {formatNumber(pembibitanYTD.total_penjualan)} <span className="text-lg text-slate-400 font-semibold">Batang</span>
-          </h2>
+        <div className="bg-white p-4 md:p-5 rounded-lg shadow-sm border border-slate-200 border-t-4 border-t-blue-400 hover:-translate-y-1 hover:shadow-md transition-all duration-300 flex items-start gap-4 relative overflow-hidden group">
+          <div className="bg-sky-50/50 p-3 rounded-lg text-sky-600 border border-sky-100 relative z-10"><ShoppingBag size={24} className="animate-[bounce_3s_ease-in-out_infinite]" /></div>
+          <div className="flex-1 relative z-10">
+            <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1">Total Penjualan Bibit YTD</p>
+            <h2 className="text-2xl lg:text-3xl font-extrabold text-[#1e3a8a]">
+              {formatNumber(pembibitanYTD.total_penjualan)} <span className="text-lg text-slate-400 font-semibold">Batang</span>
+            </h2>
+          </div>
+          {/* Doodle Art */}
+          <div className="absolute -bottom-6 -right-6 text-sky-100/40 group-hover:-translate-y-2 group-hover:rotate-12 transition-transform duration-500 pointer-events-none">
+            <svg width="120" height="120" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="8" strokeLinecap="round" xmlns="http://www.w3.org/2000/svg">
+              <path d="M20 80 Q 50 20, 80 80" />
+              <path d="M40 50 Q 60 20, 80 50" opacity="0.6" />
+            </svg>
+          </div>
         </div>
-        <div className="bg-white p-4 md:p-5 rounded-lg shadow-sm border border-slate-200 border-t-4 border-t-blue-900">
-          <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1">Stok Pembesaran Aktif</p>
-          <h2 className="text-2xl lg:text-3xl font-extrabold text-[#1e3a8a]">
-            {formatNumber(pembibitanYTD.total_pembesaran)} <span className="text-lg text-slate-400 font-semibold">Batang</span>
-          </h2>
+        <div className="bg-white p-4 md:p-5 rounded-lg shadow-sm border border-slate-200 border-t-4 border-t-blue-900 hover:-translate-y-1 hover:shadow-md transition-all duration-300 flex items-start gap-4 relative overflow-hidden group">
+          <div className="bg-indigo-50/50 p-3 rounded-lg text-indigo-600 border border-indigo-100 relative z-10"><Sprout size={24} className="animate-[pulse_3s_ease-in-out_infinite]" /></div>
+          <div className="flex-1 relative z-10">
+            <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1">Stok Pembesaran Aktif</p>
+            <h2 className="text-2xl lg:text-3xl font-extrabold text-[#1e3a8a]">
+              {formatNumber(pembibitanYTD.total_pembesaran)} <span className="text-lg text-slate-400 font-semibold">Batang</span>
+            </h2>
+          </div>
+          {/* Doodle Art */}
+          <div className="absolute -bottom-2 -right-4 text-indigo-100/40 group-hover:translate-x-2 transition-transform duration-500 pointer-events-none">
+            <svg width="100" height="100" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="6" strokeLinecap="round" xmlns="http://www.w3.org/2000/svg">
+              <path d="M10 90 Q 50 90, 90 10 M 90 10 Q 70 30, 60 20 M 90 10 Q 70 50, 80 60" />
+            </svg>
+          </div>
         </div>
       </div>
 

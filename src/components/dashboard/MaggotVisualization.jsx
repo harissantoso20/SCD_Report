@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { ResponsiveContainer, BarChart, Bar, CartesianGrid, XAxis, YAxis, Tooltip, LineChart, Line } from 'recharts';
 import useAppStore from '../../store/useAppStore';
 import { PROGRAM_IMAGES, PROGRAM_DETAILS } from '../../data/mockData';
-import { Zap, TrendingUp, Sparkles, Box, DollarSign } from 'lucide-react';
+import { Zap, TrendingUp, Sparkles, Box, DollarSign, Recycle, Bug } from 'lucide-react';
 import { useDashboardData } from '../../hooks/useDashboardData';
 
 // Chart Helpers
@@ -65,6 +65,8 @@ const MaggotVisualization = React.memo(function MaggotVisualization() {
   const omzetDataFiltered = maggotFinancialData.slice(-timeFilter);
 
   const selectedWasteManaged = bioData.reduce((sum, item) => sum + (Number(item.sampah) || 0), 0);
+  const totalOmzetYTD = maggotFinancialData.reduce((sum, d) => sum + d.omzet_kasgot + d.omzet_kering + d.omzet_fresh, 0);
+  const totalFreshMaggotYTD = maggotFinancialData.reduce((sum, d) => sum + d.fresh, 0);
 
   const generateSmartAnalogy = (kg) => {
     if (!kg) return "Belum ada data konversi sampah organik pada periode ini.";
@@ -115,20 +117,11 @@ const MaggotVisualization = React.memo(function MaggotVisualization() {
   return (
     <div className="flex flex-col gap-4">
       
-      {/* ----------------- TOP ROW (3 COLUMNS) ----------------- */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* ----------------- TOP ROW (2 COLUMNS) ----------------- */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         
-        {/* 1. Hero Banner */}
-        <div className="min-h-[200px] bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden relative group">
-          <img src={bannerImage} alt={selectedProgram} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000 ease-in-out" />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#1e3a8a]/90 via-[#1e3a8a]/40 to-transparent flex flex-col justify-end p-4 md:p-5">
-            <h3 className="text-white font-black text-2xl mb-1 drop-shadow-md">{selectedProgram}</h3>
-            <p className="text-white/90 text-xs font-medium line-clamp-3 leading-relaxed drop-shadow-sm">{details.desc}</p>
-          </div>
-        </div>
-
-        {/* 2. Insight Analitik */}
-        <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 md:p-5 flex flex-col relative overflow-hidden group hover:-translate-y-1 hover:shadow-md transition-all duration-300">
+        {/* 1. Insight Analitik (Takes up 2 columns) */}
+        <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 md:p-5 flex flex-col relative overflow-hidden group hover:-translate-y-1 hover:shadow-md transition-all duration-300 lg:col-span-2">
           <div className="flex items-center justify-between mb-4 relative z-10">
             <h4 className="text-[13px] font-bold text-[#1e3a8a] uppercase tracking-wider flex items-center gap-2">
               <Sparkles size={16} className="text-blue-500" />
@@ -139,29 +132,82 @@ const MaggotVisualization = React.memo(function MaggotVisualization() {
           <div className="flex-1 relative z-10">
             {generateSmartAnalogy(selectedWasteManaged)}
           </div>
-          <div className="absolute -bottom-6 -right-6 text-blue-50/50 group-hover:scale-110 transition-transform duration-500">
-             <Sparkles size={120} />
+          <div className="absolute -bottom-6 -right-6 text-blue-50/50 group-hover:scale-110 transition-transform duration-500 pointer-events-none">
+             <Sparkles size={140} />
           </div>
         </div>
 
-        {/* 3. Waste Managed YTD */}
-        <div className="bg-blue-50/50 rounded-lg shadow-sm border border-blue-100 p-4 md:p-5 flex flex-col justify-center relative overflow-hidden group hover:-translate-y-1 hover:shadow-md transition-all duration-300">
-          <div className="relative z-10 animate-[pulse_4s_ease-in-out_infinite]">
-            <p className="text-[11px] font-bold text-blue-600 uppercase tracking-widest mb-2">Waste Managed (YTD)</p>
-            <div className="flex items-baseline gap-2">
-              <h3 className="text-4xl lg:text-5xl font-black text-[#1e3a8a] tracking-tighter">
-                {new Intl.NumberFormat('id-ID').format(totalWasteManaged)}
-              </h3>
-              <span className="text-xl font-bold text-blue-700">Kg</span>
+        {/* 2. KPIs Stack (Waste Managed, Total Omzet, Total Penjualan Fresh) */}
+        <div className="flex flex-col gap-4">
+          
+          {/* Waste Managed YTD */}
+          <div className="bg-blue-50/50 rounded-lg shadow-sm border border-blue-100 p-4 flex flex-col justify-center relative overflow-hidden group hover:-translate-y-1 hover:shadow-md transition-all duration-300 flex-1">
+            <div className="relative z-10 flex items-start gap-3">
+              <div className="bg-white p-2.5 rounded-lg text-blue-600 shadow-sm border border-blue-100 mt-1"><Recycle size={20} className="animate-[spin_4s_linear_infinite]" /></div>
+              <div className="flex-1">
+                <p className="text-[10px] font-bold text-blue-600 uppercase tracking-widest mb-1">Waste Managed (YTD)</p>
+                <div className="flex items-baseline gap-1.5">
+                  <h3 className="text-3xl lg:text-4xl font-black text-[#1e3a8a] tracking-tighter">
+                    {new Intl.NumberFormat('id-ID').format(totalWasteManaged)}
+                  </h3>
+                  <span className="text-sm font-bold text-blue-700">Kg</span>
+                </div>
+                <p className="text-[10px] font-semibold text-blue-800 mt-1">Sampah Organik Tereduksi</p>
+              </div>
             </div>
-            <p className="text-xs font-semibold text-blue-800 mt-2">Sampah Organik Tereduksi</p>
+            {/* Sparkline decoration */}
+            <div className="absolute -bottom-4 -right-4 text-blue-200/50 group-hover:translate-x-2 transition-transform duration-500">
+                <svg width="120" height="80" viewBox="0 0 100 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M0 40 C 20 35, 40 45, 60 20 S 80 0, 100 5" stroke="currentColor" strokeWidth="8" strokeLinecap="round" />
+              </svg>
+            </div>
           </div>
-          {/* Sparkline decoration */}
-          <div className="absolute -bottom-4 -right-4 text-blue-200/50 group-hover:translate-x-2 transition-transform duration-500">
-              <svg width="150" height="100" viewBox="0 0 100 50" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M0 40 C 20 35, 40 45, 60 20 S 80 0, 100 5" stroke="currentColor" strokeWidth="8" strokeLinecap="round" />
-            </svg>
+
+          {/* Total Omzet YTD */}
+          <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 flex flex-col justify-center relative overflow-hidden group hover:-translate-y-1 hover:shadow-md transition-all duration-300 flex-1">
+            <div className="relative z-10 flex items-start gap-3">
+              <div className="bg-blue-50/50 p-2.5 rounded-lg text-blue-600 shadow-sm border border-blue-100 mt-1"><DollarSign size={20} className="animate-[pulse_2s_ease-in-out_infinite]" /></div>
+              <div className="flex-1">
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Total Omzet YTD</p>
+                <div className="flex items-baseline gap-1.5">
+                  <h3 className="text-2xl lg:text-3xl font-black text-[#1e3a8a] tracking-tighter">
+                    Rp {(totalOmzetYTD / 1000000).toFixed(1)} <span className="text-sm font-bold text-slate-400">Jt</span>
+                  </h3>
+                </div>
+              </div>
+            </div>
+            {/* Doodle Art */}
+            <div className="absolute -bottom-4 -right-2 text-blue-100/40 group-hover:translate-x-1 transition-transform duration-500 pointer-events-none">
+              <svg width="80" height="80" viewBox="0 0 100 100" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path d="M10 50 A 40 40 0 0 1 90 50 A 40 40 0 0 1 10 50" opacity="0.4" fill="none" stroke="currentColor" strokeWidth="8" strokeDasharray="10 10" />
+              </svg>
+            </div>
           </div>
+
+          {/* Total Penjualan Fresh Maggot YTD */}
+          <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 flex flex-col justify-center relative overflow-hidden group hover:-translate-y-1 hover:shadow-md transition-all duration-300 flex-1">
+            <div className="relative z-10 flex items-start gap-3">
+              <div className="bg-indigo-50/50 p-2.5 rounded-lg text-indigo-600 shadow-sm border border-indigo-100 mt-1"><Bug size={20} className="animate-[bounce_3s_ease-in-out_infinite]" /></div>
+              <div className="flex-1">
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Fresh Maggot Terjual</p>
+                <div className="flex items-baseline gap-1.5">
+                  <h3 className="text-2xl lg:text-3xl font-black text-[#1e3a8a] tracking-tighter">
+                    {new Intl.NumberFormat('id-ID').format(totalFreshMaggotYTD)}
+                  </h3>
+                  <span className="text-sm font-bold text-slate-400">Kg</span>
+                </div>
+              </div>
+            </div>
+            {/* Doodle Art */}
+            <div className="absolute -bottom-2 -right-4 text-indigo-100/40 group-hover:-rotate-12 transition-transform duration-500 pointer-events-none">
+              <svg width="100" height="80" viewBox="0 0 100 100" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="20" cy="50" r="10" opacity="0.6" />
+                <circle cx="50" cy="50" r="15" opacity="0.8" />
+                <circle cx="80" cy="50" r="10" opacity="0.6" />
+              </svg>
+            </div>
+          </div>
+
         </div>
       </div>
 

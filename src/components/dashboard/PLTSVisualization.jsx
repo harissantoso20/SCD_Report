@@ -169,32 +169,58 @@ const PLTSVisualization = React.memo(function PLTSVisualization() {
         
         {/* STATISTIK (KANAN) */}
         <div className="lg:w-[24%] flex flex-col gap-4 justify-center">
-          <div className="bg-blue-50/50 p-4 rounded border border-blue-100 flex items-center gap-4 hover:shadow-sm transition-shadow">
-            <div className="bg-white p-2.5 rounded text-[#1e3a8a] shadow-sm"><Building size={24} /></div>
-            <div>
+          <div className="bg-blue-50/50 p-4 rounded border border-blue-100 flex items-center gap-4 hover:shadow-md hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group">
+            <div className="bg-white p-2.5 rounded text-[#1e3a8a] shadow-sm relative z-10"><Building size={24} className="animate-[pulse_2s_ease-in-out_infinite]" /></div>
+            <div className="relative z-10">
               <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">EXISTING</p>
               <p className="text-xl font-extrabold text-[#25326a]">{locs.length} <span className="text-sm font-semibold text-gray-600">Unit</span></p>
             </div>
+            {/* Doodle Art */}
+            <div className="absolute -bottom-4 -right-2 text-blue-200/40 group-hover:scale-110 transition-transform duration-500 pointer-events-none">
+              <svg width="60" height="60" viewBox="0 0 100 100" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <rect x="20" y="40" width="60" height="60" rx="5" opacity="0.5" />
+                <rect x="40" y="20" width="40" height="80" rx="5" opacity="0.8" />
+              </svg>
+            </div>
           </div>
-          <div className="bg-blue-50/50 p-4 rounded border border-blue-100 flex items-center gap-4 hover:shadow-sm transition-shadow">
-            <div className="bg-white p-2.5 rounded text-[#1e3a8a] shadow-sm"><MapPin size={24} /></div>
-            <div>
+          <div className="bg-sky-50/50 p-4 rounded border border-sky-100 flex items-center gap-4 hover:shadow-md hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group">
+            <div className="bg-white p-2.5 rounded text-sky-700 shadow-sm relative z-10"><MapPin size={24} className="animate-[bounce_3s_ease-in-out_infinite]" /></div>
+            <div className="relative z-10">
               <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">TOTAL LUAS LAHAN</p>
               <p className="text-xl font-extrabold text-[#25326a]">{totalLuas} <span className="text-sm font-semibold text-gray-600">Ha</span></p>
             </div>
+            {/* Doodle Art */}
+            <div className="absolute -bottom-2 -right-4 text-sky-200/50 group-hover:translate-x-2 transition-transform duration-500 pointer-events-none">
+              <svg width="80" height="60" viewBox="0 0 100 50" fill="none" stroke="currentColor" strokeWidth="6" strokeLinecap="round" xmlns="http://www.w3.org/2000/svg">
+                <path d="M10 40 L40 10 L70 40 L100 10" />
+              </svg>
+            </div>
           </div>
-          <div className="bg-blue-50/50 p-4 rounded border border-blue-100 flex items-center gap-4 hover:shadow-sm transition-shadow">
-            <div className="bg-white p-2.5 rounded text-[#1e3a8a] shadow-sm"><Zap size={24} /></div>
-            <div>
+          <div className="bg-indigo-50/50 p-4 rounded border border-indigo-100 flex items-center gap-4 hover:shadow-md hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group">
+            <div className="bg-white p-2.5 rounded text-indigo-700 shadow-sm relative z-10"><Zap size={24} className="animate-[pulse_3s_ease-in-out_infinite]" /></div>
+            <div className="relative z-10">
               <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">TOTAL KAPASITAS</p>
               <p className="text-xl font-extrabold text-[#25326a]">{totalKapasitas} <span className="text-sm font-semibold text-gray-600">kWp</span></p>
             </div>
+            {/* Doodle Art */}
+            <div className="absolute -bottom-4 -right-4 text-indigo-200/50 group-hover:rotate-12 transition-transform duration-500 pointer-events-none">
+              <svg width="70" height="70" viewBox="0 0 100 100" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <polygon points="50,10 90,90 10,90" opacity="0.6" />
+              </svg>
+            </div>
           </div>
-          <div className="bg-blue-50/50 p-4 rounded border border-blue-100 flex items-center gap-4 hover:shadow-sm transition-shadow">
-            <div className="bg-white p-2.5 rounded text-[#1e3a8a] shadow-sm"><Users size={24} /></div>
-            <div>
+          <div className="bg-purple-50/50 p-4 rounded border border-purple-100 flex items-center gap-4 hover:shadow-md hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group">
+            <div className="bg-white p-2.5 rounded text-purple-700 shadow-sm relative z-10"><Users size={24} className="animate-[bounce_4s_ease-in-out_infinite]" /></div>
+            <div className="relative z-10">
               <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">PENERIMA MANFAAT</p>
               <p className="text-xl font-extrabold text-[#25326a]">{totalPetani} <span className="text-sm font-semibold text-gray-600">Petani</span></p>
+            </div>
+            {/* Doodle Art */}
+            <div className="absolute -bottom-2 -right-2 text-purple-200/50 group-hover:-rotate-6 transition-transform duration-500 pointer-events-none">
+              <svg width="70" height="70" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="6" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="30" cy="70" r="20" />
+                <circle cx="70" cy="40" r="15" />
+              </svg>
             </div>
           </div>
         </div>

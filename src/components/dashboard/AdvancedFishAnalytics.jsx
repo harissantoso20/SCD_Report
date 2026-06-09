@@ -4,7 +4,7 @@ import {
   BarChart, Bar, LineChart, Line, CartesianGrid, XAxis, YAxis, LabelList
 } from 'recharts';
 import { useDashboardData } from '../../hooks/useDashboardData';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, DollarSign, Package, ShoppingBag } from 'lucide-react'; // icons imported
 
 const formatRupiah = (val) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(val);
 const formatJuta = (val) => `${(val / 1000000).toFixed(1)} Jt`;
@@ -166,23 +166,52 @@ const AdvancedFishAnalytics = React.memo(function AdvancedFishAnalytics() {
       
       {/* ROW 1: TOP 3 KPIs */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white p-4 md:p-5 rounded-lg shadow-sm border border-slate-200 border-t-4 border-t-blue-600">
-          <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1">Total Revenue YTD</p>
-          <h2 className="text-2xl lg:text-3xl font-extrabold text-[#1e3a8a]">
-            {formatRupiah(fisheryYTD.total_revenue)}
-          </h2>
+        <div className="bg-white p-4 md:p-5 rounded-lg shadow-sm border border-slate-200 border-t-4 border-t-blue-600 hover:-translate-y-1 hover:shadow-md transition-all duration-300 flex items-start gap-4 relative overflow-hidden group">
+          <div className="bg-blue-50/50 p-3 rounded-lg text-blue-600 border border-blue-100 relative z-10"><DollarSign size={24} className="animate-[pulse_2s_ease-in-out_infinite]" /></div>
+          <div className="flex-1 relative z-10">
+            <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1">Total Revenue YTD</p>
+            <h2 className="text-2xl lg:text-3xl font-extrabold text-[#1e3a8a]">
+              {formatRupiah(fisheryYTD.total_revenue)}
+            </h2>
+          </div>
+          {/* Doodle Art */}
+          <div className="absolute -bottom-4 -right-2 text-blue-100/40 group-hover:translate-x-2 transition-transform duration-500 pointer-events-none">
+            <svg width="120" height="80" viewBox="0 0 100 50" fill="none" stroke="currentColor" strokeWidth="8" strokeLinecap="round" xmlns="http://www.w3.org/2000/svg">
+              <path d="M0 25 Q 25 5, 50 25 T 100 25" />
+            </svg>
+          </div>
         </div>
-        <div className="bg-white p-4 md:p-5 rounded-lg shadow-sm border border-slate-200 border-t-4 border-t-blue-400">
-          <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1">Total Ikan Konsumsi YTD</p>
-          <h2 className="text-2xl lg:text-3xl font-extrabold text-[#1e3a8a]">
-            {new Intl.NumberFormat('id-ID').format(fisheryYTD.total_konsumsi_kg)} <span className="text-lg text-slate-400 font-semibold">Kg</span>
-          </h2>
+        <div className="bg-white p-4 md:p-5 rounded-lg shadow-sm border border-slate-200 border-t-4 border-t-blue-400 hover:-translate-y-1 hover:shadow-md transition-all duration-300 flex items-start gap-4 relative overflow-hidden group">
+          <div className="bg-sky-50/50 p-3 rounded-lg text-sky-600 border border-sky-100 relative z-10"><ShoppingBag size={24} className="animate-[bounce_3s_ease-in-out_infinite]" /></div>
+          <div className="flex-1 relative z-10">
+            <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1">Total Ikan Konsumsi YTD</p>
+            <h2 className="text-2xl lg:text-3xl font-extrabold text-[#1e3a8a]">
+              {new Intl.NumberFormat('id-ID').format(fisheryYTD.total_konsumsi_kg)} <span className="text-lg text-slate-400 font-semibold">Kg</span>
+            </h2>
+          </div>
+          {/* Doodle Art */}
+          <div className="absolute -bottom-6 -right-6 text-sky-100/40 group-hover:-rotate-12 transition-transform duration-500 pointer-events-none">
+            <svg width="100" height="100" viewBox="0 0 100 100" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+              <path d="M50 10 C 80 10, 90 50, 90 90 C 50 90, 10 90, 10 50 C 10 10, 50 10, 50 10 Z" opacity="0.6" />
+            </svg>
+          </div>
         </div>
-        <div className="bg-white p-4 md:p-5 rounded-lg shadow-sm border border-slate-200 border-t-4 border-t-blue-900">
-          <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1">Total Bibit Ikan YTD</p>
-          <h2 className="text-2xl lg:text-3xl font-extrabold text-[#1e3a8a]">
-            {new Intl.NumberFormat('id-ID').format(fisheryYTD.total_bibit_ekor)} <span className="text-lg text-slate-400 font-semibold">Ekor</span>
-          </h2>
+        <div className="bg-white p-4 md:p-5 rounded-lg shadow-sm border border-slate-200 border-t-4 border-t-blue-900 hover:-translate-y-1 hover:shadow-md transition-all duration-300 flex items-start gap-4 relative overflow-hidden group">
+          <div className="bg-indigo-50/50 p-3 rounded-lg text-indigo-600 border border-indigo-100 relative z-10"><Package size={24} className="animate-[pulse_3s_ease-in-out_infinite]" /></div>
+          <div className="flex-1 relative z-10">
+            <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1">Total Bibit Ikan YTD</p>
+            <h2 className="text-2xl lg:text-3xl font-extrabold text-[#1e3a8a]">
+              {new Intl.NumberFormat('id-ID').format(fisheryYTD.total_bibit_ekor)} <span className="text-lg text-slate-400 font-semibold">Ekor</span>
+            </h2>
+          </div>
+          {/* Doodle Art */}
+          <div className="absolute -bottom-4 -right-4 text-indigo-100/40 group-hover:scale-110 transition-transform duration-500 pointer-events-none">
+            <svg width="100" height="100" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="6" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="30" cy="70" r="20" />
+              <circle cx="70" cy="40" r="15" />
+              <circle cx="50" cy="20" r="10" />
+            </svg>
+          </div>
         </div>
       </div>
 

@@ -4,7 +4,7 @@ import {
   BarChart, Bar, LineChart, Line, CartesianGrid, XAxis, YAxis, ComposedChart
 } from 'recharts';
 import { useDashboardData } from '../../hooks/useDashboardData';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, DollarSign, Box, ShoppingBag } from 'lucide-react';
 
 const formatRupiah = (val) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(val);
 const formatJuta = (val) => `${(val / 1000000).toFixed(1)} Jt`;
@@ -133,31 +133,60 @@ const TempeAnalytics = React.memo(function TempeAnalytics() {
       
       {/* ROW 1: TOP 3 KPIs */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white p-4 md:p-5 rounded-lg shadow-sm border border-slate-200 border-t-4 border-t-blue-600">
-          <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1">Total Omzet Keseluruhan YTD</p>
-          <h2 className="text-2xl lg:text-3xl font-extrabold text-[#1e3a8a] mb-2">
-            {formatRupiah(tempeYTD.total_omzet)}
-          </h2>
-          <div className="text-[11px]">
-            {getYoYLabel(yoyOmzetPct)}
+        <div className="bg-white p-4 md:p-5 rounded-lg shadow-sm border border-slate-200 border-t-4 border-t-blue-600 hover:-translate-y-1 hover:shadow-md transition-all duration-300 flex items-start gap-4 relative overflow-hidden group">
+          <div className="bg-blue-50/50 p-3 rounded-lg text-blue-600 border border-blue-100 relative z-10"><DollarSign size={24} className="animate-[pulse_2s_ease-in-out_infinite]" /></div>
+          <div className="flex-1 relative z-10">
+            <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1">Total Omzet Keseluruhan YTD</p>
+            <h2 className="text-2xl lg:text-3xl font-extrabold text-[#1e3a8a] mb-2">
+              {formatRupiah(tempeYTD.total_omzet)}
+            </h2>
+            <div className="text-[11px]">
+              {getYoYLabel(yoyOmzetPct)}
+            </div>
+          </div>
+          {/* Doodle Art */}
+          <div className="absolute -bottom-6 -right-6 text-blue-100/40 group-hover:scale-110 transition-transform duration-500 pointer-events-none">
+            <svg width="100" height="100" viewBox="0 0 100 100" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="50" cy="50" r="40" opacity="0.5" />
+              <circle cx="70" cy="30" r="20" opacity="0.8" />
+            </svg>
           </div>
         </div>
-        <div className="bg-white p-4 md:p-5 rounded-lg shadow-sm border border-slate-200 border-t-4 border-t-blue-400">
-          <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1">Vol. Jual Tempe Mentah</p>
-          <h2 className="text-2xl lg:text-3xl font-extrabold text-[#1e3a8a] mb-2">
-            {new Intl.NumberFormat('id-ID').format(tempeYTD.total_qty_mentah)} <span className="text-lg text-slate-400 font-semibold">Kg</span>
-          </h2>
-          <div className="text-[11px]">
-            {getYoYLabel(yoyMentahPct)}
+        <div className="bg-white p-4 md:p-5 rounded-lg shadow-sm border border-slate-200 border-t-4 border-t-blue-400 hover:-translate-y-1 hover:shadow-md transition-all duration-300 flex items-start gap-4 relative overflow-hidden group">
+          <div className="bg-sky-50/50 p-3 rounded-lg text-sky-600 border border-sky-100 relative z-10"><Box size={24} className="animate-[bounce_3s_ease-in-out_infinite]" /></div>
+          <div className="flex-1 relative z-10">
+            <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1">Vol. Jual Tempe Mentah</p>
+            <h2 className="text-2xl lg:text-3xl font-extrabold text-[#1e3a8a] mb-2">
+              {new Intl.NumberFormat('id-ID').format(tempeYTD.total_qty_mentah)} <span className="text-lg text-slate-400 font-semibold">Kg</span>
+            </h2>
+            <div className="text-[11px]">
+              {getYoYLabel(yoyMentahPct)}
+            </div>
+          </div>
+          {/* Doodle Art */}
+          <div className="absolute -bottom-2 -right-4 text-sky-100/40 group-hover:translate-x-2 group-hover:-translate-y-1 transition-transform duration-500 pointer-events-none">
+            <svg width="120" height="80" viewBox="0 0 100 50" fill="none" stroke="currentColor" strokeWidth="6" strokeLinecap="round" xmlns="http://www.w3.org/2000/svg">
+              <path d="M10 40 L40 10 L70 40 L100 10" />
+            </svg>
           </div>
         </div>
-        <div className="bg-white p-4 md:p-5 rounded-lg shadow-sm border border-slate-200 border-t-4 border-t-blue-900">
-          <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1">Vol. Jual Olahan Tempe</p>
-          <h2 className="text-2xl lg:text-3xl font-extrabold text-[#1e3a8a] mb-2">
-            {new Intl.NumberFormat('id-ID').format(tempeYTD.total_qty_olahan)} <span className="text-lg text-slate-400 font-semibold">Kg</span>
-          </h2>
-          <div className="text-[11px]">
-            {getYoYLabel(yoyOlahanPct)}
+        <div className="bg-white p-4 md:p-5 rounded-lg shadow-sm border border-slate-200 border-t-4 border-t-blue-900 hover:-translate-y-1 hover:shadow-md transition-all duration-300 flex items-start gap-4 relative overflow-hidden group">
+          <div className="bg-indigo-50/50 p-3 rounded-lg text-indigo-600 border border-indigo-100 relative z-10"><ShoppingBag size={24} className="animate-[pulse_3s_ease-in-out_infinite]" /></div>
+          <div className="flex-1 relative z-10">
+            <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1">Vol. Jual Olahan Tempe</p>
+            <h2 className="text-2xl lg:text-3xl font-extrabold text-[#1e3a8a] mb-2">
+              {new Intl.NumberFormat('id-ID').format(tempeYTD.total_qty_olahan)} <span className="text-lg text-slate-400 font-semibold">Kg</span>
+            </h2>
+            <div className="text-[11px]">
+              {getYoYLabel(yoyOlahanPct)}
+            </div>
+          </div>
+          {/* Doodle Art */}
+          <div className="absolute -bottom-4 -right-2 text-indigo-100/40 group-hover:rotate-12 transition-transform duration-500 pointer-events-none">
+            <svg width="100" height="100" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="6" xmlns="http://www.w3.org/2000/svg">
+              <rect x="20" y="20" width="60" height="60" rx="10" transform="rotate(15 50 50)" />
+              <rect x="30" y="30" width="40" height="40" rx="5" transform="rotate(-10 50 50)" />
+            </svg>
           </div>
         </div>
       </div>
