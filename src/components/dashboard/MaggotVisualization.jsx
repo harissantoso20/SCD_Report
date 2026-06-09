@@ -60,9 +60,8 @@ const MaggotVisualization = React.memo(function MaggotVisualization() {
   const [timeFilter, setTimeFilter] = useState(12);
 
   // Sliced data based on single filter
-  const bioData = maggotBioconversionData.slice(-timeFilter);
-  const salesDataFiltered = maggotFinancialData.slice(-timeFilter);
-  const omzetDataFiltered = maggotFinancialData.slice(-timeFilter);
+  const bioData = React.useMemo(() => maggotBioconversionData.slice(-timeFilter), [maggotBioconversionData, timeFilter]);
+  const filteredFinancialData = React.useMemo(() => maggotFinancialData.slice(-timeFilter), [maggotFinancialData, timeFilter]);
 
   const selectedWasteManaged = bioData.reduce((sum, item) => sum + (Number(item.sampah) || 0), 0);
   const totalOmzetYTD = maggotFinancialData.reduce((sum, d) => sum + d.omzet_kasgot + d.omzet_kering + d.omzet_fresh, 0);
@@ -83,7 +82,7 @@ const MaggotVisualization = React.memo(function MaggotVisualization() {
     }
 
     // Find peak sales month
-    const peakSalesData = [...salesDataFiltered].sort((a, b) => (b.omzet_kasgot + b.omzet_kering + b.omzet_fresh) - (a.omzet_kasgot + a.omzet_kering + a.omzet_fresh))[0];
+    const peakSalesData = [...filteredFinancialData].sort((a, b) => (b.omzet_kasgot + b.omzet_kering + b.omzet_fresh) - (a.omzet_kasgot + a.omzet_kering + a.omzet_fresh))[0];
     let peakSalesStatement = '';
     if (peakSalesData) {
       const totalOmzetPeak = peakSalesData.omzet_kasgot + peakSalesData.omzet_kering + peakSalesData.omzet_fresh;
@@ -93,7 +92,7 @@ const MaggotVisualization = React.memo(function MaggotVisualization() {
     }
 
     // Calculate overall sales
-    const totalSalesOmzet = salesDataFiltered.reduce((sum, d) => sum + d.omzet_kasgot + d.omzet_kering + d.omzet_fresh, 0);
+    const totalSalesOmzet = filteredFinancialData.reduce((sum, d) => sum + d.omzet_kasgot + d.omzet_kering + d.omzet_fresh, 0);
     const salesOverallStatement = ` Dari sisi komersial, total pendapatan dari penjualan produk turunan maggot (fresh, kering, kasgot) menyentuh angka Rp ${(totalSalesOmzet / 1000000).toFixed(1)} Jt.`;
 
     return (
@@ -251,7 +250,7 @@ const MaggotVisualization = React.memo(function MaggotVisualization() {
           </div>
           <div className="w-full flex-1 min-h-[220px]">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={salesDataFiltered} margin={{ top: 20, right: 0, left: -20, bottom: 0 }}>
+              <BarChart data={filteredFinancialData} margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                 <XAxis dataKey="bulan" axisLine={false} tickLine={false} tick={{fontSize: 10, fill: '#64748b', fontWeight: 'bold'}} dy={10} padding={{ left: 30, right: 30 }} />
                 <YAxis hide domain={[0, dataMax => Math.max(10, Math.ceil((dataMax || 0) * 1.2))]} />
@@ -279,7 +278,7 @@ const MaggotVisualization = React.memo(function MaggotVisualization() {
           </div>
           <div className="w-full flex-1 min-h-[220px]">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={omzetDataFiltered} margin={{ top: 20, right: 10, left: 0, bottom: 0 }}>
+              <LineChart data={filteredFinancialData} margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                 <XAxis dataKey="bulan" axisLine={false} tickLine={false} tick={{fontSize: 10, fill: '#64748b', fontWeight: 'bold'}} dy={10} padding={{ left: 30, right: 30 }} />
                 <YAxis hide domain={[0, dataMax => Math.max(10, Math.ceil((dataMax || 0) * 1.2))]} />

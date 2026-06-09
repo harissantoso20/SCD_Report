@@ -30,7 +30,9 @@ const TempeAnalytics = React.memo(function TempeAnalytics() {
   const { tempeOverviewData, tempeYTD, currentYear } = useDashboardData();
   const [timeFilter, setTimeFilter] = useState(12);
 
-  const filteredOverviewData = tempeOverviewData.slice(-timeFilter);
+  const filteredOverviewData = useMemo(() => {
+    return tempeOverviewData.slice(-timeFilter);
+  }, [tempeOverviewData, timeFilter]);
 
   const filteredTotals = useMemo(() => {
     return filteredOverviewData.reduce((acc, curr) => {
@@ -47,13 +49,14 @@ const TempeAnalytics = React.memo(function TempeAnalytics() {
   const prevYearMentah = 0;
   const prevYearOlahan = 0;
 
-
-
-  const pieData = [
-    { name: 'Tempe Papan / Mentah', value: filteredTotals.mentah },
-    { name: 'Olahan Tempe (Keripik, dll)', value: filteredTotals.olahan },
-    { name: 'Pendapatan Lain', value: filteredTotals.lainnya }
-  ].filter(item => item.value > 0);
+  const pieData = useMemo(() => {
+    const d = [
+      { name: 'Tempe Papan / Mentah', value: filteredTotals.mentah },
+      { name: 'Olahan Tempe (Keripik, dll)', value: filteredTotals.olahan },
+      { name: 'Pendapatan Lain', value: filteredTotals.lainnya }
+    ].filter(item => item.value > 0);
+    return d.length > 0 ? d : [{ name: 'Belum Ada Data', value: 1 }];
+  }, [filteredTotals]);
   
   const COLORS = ['#3b82f6', '#1e3a8a', '#f43f5e']; // Soft Blue, Deep Navy, Soft Rose
 

@@ -32,7 +32,9 @@ const AdvancedPembibitanAnalytics = React.memo(function AdvancedPembibitanAnalyt
   const { pembibitanOverviewData, pembibitanYTD, currentYear } = useDashboardData();
   const [timeFilter, setTimeFilter] = useState(12);
 
-  const filteredOverviewData = pembibitanOverviewData.slice(-timeFilter);
+  const filteredOverviewData = useMemo(() => {
+    return pembibitanOverviewData.slice(-timeFilter);
+  }, [pembibitanOverviewData, timeFilter]);
 
   const prevYear = Number(currentYear) - 1;
 

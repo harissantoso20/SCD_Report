@@ -32,8 +32,8 @@ const AdvancedFishAnalytics = React.memo(function AdvancedFishAnalytics() {
   const [timeFilter, setTimeFilter] = useState(12);
 
   // Sliced data based on single filter
-  const filteredOverviewData = fisheryOverviewData.slice(-timeFilter);
-  const slicedPortfolioRaw = fisheryPortfolioRaw.slice(-timeFilter);
+  const filteredOverviewData = useMemo(() => fisheryOverviewData.slice(-timeFilter), [fisheryOverviewData, timeFilter]);
+  const slicedPortfolioRaw = useMemo(() => fisheryPortfolioRaw.slice(-timeFilter), [fisheryPortfolioRaw, timeFilter]);
 
   // Aggregate sliced portfolio data
   const fisheryPortfolio = useMemo(() => {
@@ -50,9 +50,12 @@ const AdvancedFishAnalytics = React.memo(function AdvancedFishAnalytics() {
     });
 
     const colors = ['#1e3a8a', '#3b82f6', '#f43f5e', '#64748b', '#0ea5e9', '#e11d48'];
-    const formatPortfolio = (map) => Object.entries(map)
-      .map(([name, value], i) => ({ name, value, color: colors[i % colors.length] }))
-      .filter(item => item.value > 0);
+    const formatPortfolio = (map) => {
+      const d = Object.entries(map)
+        .map(([name, value], i) => ({ name, value, color: colors[i % colors.length] }))
+        .filter(item => item.value > 0);
+      return d.length > 0 ? d : [{ name: 'Belum Ada Data', value: 1, color: '#e2e8f0' }];
+    };
 
     return {
       konsumsi: formatPortfolio(konsumsiMap),
