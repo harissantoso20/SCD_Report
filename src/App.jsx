@@ -2,6 +2,7 @@
 
 import React, { Suspense, lazy } from 'react';
 import useAppStore from './store/useAppStore';
+import logoPTBA from './assets/logo-ptba.png';
 
 const DashboardView = lazy(() => import('./components/DashboardView'));
 const DataEntryView = lazy(() => import('./components/DataEntryView'));
@@ -14,12 +15,11 @@ export default function App() {
     <div className="min-h-screen bg-[#f8f9fa] flex flex-col w-full">
       
       {/* Header Global dengan Navigasi Tab */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 px-6 py-4 flex items-center justify-between shadow-sm w-full z-50">
+      <header className="bg-white border-b border-gray-200 sticky top-0 px-4 md:px-6 py-3 md:py-4 flex flex-col md:flex-row items-center justify-between gap-3 md:gap-0 shadow-sm w-full z-50">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-[#1e3a8a] rounded-md flex items-center justify-center text-white font-bold text-lg">BA</div>
-          <h1 className="text-lg font-bold text-[#1e3a8a]">Bukit Asam</h1>
+          <img src={logoPTBA} alt="Logo PTBA" className="h-12 md:h-16 w-auto object-contain" />
         </div>
-        <nav className="flex gap-6 font-bold text-xs uppercase tracking-wide">
+        <nav className="flex gap-4 md:gap-6 font-bold text-xs md:text-sm uppercase tracking-wide">
           <button 
             onClick={() => setActiveTab("Dashboard")}
             className={`transition-colors ${activeTab === "Dashboard" ? "text-[#1e3a8a] border-b-2 border-[#1e3a8a] pb-1" : "text-gray-400 hover:text-[#1e3a8a]"}`}

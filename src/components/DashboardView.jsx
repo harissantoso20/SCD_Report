@@ -4,6 +4,8 @@ import DashboardHeader from './dashboard/DashboardHeader';
 import PLTSVisualization from './dashboard/PLTSVisualization';
 import MaggotVisualization from './dashboard/MaggotVisualization';
 import SalesVisualization from './dashboard/SalesVisualization';
+import AdvancedFishAnalytics from './dashboard/AdvancedFishAnalytics';
+import AdvancedPembibitanAnalytics from './dashboard/AdvancedPembibitanAnalytics';
 import ProgramSummary from './dashboard/ProgramSummary';
 import { useDashboardData } from '../hooks/useDashboardData';
 import { FileImage, FileText } from './Icons';
@@ -18,15 +20,21 @@ export default function DashboardView() {
     fetchData();
   }, [fetchData]);
 
+  const p = (selectedProgram || '').toLowerCase();
+
   return (
     <div className="flex flex-col gap-6">
       <DashboardHeader />
 
       {/* VISUALISASI KONDISIONAL (LEVEL 2) */}
-      {selectedProgram === "PLTS Irigasi" ? (
+      {p === "plts irigasi" ? (
         <PLTSVisualization />
-      ) : selectedProgram === "Budidaya Maggot BSF" ? (
+      ) : p.includes("maggot") ? (
         <MaggotVisualization />
+      ) : p.includes("ikan air tawar") ? (
+        <AdvancedFishAnalytics />
+      ) : p.includes("siba pembibitan") ? (
+        <AdvancedPembibitanAnalytics />
       ) : isSalesProgram ? (
         <SalesVisualization />
       ) : (

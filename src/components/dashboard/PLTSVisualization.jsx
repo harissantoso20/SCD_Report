@@ -1,7 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import * as L from 'leaflet';
 import useAppStore from '../../store/useAppStore';
-import { MAP_LOCATIONS } from '../../data/mockData';
 import { MapPin, Building, Zap, Users } from '../Icons';
 
 export default function PLTSVisualization() {
@@ -24,12 +23,29 @@ export default function PLTSVisualization() {
     const baseLat = -3.5;
     const baseLng = 103.5;
 
-    const locs = pltsLocations && pltsLocations.length > 0 ? pltsLocations : MAP_LOCATIONS.map(m => ({ location_name: m.nama, capacity_kwp: m.kwp, area_ha: m.luas, farmers: m.petani }));
+    const locs = pltsLocations || [];
     const bounds = L.latLngBounds([]);
 
+    const COORDINATE_MAP = {
+      "Talawi Mudik": { "lat": -0.5829123, "lng": 100.7159371 },
+      "Trimulyo": { "lat": -5.171838, "lng": 105.115826 },
+      "Tanjung Raja": { "lat": -3.7161975, "lng": 103.8004536 },
+      "Nanjungan": { "lat": -3.6331314, "lng": 103.7262035 },
+      "Rejosari Mataram": { "lat": -4.8466185, "lng": 105.3391385 },
+      "Karang Raja": { "lat": -3.6816109, "lng": 103.8003334 },
+      "Muara Lawai": { "lat": -3.650469, "lng": 103.7457736 },
+      "Tanjung Agung": { "lat": -3.9438075, "lng": 103.7948504 },
+      "Lugusari": { "lat": -5.3533811, "lng": 104.8699914 },
+      "Tanjung Karangan": { "lat": -3.8947347, "lng": 103.7188515 },
+      "Matas": { "lat": -3.954861, "lng": 103.845661 },
+      "Muara Gula": { "lat": -3.5792181, "lng": 103.8098195 }
+    };
+
     locs.forEach((loc, idx) => {
-      const markerLat = loc.lat != null ? loc.lat : (baseLat + (idx * 0.1));
-      const markerLng = loc.lng != null ? loc.lng : (baseLng + (idx * 0.1));
+      // Use real coordinate if available, otherwise fallback
+      const coords = COORDINATE_MAP[loc.location_name];
+      const markerLat = coords ? coords.lat : (loc.lat != null ? loc.lat : (baseLat + (idx * 0.1)));
+      const markerLng = coords ? coords.lng : (loc.lng != null ? loc.lng : (baseLng + (idx * 0.1)));
       
       bounds.extend([markerLat, markerLng]);
 
@@ -55,7 +71,7 @@ export default function PLTSVisualization() {
     return () => map.remove();
   }, [pltsLocations]);
 
-  const locs = pltsLocations && pltsLocations.length > 0 ? pltsLocations : MAP_LOCATIONS.map(m => ({ location_name: m.nama, capacity_kwp: m.kwp, area_ha: m.luas, farmers: m.petani }));
+  const locs = pltsLocations || [];
 
   const groupedLocations = locs.reduce((acc, loc) => {
     let regionName = "Lainnya";
