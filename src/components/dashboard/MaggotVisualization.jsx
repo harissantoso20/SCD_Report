@@ -147,7 +147,7 @@ const MaggotVisualization = React.memo(function MaggotVisualization() {
               <div className="flex-1">
                 <p className="text-[10px] font-bold text-blue-600 uppercase tracking-widest mb-1">Waste Managed (YTD)</p>
                 <div className="flex items-baseline gap-1.5">
-                  <h3 className="text-3xl lg:text-4xl font-black text-[#1e3a8a] tracking-tighter">
+                  <h3 className="text-xl lg:text-3xl font-black text-[#1e3a8a] tracking-tighter">
                     {new Intl.NumberFormat('id-ID').format(totalWasteManaged)}
                   </h3>
                   <span className="text-sm font-bold text-blue-700">Kg</span>
@@ -170,7 +170,7 @@ const MaggotVisualization = React.memo(function MaggotVisualization() {
               <div className="flex-1">
                 <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Total Omzet YTD</p>
                 <div className="flex items-baseline gap-1.5">
-                  <h3 className="text-2xl lg:text-3xl font-black text-[#1e3a8a] tracking-tighter">
+                  <h3 className="text-xl lg:text-2xl font-black text-[#1e3a8a] tracking-tighter">
                     Rp {(totalOmzetYTD / 1000000).toFixed(1)} <span className="text-sm font-bold text-slate-400">Jt</span>
                   </h3>
                 </div>
@@ -191,7 +191,7 @@ const MaggotVisualization = React.memo(function MaggotVisualization() {
               <div className="flex-1">
                 <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Fresh Maggot Terjual</p>
                 <div className="flex items-baseline gap-1.5">
-                  <h3 className="text-2xl lg:text-3xl font-black text-[#1e3a8a] tracking-tighter">
+                  <h3 className="text-xl lg:text-2xl font-black text-[#1e3a8a] tracking-tighter">
                     {new Intl.NumberFormat('id-ID').format(totalFreshMaggotYTD)}
                   </h3>
                   <span className="text-sm font-bold text-slate-400">Kg</span>
@@ -227,8 +227,8 @@ const MaggotVisualization = React.memo(function MaggotVisualization() {
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={bioData} margin={{ top: 20, right: 0, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis dataKey="bulan" axisLine={false} tickLine={false} tick={{fontSize: 10, fill: '#64748b', fontWeight: 'bold'}} dy={10} />
-                <YAxis tick={{fontSize: 9, fill: '#64748b', fontWeight: 'bold'}} axisLine={false} tickLine={false} tickFormatter={(val) => val >= 1000 ? `${(val/1000).toFixed(1)}k` : val} />
+                <XAxis dataKey="bulan" axisLine={false} tickLine={false} tick={{fontSize: 10, fill: '#64748b', fontWeight: 'bold'}} dy={10} padding={{ left: 30, right: 30 }} />
+                <YAxis hide domain={[0, dataMax => Math.max(10, Math.ceil((dataMax || 0) * 1.2))]} />
                 <Tooltip cursor={{fill: '#f8fafc'}} contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '12px' }} />
                 <Bar dataKey="sampah" name="Sampah Organik (Kg)" fill="#1e3a8a" barSize={16} radius={[4, 4, 0, 0]} label={renderLabelKg} />
                 <Bar dataKey="maggot" name="Fresh Maggot (Kg)" fill="#3b82f6" barSize={16} radius={[4, 4, 0, 0]} label={renderLabelKg} />
@@ -253,8 +253,8 @@ const MaggotVisualization = React.memo(function MaggotVisualization() {
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={salesDataFiltered} margin={{ top: 20, right: 0, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis dataKey="bulan" axisLine={false} tickLine={false} tick={{fontSize: 10, fill: '#64748b', fontWeight: 'bold'}} dy={10} />
-                <YAxis tick={{fontSize: 9, fill: '#64748b', fontWeight: 'bold'}} axisLine={false} tickLine={false} tickFormatter={(val) => val >= 1000 ? `${(val/1000).toFixed(1)}k` : val} />
+                <XAxis dataKey="bulan" axisLine={false} tickLine={false} tick={{fontSize: 10, fill: '#64748b', fontWeight: 'bold'}} dy={10} padding={{ left: 30, right: 30 }} />
+                <YAxis hide domain={[0, dataMax => Math.max(10, Math.ceil((dataMax || 0) * 1.2))]} />
                 <Tooltip cursor={{fill: '#f8fafc'}} contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '12px' }} />
                 <Bar dataKey="kasgot" name="Kasgot (Kg)" stackId="a" fill="#1e3a8a" barSize={24} />
                 <Bar dataKey="kering" name="Maggot Kering (Kg)" stackId="a" fill="#f43f5e" barSize={24} />
@@ -281,11 +281,11 @@ const MaggotVisualization = React.memo(function MaggotVisualization() {
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={omzetDataFiltered} margin={{ top: 20, right: 10, left: 0, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis dataKey="bulan" axisLine={false} tickLine={false} tick={{fontSize: 10, fill: '#64748b', fontWeight: 'bold'}} dy={10} />
-                <YAxis tick={{fontSize: 9, fill: '#64748b', fontWeight: 'bold'}} axisLine={false} tickLine={false} tickFormatter={(val) => val >= 1000000 ? `${(val/1000000).toFixed(1)}Jt` : val} width={45} />
+                <XAxis dataKey="bulan" axisLine={false} tickLine={false} tick={{fontSize: 10, fill: '#64748b', fontWeight: 'bold'}} dy={10} padding={{ left: 30, right: 30 }} />
+                <YAxis hide domain={[0, dataMax => Math.max(10, Math.ceil((dataMax || 0) * 1.2))]} />
                 <Tooltip cursor={{fill: '#f8fafc', strokeWidth: 1, strokeDasharray: '3 3'}} contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '12px' }} formatter={(val) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(val)} />
-                <Line type="monotone" dataKey="omzet_kasgot" name="Omzet Kasgot" stroke="#1e3a8a" strokeWidth={3} dot={{ r: 3 }} activeDot={{ r: 5 }} />
-                <Line type="monotone" dataKey="omzet_kering" name="Omzet Kering" stroke="#f43f5e" strokeWidth={3} dot={{ r: 3 }} activeDot={{ r: 5 }} />
+                <Line type="monotone" dataKey="omzet_kasgot" name="Omzet Kasgot" stroke="#1e3a8a" strokeWidth={3} dot={{ r: 3 }} activeDot={{ r: 5 }} label={renderLineLabelRp} />
+                <Line type="monotone" dataKey="omzet_kering" name="Omzet Kering" stroke="#f43f5e" strokeWidth={3} dot={{ r: 3 }} activeDot={{ r: 5 }} label={renderLineLabelRp} />
                 <Line type="monotone" dataKey="omzet_fresh" name="Omzet Fresh" stroke="#3b82f6" strokeWidth={3} dot={{ r: 3 }} activeDot={{ r: 5 }} label={renderLineLabelRp} />
               </LineChart>
             </ResponsiveContainer>

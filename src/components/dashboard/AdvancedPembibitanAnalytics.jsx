@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import {
-  ResponsiveContainer, ComposedChart, Bar, Line, PieChart, Pie, Cell, Tooltip, Legend,
-  CartesianGrid, XAxis, YAxis, LabelList, LineChart
+  ResponsiveContainer, ComposedChart, BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, Tooltip, Legend,
+  CartesianGrid, XAxis, YAxis, LabelList
 } from 'recharts';
 import { useDashboardData } from '../../hooks/useDashboardData';
 import { TrendingUp, AlertTriangle } from '../Icons';
@@ -23,7 +23,7 @@ const FilterButtons = ({ currentRange, setRange }) => (
       <option value={12}>12 BLN</option>
     </select>
     <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-1.5 text-[#1e3a8a]">
-      <svg className="fill-current h-2.5 w-2.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+      <svg className="fill-current h-2.5 w-2.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" /></svg>
     </div>
   </div>
 );
@@ -33,16 +33,11 @@ const AdvancedPembibitanAnalytics = React.memo(function AdvancedPembibitanAnalyt
   const [timeFilter, setTimeFilter] = useState(12);
 
   const filteredOverviewData = pembibitanOverviewData.slice(-timeFilter);
-  
+
   const prevYear = Number(currentYear) - 1;
 
   // Mock prev year data to match scenario
-  const prevData = currentYear === '2026' ? {
-    pembesaran: 87045,
-    penjualan: 49395,
-    polybag: 0,
-    omzet: 254975000
-  } : {
+  const prevData = {
     pembesaran: 0,
     penjualan: 0,
     polybag: 0,
@@ -50,7 +45,7 @@ const AdvancedPembibitanAnalytics = React.memo(function AdvancedPembibitanAnalyt
   };
 
   const getPercentage = (curr, prev) => {
-    if (prev === 0) return curr > 0 ? '+100%' : '0%';
+    if (prev === 0) return '-';
     const pct = ((curr - prev) / prev) * 100;
     return `${pct > 0 ? '+' : ''}${pct.toFixed(0)}%`;
   };
@@ -62,29 +57,30 @@ const AdvancedPembibitanAnalytics = React.memo(function AdvancedPembibitanAnalyt
     { variabel: 'Total Omzet Keseluruhan', prevYearData: prevData.omzet, currYearData: pembibitanYTD.total_omzet, percent: getPercentage(pembibitanYTD.total_omzet, prevData.omzet) },
   ];
 
-  const stockToSalesRatio = pembibitanYTD.total_pembesaran > 0 
+  const stockToSalesRatio = pembibitanYTD.total_pembesaran > 0
     ? ((pembibitanYTD.total_penjualan / pembibitanYTD.total_pembesaran) * 100).toFixed(1)
     : 0;
-  
+
   const deltaOmzet = pembibitanYTD.total_omzet - prevData.omzet;
 
   const renderGaugeChart = () => {
+    const ratioVal = Number(stockToSalesRatio);
     const data = [
-      { name: 'Terjual', value: Number(stockToSalesRatio), fill: '#3b82f6' },
-      { name: 'Menumpuk', value: 100 - Number(stockToSalesRatio), fill: '#e5e7eb' }
+      { name: 'Terjual', value: ratioVal > 100 ? 100 : ratioVal, fill: '#3b82f6' },
+      { name: 'Menumpuk', value: ratioVal > 100 ? 0 : 100 - ratioVal, fill: '#e5e7eb' }
     ];
     return (
-      <div className="relative w-full h-[180px] flex items-center justify-center">
+      <div className="relative w-full h-full flex items-center justify-center">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
               data={data}
               cx="50%"
-              cy="100%"
+              cy="85%"
               startAngle={180}
               endAngle={0}
-              innerRadius={60}
-              outerRadius={80}
+              innerRadius={55}
+              outerRadius={75}
               dataKey="value"
               stroke="none"
             >
@@ -93,7 +89,7 @@ const AdvancedPembibitanAnalytics = React.memo(function AdvancedPembibitanAnalyt
             <Tooltip formatter={(value) => `${value}%`} />
           </PieChart>
         </ResponsiveContainer>
-        <div className="absolute bottom-4 flex flex-col items-center">
+        <div className="absolute bottom-1 flex flex-col items-center">
           <span className={`text-2xl font-extrabold ${Number(stockToSalesRatio) < 20 ? 'text-rose-500' : 'text-[#1e3a8a]'}`}>{stockToSalesRatio}%</span>
           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Rasio Terjual</span>
         </div>
@@ -122,37 +118,28 @@ const AdvancedPembibitanAnalytics = React.memo(function AdvancedPembibitanAnalyt
     }
 
     let omzetText = '';
-    if (deltaOmzet > 0) {
-      omzetText = <span className="font-medium text-blue-600">Dibandingkan dengan tahun sebelumnya ({prevYear}), performa tahun ini mencatat lonjakan omzet sebesar {formatRupiah(Math.abs(deltaOmzet))}, mengonfirmasi tren pertumbuhan komersial yang sangat positif.</span>;
+    if (prevData.omzet === 0) {
+      omzetText = <span className="font-medium text-slate-500">Karena belum ada data historis yang memadai, performa tahun ini difokuskan sebagai baseline awal.</span>;
+    } else if (deltaOmzet > 0) {
+      omzetText = <span className="font-medium text-blue-600">Dibandingkan dengan tahun sebelumnya ({prevYear}), performa tahun ini mencatat lonjakan omzet sebesar {formatRupiah(Math.abs(deltaOmzet))}, mengonfirmasi tren pertumbuhan komersial yang kuat.</span>;
     } else if (deltaOmzet < 0) {
-      omzetText = <span>Namun jika dibandingkan dengan tahun sebelumnya ({prevYear}), performa komersial mengalami kontraksi parah. Terdapat <span className="font-bold text-rose-500">penurunan omzet (Lost Revenue) sebesar {formatRupiah(Math.abs(deltaOmzet))}</span>, yang mensyaratkan manajemen untuk segera turun tangan membenahi rantai pasok dan mencari *offtaker* baru.</span>;
-    } else {
-      omzetText = <span className="font-medium text-slate-500">Secara komparatif, omzet tahun ini tercatat stagnan atau sama persis dengan pencapaian tahun {prevYear}.</span>;
-    }
-
-    const peakMonthData = [...filteredOverviewData].sort((a, b) => b.total_rp - a.total_rp)[0];
-    let peakStatement = null;
-    if (peakMonthData && peakMonthData.total_rp > 0) {
-      peakStatement = <p>Secara bulanan, omzet tertinggi pada periode ini berhasil dicetak pada bulan <span className="font-bold text-[#1e3a8a]">{peakMonthData.month}</span> senilai <span className="font-bold text-blue-600">{formatRupiah(peakMonthData.total_rp)}</span>.</p>;
+      omzetText = <span>Penurunan omzet YTD sebesar <span className="font-bold text-rose-600">{formatRupiah(Math.abs(deltaOmzet))}</span> dibanding periode yang sama tahun lalu. Evaluasi strategi pemasaran dan distribusi mungkin diperlukan.</span>;
     }
 
     return (
       <div className="text-slate-600 font-medium leading-relaxed text-[13px] space-y-3">
-        {peakStatement}
         <p>
-          Secara keseluruhan dalam periode <span className="font-bold text-[#1e3a8a]">{startMonth} - {endMonth} {currentYear}</span>, rasio penjualan terhadap pembesaran bibit tercatat pada level yang <span className={`font-bold ${ratioColor}`}>{ratioStatus} ({stockToSalesRatio}%)</span>. {ratioNum < 20 ? "Tingginya aktivitas pembesaran bibit di fasilitas tidak diiringi dengan tingkat penyerapan pasar yang sepadan, memicu risiko penumpukan stok." : "Aktivitas produksi bibit berhasil diserap dengan cukup baik oleh pasar, menjaga arus kas tetap sehat."}
+          Sepanjang <span className="font-bold text-[#1e3a8a]">{startMonth} - {endMonth} {currentYear}</span>, rasio bibit terjual terhadap total pembesaran berada di angka <span className={`font-bold ${ratioColor}`}>{stockToSalesRatio}%</span>, yang tergolong <span className={`font-bold ${ratioColor} uppercase text-[11px] tracking-wider`}>{ratioStatus}</span>.
         </p>
         <p>
           {omzetText}
         </p>
-        <div className="mt-3 bg-blue-50/60 p-3 rounded border border-blue-100 flex gap-3 items-start relative z-10 shadow-sm">
+        <div className="mt-3 bg-blue-50/60 p-3 rounded border border-blue-100 flex gap-3 items-start shadow-sm">
           <svg className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
           </svg>
           <p className="text-xs italic text-blue-900">
-            {ratioNum < 20 
-              ? '"Ibarat sebuah waduk, saat ini debit air (produksi bibit) jauh melebihi kapasitas saluran irigasi (penjualan). Jika keran distribusi tidak segera diperluas ke pasar baru, waduk ini berisiko meluap dan membebani biaya pemeliharaan."' 
-              : '"Ibarat sistem perpipaan yang efisien, aliran pasokan bibit dari hulu (pembesaran) saat ini mengalir lancar menuju hilir (penjualan), menciptakan siklus perputaran stok dan modal yang sangat sehat."'}
+            "Fokus pada pengelolaan siklus pembesaran yang lebih adaptif terhadap permintaan pasar akan meminimalisir penumpukan stok bibit (overstock) dan memaksimalkan perputaran modal."
           </p>
         </div>
       </div>
@@ -161,14 +148,14 @@ const AdvancedPembibitanAnalytics = React.memo(function AdvancedPembibitanAnalyt
 
   return (
     <div className="w-full flex flex-col gap-4 font-sans text-slate-800">
-      
+
       {/* ROW 1: TOP 3 KPIs */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-white p-4 md:p-5 rounded-lg shadow-sm border border-slate-200 border-t-4 border-t-blue-600 hover:-translate-y-1 hover:shadow-md transition-all duration-300 flex items-start gap-4 relative overflow-hidden group">
           <div className="bg-blue-50/50 p-3 rounded-lg text-blue-600 border border-blue-100 relative z-10"><DollarSign size={24} className="animate-[pulse_2s_ease-in-out_infinite]" /></div>
           <div className="flex-1 relative z-10">
             <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1">Total Revenue YTD</p>
-            <h2 className="text-2xl lg:text-3xl font-extrabold text-[#1e3a8a]">
+            <h2 className="text-xl lg:text-2xl font-extrabold text-[#1e3a8a]">
               {formatRupiah(pembibitanYTD.total_omzet)}
             </h2>
           </div>
@@ -183,7 +170,7 @@ const AdvancedPembibitanAnalytics = React.memo(function AdvancedPembibitanAnalyt
           <div className="bg-sky-50/50 p-3 rounded-lg text-sky-600 border border-sky-100 relative z-10"><ShoppingBag size={24} className="animate-[bounce_3s_ease-in-out_infinite]" /></div>
           <div className="flex-1 relative z-10">
             <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1">Total Penjualan Bibit YTD</p>
-            <h2 className="text-2xl lg:text-3xl font-extrabold text-[#1e3a8a]">
+            <h2 className="text-xl lg:text-2xl font-extrabold text-[#1e3a8a]">
               {formatNumber(pembibitanYTD.total_penjualan)} <span className="text-lg text-slate-400 font-semibold">Batang</span>
             </h2>
           </div>
@@ -199,7 +186,7 @@ const AdvancedPembibitanAnalytics = React.memo(function AdvancedPembibitanAnalyt
           <div className="bg-indigo-50/50 p-3 rounded-lg text-indigo-600 border border-indigo-100 relative z-10"><Sprout size={24} className="animate-[pulse_3s_ease-in-out_infinite]" /></div>
           <div className="flex-1 relative z-10">
             <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1">Stok Pembesaran Aktif</p>
-            <h2 className="text-2xl lg:text-3xl font-extrabold text-[#1e3a8a]">
+            <h2 className="text-xl lg:text-2xl font-extrabold text-[#1e3a8a]">
               {formatNumber(pembibitanYTD.total_pembesaran)} <span className="text-lg text-slate-400 font-semibold">Batang</span>
             </h2>
           </div>
@@ -213,140 +200,184 @@ const AdvancedPembibitanAnalytics = React.memo(function AdvancedPembibitanAnalyt
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 items-stretch">
-        
-        {/* Insight Analitik Panel */}
-        <section className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 md:p-5 xl:col-span-1 flex flex-col h-full relative overflow-hidden group hover:-translate-y-1 hover:shadow-md transition-all duration-300">
-          <div className="flex justify-between items-center mb-4 relative z-10">
-            <h3 className="text-[13px] font-bold text-[#1e3a8a] uppercase tracking-wider flex items-center gap-2">
-              <Sparkles size={16} className="text-blue-500" />
-              Insight Analitik
-            </h3>
-            <FilterButtons currentRange={timeFilter} setRange={setTimeFilter} />
-          </div>
-          <div className="flex-1 relative z-10">
-            {renderAIInsight()}
-          </div>
-          <Sparkles size={140} className="absolute -bottom-10 -right-10 text-blue-50 opacity-40 group-hover:opacity-60 transition-opacity duration-300 pointer-events-none" />
-        </section>
 
-        {/* Chart Panels */}
-        <div className="xl:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
-          
-          <section className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 md:p-5 md:col-span-2">
-            <h3 className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-4">Overview Produksi</h3>
-            <div className="h-[250px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart data={filteredOverviewData} margin={{ top: 20, right: 10, left: 0, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                  <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{fontSize: 11, fill: '#94a3b8'}} dy={10} />
-                  <YAxis yAxisId="left" hide />
-                  <YAxis yAxisId="right" orientation="right" hide />
-                  <Tooltip 
-                    contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
-                  />
-                  <Legend wrapperStyle={{ fontSize: '11px', fontWeight: 600, color: '#64748b', paddingTop: '10px' }} iconType="circle"/>
-                  <Bar yAxisId="left" dataKey="pembesaran_batang" name="Pembesaran (Batang)" fill="#1e3a8a" radius={[4, 4, 0, 0]} maxBarSize={40}>
-                    <LabelList dataKey="pembesaran_batang" position="top" style={{fontSize: '10px', fill: '#64748b', fontWeight: 'bold'}} formatter={(v) => v > 0 ? formatNumber(v) : ''} />
-                  </Bar>
-                  <Bar yAxisId="left" dataKey="penjualan_batang" name="Penjualan (Batang)" fill="#3b82f6" radius={[4, 4, 0, 0]} maxBarSize={40}>
-                    <LabelList dataKey="penjualan_batang" position="top" style={{fontSize: '10px', fill: '#3b82f6', fontWeight: 'bold'}} formatter={(v) => v > 0 ? formatNumber(v) : ''} />
-                  </Bar>
-                  <Line yAxisId="right" type="monotone" dataKey="total_rp" name="Omzet (Rp)" stroke="#f43f5e" strokeWidth={3} dot={{ r: 4, fill: '#f43f5e', strokeWidth: 2, stroke: '#fff' }}>
-                    <LabelList dataKey="total_rp" position="top" style={{fontSize: '10px', fill: '#e11d48', fontWeight: 'bold'}} formatter={(v) => v > 0 ? formatJuta(v) : ''} />
-                  </Line>
-                </ComposedChart>
-              </ResponsiveContainer>
-            </div>
-          </section>
+        {/* LEFT COLUMN (xl:col-span-2) */}
+        <div className="xl:col-span-2 flex flex-col gap-4">
+          {/* Row 1: Penjualan Bibit & Penjualan Media Tanam */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
+            {/* Penjualan Bibit (Formerly Overview Produksi) */}
+            <section className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 md:p-5 flex flex-col h-[340px]">
+              <div className="flex justify-between items-start md:items-center mb-4 flex-col md:flex-row gap-2">
+                <h3 className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">Penjualan Bibit</h3>
+                <div className="flex flex-wrap items-center gap-2 text-[10px] font-bold text-slate-500">
+                  <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-sm bg-[#1e3a8a]"></div> Pembesaran</div>
+                  <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-sm bg-[#3b82f6]"></div> Penjualan</div>
+                  <div className="flex items-center gap-1"><div className="w-3 h-1 bg-[#f43f5e] rounded-full"></div> Omzet</div>
+                </div>
+              </div>
+              <div className="flex-1 w-full min-h-0 flex flex-col gap-1">
+                <div className="h-[45%] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={filteredOverviewData} syncId="pembibitan1" margin={{ top: 20, right: 10, left: 0, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                      <XAxis dataKey="month" hide padding={{ left: 30, right: 30 }} />
+                      <YAxis hide domain={[0, dataMax => Math.max(10, Math.ceil((dataMax || 0) * 1.2))]} />
+                      <Tooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }} />
+                      <Line type="monotone" dataKey="total_rp" name="Omzet (Rp)" stroke="#f43f5e" strokeWidth={3} dot={{ r: 4, fill: '#f43f5e', strokeWidth: 2, stroke: '#fff' }}>
+                        <LabelList dataKey="total_rp" position="top" style={{ fontSize: '10px', fill: '#e11d48', fontWeight: 'bold' }} formatter={(v) => v > 0 ? formatJuta(v) : ''} />
+                      </Line>
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="h-[55%] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={filteredOverviewData} syncId="pembibitan1" margin={{ top: 0, right: 10, left: 0, bottom: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                      <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#94a3b8' }} dy={10} padding={{ left: 30, right: 30 }} />
+                      <YAxis hide domain={[0, dataMax => Math.max(10, Math.ceil((dataMax || 0) * 1.2))]} />
+                      <Tooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }} />
+                      <Bar dataKey="pembesaran_batang" name="Pembesaran (Btg)" fill="#1e3a8a" radius={[4, 4, 0, 0]} maxBarSize={40}>
+                        <LabelList dataKey="pembesaran_batang" position="top" style={{ fontSize: '10px', fill: '#64748b', fontWeight: 'bold' }} formatter={(v) => v > 0 ? formatNumber(v) : ''} />
+                      </Bar>
+                      <Bar dataKey="penjualan_batang" name="Penjualan (Btg)" fill="#3b82f6" radius={[4, 4, 0, 0]} maxBarSize={40}>
+                        <LabelList dataKey="penjualan_batang" position="top" style={{ fontSize: '10px', fill: '#3b82f6', fontWeight: 'bold' }} formatter={(v) => v > 0 ? formatNumber(v) : ''} />
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            </section>
+
+            {/* Penjualan Media Tanam */}
+            <section className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 md:p-5 flex flex-col h-[340px]">
+              <div className="flex justify-between items-start md:items-center mb-4 flex-col md:flex-row gap-2">
+                <h3 className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">Penjualan Media Tanam</h3>
+                <div className="flex flex-wrap items-center gap-2 text-[10px] font-bold text-slate-500">
+                  <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-sm bg-[#10b981]"></div> Terjual</div>
+                  <div className="flex items-center gap-1"><div className="w-3 h-1 bg-[#059669] rounded-full"></div> Omzet</div>
+                </div>
+              </div>
+              <div className="flex-1 w-full min-h-0 flex flex-col gap-1">
+                <div className="h-[45%] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={filteredOverviewData} syncId="pembibitan2" margin={{ top: 20, right: 10, left: 0, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                      <XAxis dataKey="month" hide padding={{ left: 30, right: 30 }} />
+                      <YAxis hide domain={[0, dataMax => Math.max(10, Math.ceil((dataMax || 0) * 1.2))]} />
+                      <Tooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }} />
+                      <Line type="monotone" dataKey="polybag_omzet" name="Omzet (Rp)" stroke="#059669" strokeWidth={3} dot={{ r: 4, fill: '#059669', strokeWidth: 2, stroke: '#fff' }}>
+                        <LabelList dataKey="polybag_omzet" position="top" style={{ fontSize: '10px', fill: '#047857', fontWeight: 'bold' }} formatter={(v) => v > 0 ? formatJuta(v) : ''} />
+                      </Line>
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="h-[55%] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={filteredOverviewData} syncId="pembibitan2" margin={{ top: 0, right: 10, left: 0, bottom: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                      <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#94a3b8' }} dy={10} padding={{ left: 30, right: 30 }} />
+                      <YAxis hide domain={[0, dataMax => Math.max(10, Math.ceil((dataMax || 0) * 1.2))]} />
+                      <Tooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }} />
+                      <Bar dataKey="polybag_sold" name="Terjual (Pcs)" fill="#10b981" radius={[4, 4, 0, 0]} maxBarSize={40}>
+                        <LabelList dataKey="polybag_sold" position="top" style={{ fontSize: '10px', fill: '#10b981', fontWeight: 'bold' }} formatter={(v) => v > 0 ? formatNumber(v) : ''} />
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            </section>
+
+          </div>
+
+          {/* Row 2: Rekapitulasi YTD */}
           <section className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 md:p-5">
-            <h3 className="text-[11px] font-bold text-slate-500 uppercase tracking-widest text-center mb-2">Stock to Sales Ratio</h3>
-            {renderGaugeChart()}
-          </section>
-
-          <section className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 md:p-5 flex flex-col justify-between">
-            <h3 className="text-[11px] font-bold text-slate-500 uppercase tracking-widest text-center mb-4">Pricing Trend (Harga Bibit Rata-Rata)</h3>
-            <div className="h-[120px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={filteredOverviewData} margin={{ top: 10, right: 10, left: 10, bottom: 5 }}>
-                  <XAxis dataKey="month" hide />
-                  <YAxis hide domain={['dataMin - 1000', 'dataMax + 1000']} />
-                  <Tooltip formatter={(value) => formatRupiah(value)} />
-                  <Line type="monotone" dataKey="avg_harga_bibit" stroke="#f43f5e" strokeWidth={3} dot={{ r: 4, fill: '#f43f5e', strokeWidth: 2, stroke: '#fff' }}>
-                    <LabelList dataKey="avg_harga_bibit" position="top" style={{fontSize: '10px', fill: '#f43f5e', fontWeight: 'bold'}} formatter={(v) => v > 0 ? formatRupiah(v) : ''} />
-                  </Line>
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="text-center mt-2">
-              <p className="text-[10px] text-slate-400">Fluktuasi harga jual per bulan</p>
+            <h2 className="text-[13px] font-bold text-[#1e3a8a] uppercase tracking-wider border-b border-slate-100 pb-2 mb-4">
+              REKAPITULASI YEAR TO DATE (YTD)
+            </h2>
+            <div className="overflow-x-auto border border-slate-200 rounded-lg shadow-sm">
+              <table className="w-full text-xs md:text-sm text-left">
+                <thead>
+                  <tr className="bg-slate-50 border-b border-slate-200">
+                    <th className="p-3 md:p-4 text-left font-bold text-[#1e3a8a] uppercase tracking-wider">Variabel</th>
+                    <th className="p-3 md:p-4 text-center font-bold text-[#1e3a8a] uppercase tracking-wider">{prevYear}</th>
+                    <th className="p-3 md:p-4 text-center font-bold text-[#1e3a8a] uppercase tracking-wider">{currentYear}</th>
+                    <th className="p-3 md:p-4 text-center font-bold text-[#1e3a8a] uppercase tracking-wider">Persentase YoY</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {YTD_TABLE_DATA.map((row, idx) => (
+                    <tr key={idx} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                      <td className="p-3 md:p-4 font-semibold text-slate-600">{row.variabel}</td>
+                      <td className="p-3 md:p-4 text-center text-slate-500 font-medium">{row.prevYearData.toLocaleString('id-ID')}</td>
+                      <td className="p-3 md:p-4 text-center font-extrabold text-[#1e3a8a]">{row.currYearData.toLocaleString('id-ID')}</td>
+                      <td className={`p-3 md:p-4 text-center font-bold ${typeof row.percent === 'string' && row.percent.startsWith('+') ? 'text-blue-600' : (row.percent === '0%' || row.percent === '-' ? 'text-slate-400' : 'text-rose-500')}`}>
+                        {row.percent}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </section>
 
         </div>
-      </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-        <section className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 md:p-5 xl:col-span-1">
-            <h3 className="text-[11px] font-bold text-slate-500 uppercase tracking-widest text-center mb-4">Ancillary Revenue</h3>
-            <div className="h-[200px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={[
-                      { name: 'Omzet Bibit', value: pembibitanYTD.total_bibit_omzet, fill: '#3b82f6' },
-                      { name: 'Omzet Polybag', value: pembibitanYTD.total_polybag_omzet, fill: '#1e3a8a' }
-                    ].filter(d => d.value > 0)}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={40}
-                    outerRadius={80}
-                    dataKey="value"
-                    stroke="#fff"
-                    strokeWidth={2}
-                  >
-                    <LabelList dataKey="name" position="outside" offset={15} style={{ fontSize: '10px', fontWeight: 600, fill: '#64748b' }} />
-                  </Pie>
-                  <Tooltip formatter={(value) => formatRupiah(value)} />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-            {pembibitanYTD.total_polybag_omzet === 0 && (
-              <div className="text-center mt-2 text-xs text-rose-500 font-medium">
-                Peringatan: Belum ada pendapatan dari produk sampingan!
+        {/* RIGHT COLUMN (xl:col-span-1) */}
+        <div className="xl:col-span-1 flex flex-col gap-4">
+
+          {/* Rasio: Bibit vs Media Tanam & Stok to Sale */}
+          <div className="flex flex-col gap-4">
+
+            {/* Rasio Bibit vs Media Tanam */}
+            <section className="bg-white rounded-lg shadow-sm border border-slate-200 p-3 md:p-4 flex flex-col items-center relative overflow-hidden h-[180px]">
+              <h3 className="text-[9px] font-bold text-slate-500 uppercase tracking-widest text-center mb-1 leading-tight">Rasio Bibit<br />vs Media Tanam</h3>
+              <div className="flex-1 w-full relative -mt-2">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={(() => {
+                        const d = [
+                          { name: 'Bibit', value: pembibitanYTD.total_bibit_omzet || 0, fill: '#3b82f6' },
+                          { name: 'Media Tanam', value: pembibitanYTD.total_polybag_omzet || 0, fill: '#10b981' }
+                        ].filter(item => item.value > 0);
+                        return d.length > 0 ? d : [{ name: 'Belum Ada Data', value: 1, fill: '#e2e8f0' }];
+                      })()}
+                      cx="50%" cy="50%" innerRadius={25} outerRadius={45} dataKey="value" stroke="#fff" strokeWidth={2}
+                    >
+                      <LabelList dataKey="name" position="outside" offset={8} style={{ fontSize: '9px', fontWeight: 600, fill: '#64748b' }} />
+                    </Pie>
+                    <Tooltip formatter={(value) => formatRupiah(value)} />
+                  </PieChart>
+                </ResponsiveContainer>
               </div>
-            )}
-        </section>
+            </section>
 
-        <section className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 md:p-5 xl:col-span-2">
-          <h2 className="text-[13px] font-bold text-[#1e3a8a] uppercase tracking-wider border-b border-slate-100 pb-2 mb-4">
-            REKAPITULASI YEAR TO DATE (YTD)
-          </h2>
-          <div className="overflow-x-auto border border-slate-200 rounded-lg shadow-sm">
-            <table className="w-full text-xs md:text-sm text-left">
-              <thead>
-                <tr className="bg-slate-50 border-b border-slate-200">
-                  <th className="p-3 md:p-4 text-left font-bold text-[#1e3a8a] uppercase tracking-wider">Variabel</th>
-                  <th className="p-3 md:p-4 text-center font-bold text-[#1e3a8a] uppercase tracking-wider">{prevYear}</th>
-                  <th className="p-3 md:p-4 text-center font-bold text-[#1e3a8a] uppercase tracking-wider">{currentYear}</th>
-                  <th className="p-3 md:p-4 text-center font-bold text-[#1e3a8a] uppercase tracking-wider">Persentase YoY</th>
-                </tr>
-              </thead>
-              <tbody>
-                {YTD_TABLE_DATA.map((row, idx) => (
-                  <tr key={idx} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-                    <td className="p-3 md:p-4 font-semibold text-slate-600">{row.variabel}</td>
-                    <td className="p-3 md:p-4 text-center text-slate-500 font-medium">{row.prevYearData.toLocaleString('id-ID')}</td>
-                    <td className="p-3 md:p-4 text-center font-extrabold text-[#1e3a8a]">{row.currYearData.toLocaleString('id-ID')}</td>
-                    <td className={`p-3 md:p-4 text-center font-bold ${row.percent.startsWith('+') ? 'text-blue-600' : (row.percent === '0%' ? 'text-slate-400' : 'text-rose-500')}`}>
-                      {row.percent}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            {/* Rasio Stok to Sale */}
+            <section className="bg-white rounded-lg shadow-sm border border-slate-200 p-3 md:p-4 flex flex-col items-center relative overflow-hidden h-[180px]">
+              <h3 className="text-[9px] font-bold text-slate-500 uppercase tracking-widest text-center mb-1 leading-tight">Rasio Stok<br />To Sale</h3>
+              <div className="flex-1 w-full relative flex items-center justify-center">
+                {renderGaugeChart()}
+              </div>
+            </section>
+            
           </div>
-        </section>
+
+          {/* Insight Analitik */}
+          <section className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 md:p-5 flex-1 flex flex-col">
+            <div className="flex justify-between items-center border-b border-slate-100 pb-2 mb-4">
+              <h3 className="text-[13px] font-bold text-[#1e3a8a] uppercase tracking-widest">
+                Insight Analitik
+              </h3>
+              <Sparkles size={16} className="text-blue-500" />
+            </div>
+            <div className="flex-1 overflow-y-auto pr-1 custom-scrollbar">
+              {renderAIInsight()}
+            </div>
+          </section>
+
+        </div>
+
       </div>
 
     </div>

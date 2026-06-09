@@ -113,9 +113,9 @@ const AdvancedFishAnalytics = React.memo(function AdvancedFishAnalytics() {
   // Fallback mock data for YTD Table
   const prevYear = Number(currentYear) - 1;
   const YTD_TABLE_DATA = [
-    { variabel: 'Penjualan Ikan Konsumsi (Kg)', prevYearData: 1090, currYearData: fisheryYTD.total_konsumsi_kg, percent: '+3%' },
-    { variabel: 'Penjualan Bibit Ikan (Ekor)', prevYearData: 0, currYearData: fisheryYTD.total_bibit_ekor, percent: '+100%' },
-    { variabel: 'Total Omzet Keseluruhan', prevYearData: 36695000, currYearData: fisheryYTD.total_revenue, percent: '+9%' },
+    { variabel: 'Penjualan Ikan Konsumsi (Kg)', prevYearData: 0, currYearData: fisheryYTD.total_konsumsi_kg, percent: '-' },
+    { variabel: 'Penjualan Bibit Ikan (Ekor)', prevYearData: 0, currYearData: fisheryYTD.total_bibit_ekor, percent: '-' },
+    { variabel: 'Total Omzet Keseluruhan', prevYearData: 0, currYearData: fisheryYTD.total_revenue, percent: '-' },
   ];
 
   const renderLineLabelRp = (props) => {
@@ -170,7 +170,7 @@ const AdvancedFishAnalytics = React.memo(function AdvancedFishAnalytics() {
           <div className="bg-blue-50/50 p-3 rounded-lg text-blue-600 border border-blue-100 relative z-10"><DollarSign size={24} className="animate-[pulse_2s_ease-in-out_infinite]" /></div>
           <div className="flex-1 relative z-10">
             <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1">Total Revenue YTD</p>
-            <h2 className="text-2xl lg:text-3xl font-extrabold text-[#1e3a8a]">
+            <h2 className="text-xl lg:text-2xl font-extrabold text-[#1e3a8a]">
               {formatRupiah(fisheryYTD.total_revenue)}
             </h2>
           </div>
@@ -185,7 +185,7 @@ const AdvancedFishAnalytics = React.memo(function AdvancedFishAnalytics() {
           <div className="bg-sky-50/50 p-3 rounded-lg text-sky-600 border border-sky-100 relative z-10"><ShoppingBag size={24} className="animate-[bounce_3s_ease-in-out_infinite]" /></div>
           <div className="flex-1 relative z-10">
             <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1">Total Ikan Konsumsi YTD</p>
-            <h2 className="text-2xl lg:text-3xl font-extrabold text-[#1e3a8a]">
+            <h2 className="text-xl lg:text-2xl font-extrabold text-[#1e3a8a]">
               {new Intl.NumberFormat('id-ID').format(fisheryYTD.total_konsumsi_kg)} <span className="text-lg text-slate-400 font-semibold">Kg</span>
             </h2>
           </div>
@@ -200,7 +200,7 @@ const AdvancedFishAnalytics = React.memo(function AdvancedFishAnalytics() {
           <div className="bg-indigo-50/50 p-3 rounded-lg text-indigo-600 border border-indigo-100 relative z-10"><Package size={24} className="animate-[pulse_3s_ease-in-out_infinite]" /></div>
           <div className="flex-1 relative z-10">
             <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1">Total Bibit Ikan YTD</p>
-            <h2 className="text-2xl lg:text-3xl font-extrabold text-[#1e3a8a]">
+            <h2 className="text-xl lg:text-2xl font-extrabold text-[#1e3a8a]">
               {new Intl.NumberFormat('id-ID').format(fisheryYTD.total_bibit_ekor)} <span className="text-lg text-slate-400 font-semibold">Ekor</span>
             </h2>
           </div>
@@ -239,7 +239,7 @@ const AdvancedFishAnalytics = React.memo(function AdvancedFishAnalytics() {
                     <BarChart data={filteredOverviewData} margin={{ top: 25, right: 10, left: 10, bottom: 0 }}>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                       <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: '#64748b', fontWeight: 'bold' }} dy={10} interval={0} />
-                      <YAxis hide={true} domain={[0, 'dataMax * 1.2']} />
+                      <YAxis hide={true} domain={[0, dataMax => Math.max(10, Math.ceil((dataMax || 0) * 1.2))]} />
                       <Tooltip cursor={{ fill: '#f8fafc' }} contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '12px' }} />
                       <Bar dataKey="konsumsi_kg" name="Ikan Konsumsi" fill="#3b82f6" radius={[4, 4, 0, 0]} barSize={24} label={renderLabelKg} />
                     </BarChart>
@@ -255,7 +255,7 @@ const AdvancedFishAnalytics = React.memo(function AdvancedFishAnalytics() {
                     <BarChart data={filteredOverviewData} margin={{ top: 25, right: 10, left: 10, bottom: 0 }}>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                       <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: '#64748b', fontWeight: 'bold' }} dy={10} interval={0} />
-                      <YAxis hide={true} domain={[0, 'dataMax * 1.2']} />
+                      <YAxis hide={true} domain={[0, dataMax => Math.max(10, Math.ceil((dataMax || 0) * 1.2))]} />
                       <Tooltip cursor={{ fill: '#f8fafc' }} contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '12px' }} />
                       <Bar dataKey="bibit_ekor" name="Bibit Ikan" fill="#f43f5e" radius={[4, 4, 0, 0]} barSize={24} label={renderLabelEkor} />
                     </BarChart>
@@ -272,7 +272,7 @@ const AdvancedFishAnalytics = React.memo(function AdvancedFishAnalytics() {
                   <LineChart data={filteredOverviewData} margin={{ top: 25, right: 10, left: 10, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                     <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: '#64748b', fontWeight: 'bold' }} dy={10} interval={0} />
-                    <YAxis hide={true} domain={[0, 'dataMax * 1.2']} />
+                    <YAxis hide={true} domain={[0, dataMax => Math.max(10, Math.ceil((dataMax || 0) * 1.2))]} />
                     <Tooltip 
                       cursor={{ fill: '#f8fafc', strokeDasharray: '3 3' }} 
                       formatter={(val) => [formatRupiah(val), 'Total Omzet']} 

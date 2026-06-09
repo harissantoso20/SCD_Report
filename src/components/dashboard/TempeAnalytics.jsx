@@ -43,19 +43,11 @@ const TempeAnalytics = React.memo(function TempeAnalytics() {
   }, [filteredOverviewData]);
 
   const prevYear = Number(currentYear) - 1;
-  const prevYearOmzet = 20000000;
-  const prevYearMentah = 300;
-  const prevYearOlahan = 50;
+  const prevYearOmzet = 0;
+  const prevYearMentah = 0;
+  const prevYearOlahan = 0;
 
-  const yoyOmzetPct = ((tempeYTD.total_omzet - prevYearOmzet) / prevYearOmzet) * 100;
-  const yoyMentahPct = ((tempeYTD.total_qty_mentah - prevYearMentah) / prevYearMentah) * 100;
-  const yoyOlahanPct = ((tempeYTD.total_qty_olahan - prevYearOlahan) / prevYearOlahan) * 100;
 
-  const getYoYLabel = (pct) => {
-    if (pct > 0) return <span className="text-blue-600 font-semibold">▲ +{pct.toFixed(1)}% dibanding tahun lalu</span>;
-    if (pct < 0) return <span className="text-rose-500 font-semibold">▼ {pct.toFixed(1)}% dibanding tahun lalu</span>;
-    return <span className="text-slate-500 font-semibold">- Sama dengan tahun lalu</span>;
-  };
 
   const pieData = [
     { name: 'Tempe Papan / Mentah', value: filteredTotals.mentah },
@@ -92,7 +84,7 @@ const TempeAnalytics = React.memo(function TempeAnalytics() {
           Secara keseluruhan dalam periode <span className="font-bold text-[#1e3a8a]">{startMonth} - {endMonth} {currentYear}</span>, volume penjualan Tempe Mentah menyentuh <span className="font-bold text-blue-600">{new Intl.NumberFormat('id-ID').format(totalMentah)} Kg</span>, sementara produk Olahan Tempe terserap pasar sebesar <span className="font-bold text-blue-900">{new Intl.NumberFormat('id-ID').format(totalOlahan)} Kg</span>. Perpaduan keduanya sukses mencetak akumulasi omzet <span className="font-bold text-blue-700">{formatRupiah(tempeYTD.total_omzet)}</span>.
         </p>
         <p>
-          Jika dikomparasikan secara *Year-on-Year* (YoY), performa komersial mencatat {yoyOmzetPct > 0 ? "pertumbuhan positif" : "terjadinya kontraksi pendapatan"} dibandingkan tahun sebelumnya. Di sisi lain, harga jual Olahan Tempe (rata-rata Rp {new Intl.NumberFormat('id-ID').format(avgPriceOlahan)}/Kg) terbukti jauh lebih tinggi dibandingkan harga Mentah (rata-rata Rp {new Intl.NumberFormat('id-ID').format(avgPriceMentah)}/Kg).
+          Jika dikomparasikan secara *Year-on-Year* (YoY), {prevYearOmzet > 0 ? (tempeYTD.total_omzet > prevYearOmzet ? "performa komersial mencatat pertumbuhan positif dibandingkan tahun sebelumnya" : "terjadi kontraksi pendapatan") : "belum ada data historis yang memadai untuk menghitung pertumbuhan komersial secara akurat"}. Di sisi lain, harga jual Olahan Tempe (rata-rata Rp {new Intl.NumberFormat('id-ID').format(avgPriceOlahan)}/Kg) terbukti jauh lebih tinggi dibandingkan harga Mentah (rata-rata Rp {new Intl.NumberFormat('id-ID').format(avgPriceMentah)}/Kg).
         </p>
         <div className="mt-3 bg-blue-50/60 p-3 rounded border border-blue-100 flex gap-3 items-start relative z-10 shadow-sm">
           <svg className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -135,14 +127,9 @@ const TempeAnalytics = React.memo(function TempeAnalytics() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-white p-4 md:p-5 rounded-lg shadow-sm border border-slate-200 border-t-4 border-t-blue-600 hover:-translate-y-1 hover:shadow-md transition-all duration-300 flex items-start gap-4 relative overflow-hidden group">
           <div className="bg-blue-50/50 p-3 rounded-lg text-blue-600 border border-blue-100 relative z-10"><DollarSign size={24} className="animate-[pulse_2s_ease-in-out_infinite]" /></div>
-          <div className="flex-1 relative z-10">
-            <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1">Total Omzet Keseluruhan YTD</p>
-            <h2 className="text-2xl lg:text-3xl font-extrabold text-[#1e3a8a] mb-2">
-              {formatRupiah(tempeYTD.total_omzet)}
-            </h2>
-            <div className="text-[11px]">
-              {getYoYLabel(yoyOmzetPct)}
-            </div>
+          <div className="flex flex-col mb-1 relative z-10">
+            <span className="text-[9px] font-bold text-slate-500 tracking-wider uppercase mb-1">Total Omzet Keseluruhan YTD</span>
+            <span className="text-xl xl:text-2xl font-extrabold text-[#1e3a8a]">{formatRupiah(tempeYTD.total_omzet)}</span>
           </div>
           {/* Doodle Art */}
           <div className="absolute -bottom-6 -right-6 text-blue-100/40 group-hover:scale-110 transition-transform duration-500 pointer-events-none">
@@ -154,14 +141,9 @@ const TempeAnalytics = React.memo(function TempeAnalytics() {
         </div>
         <div className="bg-white p-4 md:p-5 rounded-lg shadow-sm border border-slate-200 border-t-4 border-t-blue-400 hover:-translate-y-1 hover:shadow-md transition-all duration-300 flex items-start gap-4 relative overflow-hidden group">
           <div className="bg-sky-50/50 p-3 rounded-lg text-sky-600 border border-sky-100 relative z-10"><Box size={24} className="animate-[bounce_3s_ease-in-out_infinite]" /></div>
-          <div className="flex-1 relative z-10">
-            <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1">Vol. Jual Tempe Mentah</p>
-            <h2 className="text-2xl lg:text-3xl font-extrabold text-[#1e3a8a] mb-2">
-              {new Intl.NumberFormat('id-ID').format(tempeYTD.total_qty_mentah)} <span className="text-lg text-slate-400 font-semibold">Kg</span>
-            </h2>
-            <div className="text-[11px]">
-              {getYoYLabel(yoyMentahPct)}
-            </div>
+          <div className="flex flex-col mb-1 relative z-10">
+            <span className="text-[9px] font-bold text-slate-500 tracking-wider uppercase mb-1">Vol. Jual Tempe Mentah</span>
+            <span className="text-xl xl:text-2xl font-extrabold text-[#1e3a8a]">{new Intl.NumberFormat('id-ID').format(tempeYTD.total_qty_mentah)} <span className="text-sm font-semibold text-slate-400">Kg</span></span>
           </div>
           {/* Doodle Art */}
           <div className="absolute -bottom-2 -right-4 text-sky-100/40 group-hover:translate-x-2 group-hover:-translate-y-1 transition-transform duration-500 pointer-events-none">
@@ -172,14 +154,9 @@ const TempeAnalytics = React.memo(function TempeAnalytics() {
         </div>
         <div className="bg-white p-4 md:p-5 rounded-lg shadow-sm border border-slate-200 border-t-4 border-t-blue-900 hover:-translate-y-1 hover:shadow-md transition-all duration-300 flex items-start gap-4 relative overflow-hidden group">
           <div className="bg-indigo-50/50 p-3 rounded-lg text-indigo-600 border border-indigo-100 relative z-10"><ShoppingBag size={24} className="animate-[pulse_3s_ease-in-out_infinite]" /></div>
-          <div className="flex-1 relative z-10">
-            <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1">Vol. Jual Olahan Tempe</p>
-            <h2 className="text-2xl lg:text-3xl font-extrabold text-[#1e3a8a] mb-2">
-              {new Intl.NumberFormat('id-ID').format(tempeYTD.total_qty_olahan)} <span className="text-lg text-slate-400 font-semibold">Kg</span>
-            </h2>
-            <div className="text-[11px]">
-              {getYoYLabel(yoyOlahanPct)}
-            </div>
+          <div className="flex flex-col mb-1 relative z-10">
+            <span className="text-[9px] font-bold text-slate-500 tracking-wider uppercase mb-1">Vol. Jual Olahan Tempe</span>
+            <span className="text-xl xl:text-2xl font-extrabold text-[#1e3a8a]">{new Intl.NumberFormat('id-ID').format(tempeYTD.total_qty_olahan)} <span className="text-sm font-semibold text-slate-400">Kg</span></span>
           </div>
           {/* Doodle Art */}
           <div className="absolute -bottom-4 -right-2 text-indigo-100/40 group-hover:rotate-12 transition-transform duration-500 pointer-events-none">
@@ -200,30 +177,39 @@ const TempeAnalytics = React.memo(function TempeAnalytics() {
             <h3 className="text-[13px] font-bold text-[#1e3a8a] uppercase tracking-widest">
               Tren Volume vs. Omzet Kategori
             </h3>
+            <div className="flex flex-wrap justify-end items-center gap-2 md:gap-3 text-[10px] font-bold text-slate-500">
+              <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-sm bg-[#3b82f6]"></div> Vol Mentah</div>
+              <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-sm bg-[#1e3a8a]"></div> Vol Olahan</div>
+              <div className="flex items-center gap-1"><div className="w-3 h-1 bg-[#3b82f6] rounded-full"></div> Omzet Mentah</div>
+              <div className="flex items-center gap-1"><div className="w-3 h-1 bg-[#1e3a8a] rounded-full"></div> Omzet Olahan</div>
+            </div>
           </div>
           
-          <div className="flex-1 w-full min-h-0">
-            <ResponsiveContainer width="100%" height="100%">
-              <ComposedChart data={filteredOverviewData} margin={{ top: 25, right: 10, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#64748b', fontWeight: 'bold' }} dy={10} />
-                <YAxis yAxisId="left" hide={false} axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#64748b' }} dx={-10} />
-                <YAxis yAxisId="right" orientation="right" hide={true} />
-                <Tooltip 
-                  cursor={{ fill: '#f8fafc', strokeDasharray: '3 3' }} 
-                  contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '12px' }} 
-                />
-                <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }} />
-                
-                {/* Grouped Bars for Volume */}
-                <Bar yAxisId="left" dataKey="qty_mentah" name="Vol. Tempe Mentah (Kg)" fill="#3b82f6" radius={[4, 4, 0, 0]} barSize={16} label={renderLabelKg} />
-                <Bar yAxisId="left" dataKey="qty_olahan" name="Vol. Olahan Tempe (Kg)" fill="#1e3a8a" radius={[4, 4, 0, 0]} barSize={16} label={renderLabelKg} />
-                
-                {/* Line Charts for Omzet */}
-                <Line yAxisId="right" type="monotone" dataKey="omzet_mentah" name="Omzet Mentah (Rp)" stroke="#3b82f6" strokeWidth={3} dot={{ r: 4, fill: '#fff', stroke: '#3b82f6', strokeWidth: 2 }} activeDot={{ r: 6 }} label={renderLineLabelRp} />
-                <Line yAxisId="right" type="monotone" dataKey="omzet_olahan" name="Omzet Olahan (Rp)" stroke="#1e3a8a" strokeWidth={3} dot={{ r: 4, fill: '#fff', stroke: '#1e3a8a', strokeWidth: 2 }} activeDot={{ r: 6 }} label={renderLineLabelRp} />
-              </ComposedChart>
-            </ResponsiveContainer>
+          <div className="flex-1 w-full min-h-0 flex flex-col gap-1">
+            <div className="h-[45%] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={filteredOverviewData} syncId="tempeChart" margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                  <XAxis dataKey="month" hide={true} padding={{ left: 30, right: 30 }} />
+                  <YAxis hide={true} domain={[0, dataMax => Math.max(10, Math.ceil((dataMax || 0) * 1.2))]} />
+                  <Tooltip cursor={{ fill: '#f8fafc', strokeDasharray: '3 3' }} contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '11px' }} />
+                  <Line type="monotone" dataKey="omzet_mentah" name="Omzet Mentah (Rp)" stroke="#3b82f6" strokeWidth={3} dot={{ r: 4, fill: '#fff', stroke: '#3b82f6', strokeWidth: 2 }} activeDot={{ r: 6 }} label={renderLineLabelRp} />
+                  <Line type="monotone" dataKey="omzet_olahan" name="Omzet Olahan (Rp)" stroke="#1e3a8a" strokeWidth={3} dot={{ r: 4, fill: '#fff', stroke: '#1e3a8a', strokeWidth: 2 }} activeDot={{ r: 6 }} label={renderLineLabelRp} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="h-[55%] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={filteredOverviewData} syncId="tempeChart" margin={{ top: 0, right: 10, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                  <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#64748b', fontWeight: 'bold' }} dy={10} padding={{ left: 30, right: 30 }} />
+                  <YAxis hide={true} domain={[0, dataMax => Math.max(10, Math.ceil((dataMax || 0) * 1.2))]} />
+                  <Tooltip cursor={{ fill: '#f8fafc', strokeDasharray: '3 3' }} contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '11px' }} />
+                  <Bar dataKey="qty_mentah" name="Vol. Tempe Mentah (Kg)" fill="#3b82f6" radius={[4, 4, 0, 0]} barSize={16} label={renderLabelKg} />
+                  <Bar dataKey="qty_olahan" name="Vol. Olahan Tempe (Kg)" fill="#1e3a8a" radius={[4, 4, 0, 0]} barSize={16} label={renderLabelKg} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </div>
         </div>
 
@@ -265,7 +251,7 @@ const TempeAnalytics = React.memo(function TempeAnalytics() {
             {pieData.length > 0 && (
               <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none mt-[-15px]">
                 <span className="text-[11px] text-slate-500 font-bold uppercase">Total Omzet</span>
-                <span className="text-lg font-black text-[#1e3a8a]">{formatJuta(filteredTotals.total)}</span>
+                <span className="text-lg xl:text-xl font-black text-[#1e3a8a]">{formatJuta(filteredTotals.total)}</span>
               </div>
             )}
           </div>
