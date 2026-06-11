@@ -10,6 +10,7 @@ import QuailAnalytics from './dashboard/QuailAnalytics';
 import TempeAnalytics from './dashboard/TempeAnalytics';
 import EcogrowAnalytics from './dashboard/EcogrowAnalytics';
 import CahayaTaniAnalytics from './dashboard/CahayaTaniAnalytics';
+import ItikAnalytics from './dashboard/ItikAnalytics';
 import ProgramSummary from './dashboard/ProgramSummary';
 import { useDashboardData } from '../hooks/useDashboardData';
 import { FileImage, FileText } from './Icons';
@@ -47,6 +48,8 @@ export default function DashboardView() {
         <EcogrowAnalytics />
       ) : p.includes("cahaya tani") ? (
         <CahayaTaniAnalytics />
+      ) : p.includes("itik") ? (
+        <ItikAnalytics />
       ) : isSalesProgram ? (
         <SalesVisualization />
       ) : (

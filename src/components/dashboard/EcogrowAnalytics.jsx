@@ -5,6 +5,7 @@ import { DollarSign, TrendingUp, TrendingDown, PieChart as PieChartIcon, Sparkle
 
 // Helpers
 const formatRupiah = (val) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(val);
+const formatNumber = (val) => new Intl.NumberFormat('id-ID').format(val);
 const formatJuta = (val) => {
   if (val >= 1000000) return `Rp ${(val / 1000000).toFixed(1)} Jt`;
   return `Rp ${(val / 1000).toFixed(0)} Rb`;
@@ -152,7 +153,7 @@ const EcogrowAnalytics = () => {
   };
 
   // LAYER 2: Product Mix (Donut Chart)
-  const getPercentage = (curr, prev) => {
+  const getPercentageJSX = (curr, prev) => {
     if (prev === 0) return '-';
     const pct = ((curr - prev) / prev) * 100;
     return (
@@ -163,7 +164,7 @@ const EcogrowAnalytics = () => {
   };
 
   const YTD_TABLE_DATA = [
-    { variabel: 'Total Omzet Keseluruhan', prevYearData: ecogrowYTD.prev_total_omzet || 0, currYearData: ecogrowYTD.total_omzet || 0, percent: getPercentage(ecogrowYTD.total_omzet || 0, ecogrowYTD.prev_total_omzet || 0), isCurrency: true }
+    { variabel: 'Total Omzet Keseluruhan', prevYearData: ecogrowYTD.prev_total_omzet || 0, currYearData: ecogrowYTD.total_omzet || 0, percent: getPercentageJSX(ecogrowYTD.total_omzet || 0, ecogrowYTD.prev_total_omzet || 0), isCurrency: true }
   ];
 
   const pieData = useMemo(() => {
@@ -350,7 +351,7 @@ const EcogrowAnalytics = () => {
             <thead className="text-[11px] uppercase bg-slate-50 text-[#1e3a8a] font-extrabold tracking-wider">
               <tr>
                 <th className="px-6 py-4 rounded-tl-lg">Variabel</th>
-                <th className="px-6 py-4 text-right">{prevYear}</th>
+                <th className="px-6 py-4 text-right">{Number(currentYear) - 1}</th>
                 <th className="px-6 py-4 text-right">{currentYear}</th>
                 <th className="px-6 py-4 text-right rounded-tr-lg">Persentase YoY</th>
               </tr>
