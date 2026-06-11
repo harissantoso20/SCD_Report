@@ -49,7 +49,7 @@ const MaggotVisualization = React.memo(function MaggotVisualization() {
   const { 
     maggotBioconversionData, 
     maggotFinancialData, 
-    totalWasteManaged,
+    maggotYTD,
     currentYear
   } = useDashboardData();
 
@@ -64,8 +64,12 @@ const MaggotVisualization = React.memo(function MaggotVisualization() {
   const filteredFinancialData = React.useMemo(() => maggotFinancialData.slice(-timeFilter), [maggotFinancialData, timeFilter]);
 
   const selectedWasteManaged = bioData.reduce((sum, item) => sum + (Number(item.sampah) || 0), 0);
-  const totalOmzetYTD = maggotFinancialData.reduce((sum, d) => sum + d.omzet_kasgot + d.omzet_kering + d.omzet_fresh, 0);
-  const totalFreshMaggotYTD = maggotFinancialData.reduce((sum, d) => sum + d.fresh, 0);
+
+  const getPercentage = (curr, prev) => {
+    if (prev === 0) return '-';
+    const pct = ((curr - prev) / prev) * 100;
+    return `${pct > 0 ? '+' : ''}${pct.toFixed(0)}%`;
+  };
 
   const generateSmartAnalogy = (kg) => {
     if (!kg) return "Belum ada data konversi sampah organik pada periode ini.";
@@ -147,7 +151,7 @@ const MaggotVisualization = React.memo(function MaggotVisualization() {
                 <p className="text-[10px] font-bold text-blue-600 uppercase tracking-widest mb-1">Waste Managed (YTD)</p>
                 <div className="flex items-baseline gap-1.5">
                   <h3 className="text-xl lg:text-3xl font-black text-[#1e3a8a] tracking-tighter">
-                    {new Intl.NumberFormat('id-ID').format(totalWasteManaged)}
+                    {new Intl.NumberFormat('id-ID').format(maggotYTD?.currWaste || 0)}
                   </h3>
                   <span className="text-sm font-bold text-blue-700">Kg</span>
                 </div>
@@ -170,7 +174,7 @@ const MaggotVisualization = React.memo(function MaggotVisualization() {
                 <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Total Omzet YTD</p>
                 <div className="flex items-baseline gap-1.5">
                   <h3 className="text-xl lg:text-2xl font-black text-[#1e3a8a] tracking-tighter">
-                    Rp {(totalOmzetYTD / 1000000).toFixed(1)} <span className="text-sm font-bold text-slate-400">Jt</span>
+                    Rp {((maggotYTD?.currOmzet || 0) / 1000000).toFixed(1)} <span className="text-sm font-bold text-slate-400">Jt</span>
                   </h3>
                 </div>
               </div>
@@ -191,7 +195,7 @@ const MaggotVisualization = React.memo(function MaggotVisualization() {
                 <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Fresh Maggot Terjual</p>
                 <div className="flex items-baseline gap-1.5">
                   <h3 className="text-xl lg:text-2xl font-black text-[#1e3a8a] tracking-tighter">
-                    {new Intl.NumberFormat('id-ID').format(totalFreshMaggotYTD)}
+                    {new Intl.NumberFormat('id-ID').format(maggotYTD?.currFresh || 0)}
                   </h3>
                   <span className="text-sm font-bold text-slate-400">Kg</span>
                 </div>
@@ -296,6 +300,49 @@ const MaggotVisualization = React.memo(function MaggotVisualization() {
           </div>
         </div>
 
+      </div>
+
+      {/* ----------------- REKAPITULASI YTD ----------------- */}
+      <div className="bg-white p-4 md:p-5 rounded-lg shadow-sm border border-slate-200 mt-4">
+        <h3 className="text-[13px] font-bold text-[#1e3a8a] uppercase tracking-widest border-b border-slate-100 pb-2 mb-4">
+          Rekapitulasi Year to Date (YTD)
+        </h3>
+        <div className="w-full overflow-x-auto minimal-scrollbar flex-1 flex flex-col justify-center">
+          <table className="w-full text-xs md:text-sm border-collapse border border-slate-100 rounded-lg overflow-hidden">
+            <thead>
+              <tr className="bg-slate-50">
+                <th className="p-3 md:p-4 text-left font-bold text-[#1e3a8a] uppercase tracking-wider border-b border-slate-200">Variabel</th>
+                <th className="p-3 md:p-4 text-center font-bold text-[#1e3a8a] uppercase tracking-wider border-b border-slate-200">{Number(currentYear) - 1}</th>
+                <th className="p-3 md:p-4 text-center font-bold text-[#1e3a8a] uppercase tracking-wider border-b border-slate-200">{currentYear}</th>
+                <th className="p-3 md:p-4 text-center font-bold text-[#1e3a8a] uppercase tracking-wider border-b border-slate-200">Persentase YoY</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                { variabel: 'Waste Managed (Kg)', prevYearData: maggotYTD?.prevWaste || 0, currYearData: maggotYTD?.currWaste || 0, percent: getPercentage(maggotYTD?.currWaste || 0, maggotYTD?.prevWaste || 0), isCurrency: false },
+                { variabel: 'Fresh Maggot Terjual (Kg)', prevYearData: maggotYTD?.prevFresh || 0, currYearData: maggotYTD?.currFresh || 0, percent: getPercentage(maggotYTD?.currFresh || 0, maggotYTD?.prevFresh || 0), isCurrency: false },
+                { variabel: 'Total Omzet Keseluruhan', prevYearData: maggotYTD?.prevOmzet || 0, currYearData: maggotYTD?.currOmzet || 0, percent: getPercentage(maggotYTD?.currOmzet || 0, maggotYTD?.prevOmzet || 0), isCurrency: true },
+              ].map((row, idx) => (
+                <tr key={idx} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                  <td className="p-3 md:p-4 font-semibold text-slate-600">{row.variabel}</td>
+                  <td className="p-3 md:p-4 text-center text-slate-500 font-medium">
+                    {row.isCurrency 
+                      ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(row.prevYearData) 
+                      : new Intl.NumberFormat('id-ID').format(row.prevYearData)}
+                  </td>
+                  <td className="p-3 md:p-4 text-center font-extrabold text-[#1e3a8a]">
+                    {row.isCurrency 
+                      ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(row.currYearData) 
+                      : new Intl.NumberFormat('id-ID').format(row.currYearData)}
+                  </td>
+                  <td className={`p-3 md:p-4 text-center font-bold ${row.percent.startsWith('+') ? 'text-blue-600' : (row.percent === '-' ? 'text-slate-400' : 'text-rose-500')}`}>
+                    {row.percent}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

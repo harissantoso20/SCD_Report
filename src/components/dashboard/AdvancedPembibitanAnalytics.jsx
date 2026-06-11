@@ -38,14 +38,6 @@ const AdvancedPembibitanAnalytics = React.memo(function AdvancedPembibitanAnalyt
 
   const prevYear = Number(currentYear) - 1;
 
-  // Mock prev year data to match scenario
-  const prevData = {
-    pembesaran: 0,
-    penjualan: 0,
-    polybag: 0,
-    omzet: 0
-  };
-
   const getPercentage = (curr, prev) => {
     if (prev === 0) return '-';
     const pct = ((curr - prev) / prev) * 100;
@@ -53,17 +45,17 @@ const AdvancedPembibitanAnalytics = React.memo(function AdvancedPembibitanAnalyt
   };
 
   const YTD_TABLE_DATA = [
-    { variabel: 'Pembesaran Bibit (Batang)', prevYearData: prevData.pembesaran, currYearData: pembibitanYTD.total_pembesaran, percent: getPercentage(pembibitanYTD.total_pembesaran, prevData.pembesaran) },
-    { variabel: 'Penjualan Bibit (Batang)', prevYearData: prevData.penjualan, currYearData: pembibitanYTD.total_penjualan, percent: getPercentage(pembibitanYTD.total_penjualan, prevData.penjualan) },
-    { variabel: 'Penjualan Polybag (Ea)', prevYearData: prevData.polybag, currYearData: pembibitanYTD.total_polybag, percent: getPercentage(pembibitanYTD.total_polybag, prevData.polybag) },
-    { variabel: 'Total Omzet Keseluruhan', prevYearData: prevData.omzet, currYearData: pembibitanYTD.total_omzet, percent: getPercentage(pembibitanYTD.total_omzet, prevData.omzet) },
+    { variabel: 'Pembesaran Bibit (Batang)', prevYearData: pembibitanYTD?.prevPembesaran || 0, currYearData: pembibitanYTD?.currPembesaran || 0, percent: getPercentage(pembibitanYTD?.currPembesaran || 0, pembibitanYTD?.prevPembesaran || 0), isCurrency: false },
+    { variabel: 'Penjualan Bibit (Batang)', prevYearData: pembibitanYTD?.prevPenjualan || 0, currYearData: pembibitanYTD?.currPenjualan || 0, percent: getPercentage(pembibitanYTD?.currPenjualan || 0, pembibitanYTD?.prevPenjualan || 0), isCurrency: false },
+    { variabel: 'Penjualan Polybag (Ea)', prevYearData: pembibitanYTD?.prevPolybag || 0, currYearData: pembibitanYTD?.currPolybag || 0, percent: getPercentage(pembibitanYTD?.currPolybag || 0, pembibitanYTD?.prevPolybag || 0), isCurrency: false },
+    { variabel: 'Total Omzet Keseluruhan', prevYearData: pembibitanYTD?.prevRevenue || 0, currYearData: pembibitanYTD?.currRevenue || 0, percent: getPercentage(pembibitanYTD?.currRevenue || 0, pembibitanYTD?.prevRevenue || 0), isCurrency: true },
   ];
 
-  const stockToSalesRatio = pembibitanYTD.total_pembesaran > 0
-    ? ((pembibitanYTD.total_penjualan / pembibitanYTD.total_pembesaran) * 100).toFixed(1)
+  const stockToSalesRatio = (pembibitanYTD?.currPembesaran || 0) > 0
+    ? (((pembibitanYTD?.currPenjualan || 0) / (pembibitanYTD?.currPembesaran || 0)) * 100).toFixed(1)
     : 0;
 
-  const deltaOmzet = pembibitanYTD.total_omzet - prevData.omzet;
+  const deltaOmzet = (pembibitanYTD?.currRevenue || 0) - (pembibitanYTD?.prevRevenue || 0);
 
   const renderGaugeChart = () => {
     const ratioVal = Number(stockToSalesRatio);
@@ -102,39 +94,51 @@ const AdvancedPembibitanAnalytics = React.memo(function AdvancedPembibitanAnalyt
   const renderAIInsight = () => {
     if (filteredOverviewData.length === 0) return <p className="text-slate-500 italic text-sm">Data analitik belum tersedia untuk periode ini.</p>;
     
-    const startMonth = pembibitanOverviewData[0]?.month || 'JAN';
-    const endMonth = pembibitanOverviewData[pembibitanOverviewData.length - 1]?.month || '';
+    const startMonth = filteredOverviewData[0]?.month || 'JAN';
+    const endMonth = filteredOverviewData[filteredOverviewData.length - 1]?.month || '';
 
-    let ratioStatus = '';
-    let ratioColor = '';
-    const ratioNum = Number(stockToSalesRatio);
-    if (ratioNum >= 50) {
-      ratioStatus = 'cukup sehat';
-      ratioColor = 'text-blue-500';
-    } else if (ratioNum >= 20) {
-      ratioStatus = 'perlu ditingkatkan';
-      ratioColor = 'text-sky-500';
-    } else {
-      ratioStatus = 'sangat rendah';
-      ratioColor = 'text-rose-500';
+    let peakMonth = '';
+    let peakOmzet = 0;
+    filteredOverviewData.forEach(d => {
+      if (d.total_rp > peakOmzet) {
+        peakOmzet = d.total_rp;
+        peakMonth = d.month;
+      }
+    });
+
+    const formatPeak = (val) => {
+      if (val >= 1000000) return (val / 1000000).toFixed(1) + ' Jt';
+      if (val >= 1000) return (val / 1000).toFixed(1) + ' Rb';
+      return formatRupiah(val);
+    };
+
+    const totalRevenue = pembibitanYTD?.currRevenue || 0;
+    const bibitOmzet = pembibitanYTD?.currBibitOmzet || 0;
+    const polybagOmzet = pembibitanYTD?.currPolybagOmzet || 0;
+
+    let dominantProduct = "Bibit Tanaman";
+    let dominantPercentage = 0;
+    if (totalRevenue > 0) {
+      if (bibitOmzet >= polybagOmzet) {
+        dominantPercentage = ((bibitOmzet / totalRevenue) * 100).toFixed(0);
+      } else {
+        dominantProduct = "Media Tanam (Polybag)";
+        dominantPercentage = ((polybagOmzet / totalRevenue) * 100).toFixed(0);
+      }
     }
 
-    let omzetText = '';
-    if (prevData.omzet === 0) {
-      omzetText = <span className="font-medium text-slate-500">Karena belum ada data historis yang memadai, performa tahun ini difokuskan sebagai baseline awal.</span>;
-    } else if (deltaOmzet > 0) {
-      omzetText = <span className="font-medium text-blue-600">Dibandingkan dengan tahun sebelumnya ({prevYear}), performa tahun ini mencatat lonjakan omzet sebesar {formatRupiah(Math.abs(deltaOmzet))}, mengonfirmasi tren pertumbuhan komersial yang kuat.</span>;
-    } else if (deltaOmzet < 0) {
-      omzetText = <span>Penurunan omzet YTD sebesar <span className="font-bold text-rose-600">{formatRupiah(Math.abs(deltaOmzet))}</span> dibanding periode yang sama tahun lalu. Evaluasi strategi pemasaran dan distribusi mungkin diperlukan.</span>;
-    }
+    const yoyStatus = deltaOmzet >= 0 ? "tren pertumbuhan positif" : "tren penurunan";
 
     return (
       <div className="text-slate-600 font-medium leading-relaxed text-[13px] space-y-3">
         <p>
-          Sepanjang <span className="font-bold text-[#1e3a8a]">{startMonth} - {endMonth} {currentYear}</span>, rasio bibit terjual terhadap total pembesaran berada di angka <span className={`font-bold ${ratioColor}`}>{stockToSalesRatio}%</span>, yang tergolong <span className={`font-bold ${ratioColor} uppercase text-[11px] tracking-wider`}>{ratioStatus}</span>.
+          Secara bulanan, puncak gairah pasar terjadi pada bulan <span className="font-bold text-[#1e3a8a]">{peakMonth || '-'}</span> dengan total omzet tertinggi menembus <span className="font-bold text-[#1e3a8a]">{peakOmzet > 0 ? formatPeak(peakOmzet) : '-'}</span>.
         </p>
         <p>
-          {omzetText}
+          Secara keseluruhan dalam periode <span className="font-bold text-[#1e3a8a]">{startMonth} - {endMonth} {currentYear}</span>, total pendapatan mencapai <span className="font-bold text-[#1e3a8a]">{formatRupiah(totalRevenue)}</span>. Portofolio bisnis saat ini sangat condong pada penjualan <span className="font-bold text-[#1e3a8a]">{dominantProduct}</span>, yang menguasai <span className="font-bold text-slate-800">{dominantPercentage}%</span> dari kue pendapatan.
+        </p>
+        <p>
+          Jika dikomparasikan secara <span className="italic">*Year-on-Year*</span> (YoY), omzet YTD ini mencerminkan {yoyStatus} bila dibandingkan dengan perolehan di tahun sebelumnya.
         </p>
         <div className="mt-3 bg-blue-50/60 p-3 rounded border border-blue-100 flex gap-3 items-start shadow-sm">
           <svg className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -158,7 +162,7 @@ const AdvancedPembibitanAnalytics = React.memo(function AdvancedPembibitanAnalyt
           <div className="flex-1 relative z-10">
             <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1">Total Revenue YTD</p>
             <h2 className="text-xl lg:text-2xl font-extrabold text-[#1e3a8a]">
-              {formatRupiah(pembibitanYTD.total_omzet)}
+              {formatRupiah(pembibitanYTD?.currRevenue || 0)}
             </h2>
           </div>
           {/* Doodle Art */}
@@ -173,7 +177,7 @@ const AdvancedPembibitanAnalytics = React.memo(function AdvancedPembibitanAnalyt
           <div className="flex-1 relative z-10">
             <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1">Total Penjualan Bibit YTD</p>
             <h2 className="text-xl lg:text-2xl font-extrabold text-[#1e3a8a]">
-              {formatNumber(pembibitanYTD.total_penjualan)} <span className="text-lg text-slate-400 font-semibold">Batang</span>
+              {formatNumber(pembibitanYTD?.currPenjualan || 0)} <span className="text-lg text-slate-400 font-semibold">Batang</span>
             </h2>
           </div>
           {/* Doodle Art */}
@@ -189,7 +193,7 @@ const AdvancedPembibitanAnalytics = React.memo(function AdvancedPembibitanAnalyt
           <div className="flex-1 relative z-10">
             <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1">Stok Pembesaran Aktif</p>
             <h2 className="text-xl lg:text-2xl font-extrabold text-[#1e3a8a]">
-              {formatNumber(pembibitanYTD.total_pembesaran)} <span className="text-lg text-slate-400 font-semibold">Batang</span>
+              {formatNumber(pembibitanYTD?.currPembesaran || 0)} <span className="text-lg text-slate-400 font-semibold">Batang</span>
             </h2>
           </div>
           {/* Doodle Art */}
@@ -201,10 +205,10 @@ const AdvancedPembibitanAnalytics = React.memo(function AdvancedPembibitanAnalyt
         </div>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 items-stretch">
+      <div className="grid grid-cols-1 xl:grid-cols-5 gap-4 items-stretch">
 
-        {/* LEFT COLUMN (xl:col-span-2) */}
-        <div className="xl:col-span-2 flex flex-col gap-4">
+        {/* LEFT COLUMN (xl:col-span-3) */}
+        <div className="xl:col-span-3 flex flex-col gap-4">
           {/* Row 1: Penjualan Bibit & Penjualan Media Tanam */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
@@ -311,8 +315,16 @@ const AdvancedPembibitanAnalytics = React.memo(function AdvancedPembibitanAnalyt
                   {YTD_TABLE_DATA.map((row, idx) => (
                     <tr key={idx} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
                       <td className="p-3 md:p-4 font-semibold text-slate-600">{row.variabel}</td>
-                      <td className="p-3 md:p-4 text-center text-slate-500 font-medium">{row.prevYearData.toLocaleString('id-ID')}</td>
-                      <td className="p-3 md:p-4 text-center font-extrabold text-[#1e3a8a]">{row.currYearData.toLocaleString('id-ID')}</td>
+                      <td className="p-3 md:p-4 text-center text-slate-500 font-medium">
+                        {row.isCurrency 
+                          ? formatRupiah(row.prevYearData) 
+                          : new Intl.NumberFormat('id-ID').format(row.prevYearData)}
+                      </td>
+                      <td className="p-3 md:p-4 text-center font-extrabold text-[#1e3a8a]">
+                        {row.isCurrency 
+                          ? formatRupiah(row.currYearData) 
+                          : new Intl.NumberFormat('id-ID').format(row.currYearData)}
+                      </td>
                       <td className={`p-3 md:p-4 text-center font-bold ${typeof row.percent === 'string' && row.percent.startsWith('+') ? 'text-blue-600' : (row.percent === '0%' || row.percent === '-' ? 'text-slate-400' : 'text-rose-500')}`}>
                         {row.percent}
                       </td>
@@ -325,11 +337,11 @@ const AdvancedPembibitanAnalytics = React.memo(function AdvancedPembibitanAnalyt
 
         </div>
 
-        {/* RIGHT COLUMN (xl:col-span-1) */}
-        <div className="xl:col-span-1 flex flex-col gap-4">
+        {/* RIGHT COLUMN (xl:col-span-2) */}
+        <div className="xl:col-span-2 flex flex-col gap-4">
 
           {/* Rasio: Bibit vs Media Tanam & Stok to Sale */}
-          <div className="flex flex-col gap-4">
+          <div className="grid grid-cols-2 gap-4">
 
             {/* Rasio Bibit vs Media Tanam */}
             <section className="bg-white rounded-lg shadow-sm border border-slate-200 p-3 md:p-4 flex flex-col items-center relative overflow-hidden h-[180px]">
@@ -340,9 +352,9 @@ const AdvancedPembibitanAnalytics = React.memo(function AdvancedPembibitanAnalyt
                     <Pie
                       data={(() => {
                         const d = [
-                          { name: 'Bibit', value: pembibitanYTD.total_bibit_omzet || 0, fill: '#3b82f6' },
-                          { name: 'Media Tanam', value: pembibitanYTD.total_polybag_omzet || 0, fill: '#10b981' }
-                        ].filter(item => item.value > 0);
+                          { name: 'Bibit', value: pembibitanYTD?.currBibitOmzet || 0, fill: '#3b82f6' },
+                          { name: 'Media Tanam', value: pembibitanYTD?.currPolybagOmzet || 0, fill: '#10b981' }
+                        ].filter(d => d.value > 0);
                         return d.length > 0 ? d : [{ name: 'Belum Ada Data', value: 1, fill: '#e2e8f0' }];
                       })()}
                       cx="50%" cy="50%" innerRadius={25} outerRadius={45} dataKey="value" stroke="#fff" strokeWidth={2}
@@ -367,11 +379,12 @@ const AdvancedPembibitanAnalytics = React.memo(function AdvancedPembibitanAnalyt
 
           {/* Insight Analitik */}
           <section className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 md:p-5 flex-1 flex flex-col">
-            <div className="flex justify-between items-center border-b border-slate-100 pb-2 mb-4">
-              <h3 className="text-[13px] font-bold text-[#1e3a8a] uppercase tracking-widest">
+            <div className="flex justify-between items-center mb-4 relative z-10">
+              <h3 className="text-[13px] font-bold text-[#1e3a8a] uppercase tracking-widest flex items-center gap-2">
+                <Sparkles size={16} className="text-blue-500" />
                 Insight Analitik
               </h3>
-              <Sparkles size={16} className="text-blue-500" />
+              <FilterButtons currentRange={timeFilter} setRange={setTimeFilter} />
             </div>
             <div className="flex-1 overflow-y-auto pr-1 custom-scrollbar">
               {renderAIInsight()}

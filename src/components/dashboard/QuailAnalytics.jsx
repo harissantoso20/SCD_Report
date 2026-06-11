@@ -33,16 +33,17 @@ const QuailAnalytics = React.memo(function QuailAnalytics() {
   const filteredOverviewData = quailOverviewData.slice(-timeFilter);
 
   const prevYear = Number(currentYear) - 1;
-  const prevYearOmzet = 0;
-  const prevYearTelur = 0;
-  const prevYearKohe = 0;
 
-
+  const getPercentage = (curr, prev) => {
+    if (prev === 0) return '-';
+    const pct = ((curr - prev) / prev) * 100;
+    return `${pct > 0 ? '+' : ''}${pct.toFixed(0)}%`;
+  };
 
   const YTD_TABLE_DATA = [
-    { variabel: 'Total Produksi Telur (Butir)', prevYearData: prevYearTelur, currYearData: quailYTD.total_qty_telur, percent: '-' },
-    { variabel: 'Total Penjualan Kohe/Kotoran (Kg)', prevYearData: prevYearKohe, currYearData: quailYTD.total_qty_kohe, percent: '-' },
-    { variabel: 'Total Omzet Keseluruhan (Rp)', prevYearData: prevYearOmzet, currYearData: quailYTD.total_omzet, percent: '-' }
+    { variabel: 'Total Produksi Telur (Butir)', prevYearData: quailYTD.prev_total_qty_telur, currYearData: quailYTD.total_qty_telur, percent: getPercentage(quailYTD.total_qty_telur, quailYTD.prev_total_qty_telur) },
+    { variabel: 'Total Penjualan Kohe/Kotoran (Kg)', prevYearData: quailYTD.prev_total_qty_kohe, currYearData: quailYTD.total_qty_kohe, percent: getPercentage(quailYTD.total_qty_kohe, quailYTD.prev_total_qty_kohe) },
+    { variabel: 'Total Omzet Keseluruhan (Rp)', prevYearData: quailYTD.prev_total_omzet, currYearData: quailYTD.total_omzet, percent: getPercentage(quailYTD.total_omzet, quailYTD.prev_total_omzet) }
   ];
 
   const pieData = (() => {
@@ -80,7 +81,7 @@ const QuailAnalytics = React.memo(function QuailAnalytics() {
           Secara keseluruhan dalam periode <span className="font-bold text-[#1e3a8a]">{startMonth} - {endMonth} {currentYear}</span>, total produksi telur puyuh mencapai <span className="font-bold text-blue-600">{new Intl.NumberFormat('id-ID').format(totalTelur)} Butir</span> dengan akumulasi pendapatan keseluruhan menyentuh <span className="font-bold text-blue-800">{formatRupiah(quailYTD.total_omzet)}</span>. Rata-rata harga jual telur di pasar berada di kisaran Rp {avgPrice}/butir. 
         </p>
         <p>
-          Jika dikomparasikan secara *Year-on-Year* (YoY), {prevYearOmzet > 0 ? (quailYTD.total_omzet > prevYearOmzet ? "performa komersial saat ini mencatat tren pertumbuhan positif dibandingkan periode yang sama di tahun sebelumnya." : "terjadinya kontraksi pendapatan") : "belum ada data historis yang memadai untuk menghitung pertumbuhan komersial secara akurat."} Diversifikasi ke produk sekunder seperti pupuk kohe juga {prevYearKohe > 0 ? (quailYTD.total_qty_kohe > prevYearKohe ? "berhasil menopang tambahan pendapatan operasional." : "perlu dimaksimalkan kembali serapan penualannya.") : "merupakan strategi potensial untuk menopang tambahan pendapatan operasional."}
+          Jika dikomparasikan secara *Year-on-Year* (YoY), {quailYTD.prev_total_omzet > 0 ? (quailYTD.total_omzet > quailYTD.prev_total_omzet ? "performa komersial saat ini mencatat tren pertumbuhan positif dibandingkan periode yang sama di tahun sebelumnya." : "terjadinya kontraksi pendapatan") : "belum ada data historis yang memadai untuk menghitung pertumbuhan komersial secara akurat."} Diversifikasi ke produk sekunder seperti pupuk kohe juga {quailYTD.prev_total_qty_kohe > 0 ? (quailYTD.total_qty_kohe > quailYTD.prev_total_qty_kohe ? "berhasil menopang tambahan pendapatan operasional." : "perlu dimaksimalkan kembali serapan penualannya.") : "merupakan strategi potensial untuk menopang tambahan pendapatan operasional."}
         </p>
         <div className="mt-3 bg-blue-50/60 p-3 rounded border border-blue-100 flex gap-3 items-start relative z-10 shadow-sm">
           <svg className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

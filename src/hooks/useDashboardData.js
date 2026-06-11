@@ -11,7 +11,11 @@ export function useDashboardData() {
   const salesData = useAppStore((state) => state.salesData) || [];
   
   const currentYear = selectedDate ? selectedDate.split('-')[0] : new Date().getFullYear().toString();
+  const prevYear = (Number(currentYear) - 1).toString();
   const selectedMonthIdx = selectedDate ? new Date(selectedDate).getMonth() : new Date().getMonth();
+
+  const currYearSalesData = useMemo(() => salesData.filter(d => String(d.Tahun) === currentYear), [salesData, currentYear]);
+  const prevYearSalesData = useMemo(() => salesData.filter(d => String(d.Tahun) === prevYear), [salesData, prevYear]);
 
   const isSalesProgram = useMemo(() => {
     const p = (selectedProgram || '').toLowerCase();
@@ -28,7 +32,7 @@ export function useDashboardData() {
     const dataMap = {};
     MAGGOT_MONTH_NAMES.forEach((m, i) => { dataMap[i] = { bulan: m, sampah: 0, maggot: 0 }; });
 
-    salesData.forEach(row => {
+    currYearSalesData.forEach(row => {
       let monthStr = (row.Bulan || '').toUpperCase();
       if (monthStr.includes('JAN')) monthStr = 'JAN';
       if (monthStr.includes('FEB')) monthStr = 'FEB';
@@ -64,7 +68,7 @@ export function useDashboardData() {
     const dataMap = {};
     MAGGOT_MONTH_NAMES.forEach((m, i) => { dataMap[i] = { bulan: m, fresh: 0, kering: 0, kasgot: 0, omzet: 0, omzet_fresh: 0, omzet_kering: 0, omzet_kasgot: 0 }; });
 
-    salesData.forEach(row => {
+    currYearSalesData.forEach(row => {
       let monthStr = (row.Bulan || '').toUpperCase();
       if (monthStr.includes('JAN')) monthStr = 'JAN';
       if (monthStr.includes('FEB')) monthStr = 'FEB';
@@ -105,7 +109,7 @@ export function useDashboardData() {
     const p = (selectedProgram || '').toLowerCase();
     if (!p.includes("maggot")) return [];
     let freshRev = 0, keringRev = 0, kasgotRev = 0;
-    salesData.forEach(row => {
+    currYearSalesData.forEach(row => {
       let monthStr = (row.Bulan || '').toUpperCase();
       if (monthStr.includes('JAN')) monthStr = 'JAN';
       if (monthStr.includes('FEB')) monthStr = 'FEB';
@@ -141,7 +145,7 @@ export function useDashboardData() {
     const dataMap = {};
     MAGGOT_MONTH_NAMES.forEach((m, i) => { dataMap[i] = { bulan: m, Omzet: 0 }; });
 
-    salesData.forEach(row => {
+    currYearSalesData.forEach(row => {
       let monthStr = (row.Bulan || '').toUpperCase();
       if (monthStr.includes('JAN')) monthStr = 'JAN';
       if (monthStr.includes('FEB')) monthStr = 'FEB';
@@ -174,6 +178,50 @@ export function useDashboardData() {
     return maggotPortfolioData.reduce((sum, item) => sum + item.value, 0);
   }, [maggotPortfolioData]);
 
+  const maggotYTD = useMemo(() => {
+    const p = (selectedProgram || '').toLowerCase();
+    if (!p.includes("maggot")) return { currWaste: 0, prevWaste: 0, currFresh: 0, prevFresh: 0, currOmzet: 0, prevOmzet: 0 };
+    
+    let currWaste = 0, prevWaste = 0, currFresh = 0, prevFresh = 0, currOmzet = 0, prevOmzet = 0;
+
+    const processRow = (row, isPrev) => {
+      let monthStr = (row.Bulan || '').toUpperCase();
+      if (monthStr.includes('JAN')) monthStr = 'JAN';
+      if (monthStr.includes('FEB')) monthStr = 'FEB';
+      if (monthStr.includes('MAR')) monthStr = 'MAR';
+      if (monthStr.includes('APR')) monthStr = 'APR';
+      if (monthStr.includes('MAY') || monthStr.includes('MEI')) monthStr = 'MEI';
+      if (monthStr.includes('JUN')) monthStr = 'JUN';
+      if (monthStr.includes('JUL')) monthStr = 'JUL';
+      if (monthStr.includes('AUG') || monthStr.includes('AGS')) monthStr = 'AUG';
+      if (monthStr.includes('SEP')) monthStr = 'SEP';
+      if (monthStr.includes('OCT') || monthStr.includes('OKT')) monthStr = 'OKT';
+      if (monthStr.includes('NOV')) monthStr = 'NOV';
+      if (monthStr.includes('DEC') || monthStr.includes('DES')) monthStr = 'DES';
+
+      const monthIdx = MAGGOT_MONTH_NAMES.indexOf(monthStr);
+      if (monthIdx !== -1 && monthIdx <= selectedMonthIdx) {
+        if (row.Operasional === "Sampah Organik Terurai") {
+          if (isPrev) prevWaste += (Number(row['Value Operasional']) || 0);
+          else currWaste += (Number(row['Value Operasional']) || 0);
+        }
+        if (row.Produk === "Fresh Maggot") {
+          if (isPrev) prevFresh += (Number(row.Jumlah) || 0);
+          else currFresh += (Number(row.Jumlah) || 0);
+        }
+        if (row.Produk === "Fresh Maggot" || row.Produk === "Maggot Kering" || row.Produk === "Kasgot") {
+          if (isPrev) prevOmzet += (Number(row.Omzet) || 0);
+          else currOmzet += (Number(row.Omzet) || 0);
+        }
+      }
+    };
+
+    currYearSalesData.forEach(r => processRow(r, false));
+    prevYearSalesData.forEach(r => processRow(r, true));
+
+    return { currWaste, prevWaste, currFresh, prevFresh, currOmzet, prevOmzet };
+  }, [selectedProgram, currYearSalesData, prevYearSalesData, selectedMonthIdx]);
+
   const fisheryOverviewData = useMemo(() => {
     const p = (selectedProgram || '').toLowerCase();
     if (!p.includes("ikan air tawar")) return [];
@@ -190,7 +238,7 @@ export function useDashboardData() {
       }; 
     });
 
-    salesData.forEach(row => {
+    currYearSalesData.forEach(row => {
       let monthStr = (row.Bulan || '').toUpperCase();
       if (monthStr.includes('JAN')) monthStr = 'JAN';
       if (monthStr.includes('FEB')) monthStr = 'FEB';
@@ -237,7 +285,7 @@ export function useDashboardData() {
       dataMap[i] = { month: m, konsumsi: {}, bibit: {} };
     });
 
-    salesData.forEach(row => {
+    currYearSalesData.forEach(row => {
       let monthStr = (row.Bulan || '').toUpperCase();
       if (monthStr.includes('JAN')) monthStr = 'JAN';
       if (monthStr.includes('FEB')) monthStr = 'FEB';
@@ -270,13 +318,47 @@ export function useDashboardData() {
   }, [selectedProgram, salesData, selectedMonthIdx]);
 
   const fisheryYTD = useMemo(() => {
-    return fisheryOverviewData.reduce((acc, curr) => {
-      acc.total_revenue += curr.total_rp;
-      acc.total_konsumsi_kg += curr.konsumsi_kg;
-      acc.total_bibit_ekor += curr.bibit_ekor;
-      return acc;
-    }, { total_revenue: 0, total_konsumsi_kg: 0, total_bibit_ekor: 0 });
-  }, [fisheryOverviewData]);
+    const p = (selectedProgram || '').toLowerCase();
+    if (!p.includes("ikan air tawar")) return { currKonsumsi: 0, prevKonsumsi: 0, currBibit: 0, prevBibit: 0, currRevenue: 0, prevRevenue: 0 };
+    
+    let currKonsumsi = 0, prevKonsumsi = 0, currBibit = 0, prevBibit = 0, currRevenue = 0, prevRevenue = 0;
+
+    const processRow = (row, isPrev) => {
+      let monthStr = (row.Bulan || '').toUpperCase();
+      if (monthStr.includes('JAN')) monthStr = 'JAN';
+      if (monthStr.includes('FEB')) monthStr = 'FEB';
+      if (monthStr.includes('MAR')) monthStr = 'MAR';
+      if (monthStr.includes('APR')) monthStr = 'APR';
+      if (monthStr.includes('MAY') || monthStr.includes('MEI')) monthStr = 'MEI';
+      if (monthStr.includes('JUN')) monthStr = 'JUN';
+      if (monthStr.includes('JUL')) monthStr = 'JUL';
+      if (monthStr.includes('AUG') || monthStr.includes('AGS')) monthStr = 'AUG';
+      if (monthStr.includes('SEP')) monthStr = 'SEP';
+      if (monthStr.includes('OCT') || monthStr.includes('OKT')) monthStr = 'OKT';
+      if (monthStr.includes('NOV')) monthStr = 'NOV';
+      if (monthStr.includes('DEC') || monthStr.includes('DES')) monthStr = 'DES';
+
+      const monthIdx = MAGGOT_MONTH_NAMES.indexOf(monthStr);
+      if (monthIdx !== -1 && monthIdx <= selectedMonthIdx) {
+        const cat = (row['Kategori Produk'] || '').toLowerCase();
+        const omzet = Number(row.Omzet) || 0;
+        const qty = Number(row.Jumlah) || 0;
+
+        if (cat === 'ikan konsumsi') {
+          if (isPrev) { prevKonsumsi += qty; prevRevenue += omzet; }
+          else { currKonsumsi += qty; currRevenue += omzet; }
+        } else if (cat === 'bibit ikan') {
+          if (isPrev) { prevBibit += qty; prevRevenue += omzet; }
+          else { currBibit += qty; currRevenue += omzet; }
+        }
+      }
+    };
+
+    currYearSalesData.forEach(r => processRow(r, false));
+    prevYearSalesData.forEach(r => processRow(r, true));
+
+    return { currKonsumsi, prevKonsumsi, currBibit, prevBibit, currRevenue, prevRevenue };
+  }, [selectedProgram, currYearSalesData, prevYearSalesData, selectedMonthIdx]);
 
   const pembibitanOverviewData = useMemo(() => {
     const p = (selectedProgram || '').toLowerCase();
@@ -297,7 +379,7 @@ export function useDashboardData() {
       }; 
     });
 
-    salesData.forEach(row => {
+    currYearSalesData.forEach(row => {
       let monthStr = (row.Bulan || '').toUpperCase();
       if (monthStr.includes('JAN')) monthStr = 'JAN';
       if (monthStr.includes('FEB')) monthStr = 'FEB';
@@ -314,7 +396,8 @@ export function useDashboardData() {
 
       const monthIdx = MAGGOT_MONTH_NAMES.indexOf(monthStr);
       if (monthIdx !== -1 && monthIdx <= selectedMonthIdx) {
-        if (row.Operasional === "Jumlah Pembesaran (Batang)") {
+        const op = (row.Operasional || '').toLowerCase();
+        if (op === "pembesaran_batang" || op === "pembesaran bibit") {
           dataMap[monthIdx].pembesaran_batang += (Number(row['Value Operasional']) || 0);
         }
 
@@ -323,19 +406,19 @@ export function useDashboardData() {
         const qty = Number(row.Jumlah) || 0;
         const harga = Number(row['Harga Satuan']) || 0;
 
-        if (cat === 'penjualan bibit tanaman') {
+        if (cat === 'bibit_tanaman' || cat === 'bibit tanaman') {
           dataMap[monthIdx].penjualan_batang += qty;
           dataMap[monthIdx].bibit_omzet += omzet;
           if (qty > 0 && harga > 0) {
             dataMap[monthIdx].bibit_count_for_avg += 1;
             dataMap[monthIdx].sum_harga_bibit += harga;
           }
-        } else if (cat === 'penjualan produk lainnya') {
+        } else if (cat === 'produk_lainnya' || cat === 'media tanam') {
           dataMap[monthIdx].polybag_sold += qty;
           dataMap[monthIdx].polybag_omzet += omzet;
         }
         
-        if (cat === 'penjualan bibit tanaman' || cat === 'penjualan produk lainnya') {
+        if (cat === 'bibit_tanaman' || cat === 'bibit tanaman' || cat === 'produk_lainnya' || cat === 'media tanam') {
           dataMap[monthIdx].total_rp += omzet;
         }
       }
@@ -346,60 +429,106 @@ export function useDashboardData() {
       avg_harga_bibit: d.bibit_count_for_avg > 0 ? (d.sum_harga_bibit / d.bibit_count_for_avg) : 0
     }));
     
-    // Inject mock data if no real data exists, to demonstrate the scenario requested by user
-    const hasData = result.some(d => d.pembesaran_batang > 0 || d.total_rp > 0);
-    if (!hasData) {
-      if (currentYear === '2026') {
-        return [
-          { month: 'JAN', pembesaran_batang: 310300, penjualan_batang: 1100, polybag_sold: 0, bibit_omzet: 6200000, polybag_omzet: 0, total_rp: 6200000, avg_harga_bibit: 5636 },
-          { month: 'FEB', pembesaran_batang: 313700, penjualan_batang: 100, polybag_sold: 0, bibit_omzet: 3700000, polybag_omzet: 0, total_rp: 3700000, avg_harga_bibit: 37000 },
-          { month: 'MAR', pembesaran_batang: 316246, penjualan_batang: 0, polybag_sold: 0, bibit_omzet: 0, polybag_omzet: 0, total_rp: 0, avg_harga_bibit: 0 },
-          { month: 'APR', pembesaran_batang: 316246, penjualan_batang: 11509, polybag_sold: 0, bibit_omzet: 52139100, polybag_omzet: 0, total_rp: 52139100, avg_harga_bibit: 4530 },
-          { month: 'MEI', pembesaran_batang: 0, penjualan_batang: 0, polybag_sold: 0, bibit_omzet: 0, polybag_omzet: 0, total_rp: 0, avg_harga_bibit: 0 },
-          { month: 'JUN', pembesaran_batang: 0, penjualan_batang: 0, polybag_sold: 0, bibit_omzet: 0, polybag_omzet: 0, total_rp: 0, avg_harga_bibit: 0 },
-          { month: 'JUL', pembesaran_batang: 0, penjualan_batang: 0, polybag_sold: 0, bibit_omzet: 0, polybag_omzet: 0, total_rp: 0, avg_harga_bibit: 0 },
-          { month: 'AUG', pembesaran_batang: 0, penjualan_batang: 0, polybag_sold: 0, bibit_omzet: 0, polybag_omzet: 0, total_rp: 0, avg_harga_bibit: 0 },
-          { month: 'SEP', pembesaran_batang: 0, penjualan_batang: 0, polybag_sold: 0, bibit_omzet: 0, polybag_omzet: 0, total_rp: 0, avg_harga_bibit: 0 },
-          { month: 'OKT', pembesaran_batang: 0, penjualan_batang: 0, polybag_sold: 0, bibit_omzet: 0, polybag_omzet: 0, total_rp: 0, avg_harga_bibit: 0 },
-          { month: 'NOV', pembesaran_batang: 0, penjualan_batang: 0, polybag_sold: 0, bibit_omzet: 0, polybag_omzet: 0, total_rp: 0, avg_harga_bibit: 0 },
-          { month: 'DES', pembesaran_batang: 0, penjualan_batang: 0, polybag_sold: 0, bibit_omzet: 0, polybag_omzet: 0, total_rp: 0, avg_harga_bibit: 0 },
-        ].filter((_, i) => i <= selectedMonthIdx);
-      } else if (currentYear === '2025') {
-        return [
-          { month: 'JAN', pembesaran_batang: 8000, penjualan_batang: 4000, polybag_sold: 0, bibit_omzet: 20000000, polybag_omzet: 0, total_rp: 20000000, avg_harga_bibit: 5000 },
-          { month: 'FEB', pembesaran_batang: 7000, penjualan_batang: 3000, polybag_sold: 0, bibit_omzet: 15000000, polybag_omzet: 0, total_rp: 15000000, avg_harga_bibit: 5000 },
-          { month: 'MAR', pembesaran_batang: 6000, penjualan_batang: 5000, polybag_sold: 0, bibit_omzet: 25000000, polybag_omzet: 0, total_rp: 25000000, avg_harga_bibit: 5000 },
-          { month: 'APR', pembesaran_batang: 8000, penjualan_batang: 4000, polybag_sold: 0, bibit_omzet: 20000000, polybag_omzet: 0, total_rp: 20000000, avg_harga_bibit: 5000 },
-          { month: 'MEI', pembesaran_batang: 7000, penjualan_batang: 4000, polybag_sold: 0, bibit_omzet: 20000000, polybag_omzet: 0, total_rp: 20000000, avg_harga_bibit: 5000 },
-          { month: 'JUN', pembesaran_batang: 8000, penjualan_batang: 5000, polybag_sold: 0, bibit_omzet: 25000000, polybag_omzet: 0, total_rp: 25000000, avg_harga_bibit: 5000 },
-          { month: 'JUL', pembesaran_batang: 7000, penjualan_batang: 4000, polybag_sold: 0, bibit_omzet: 20000000, polybag_omzet: 0, total_rp: 20000000, avg_harga_bibit: 5000 },
-          { month: 'AUG', pembesaran_batang: 8000, penjualan_batang: 4000, polybag_sold: 0, bibit_omzet: 20000000, polybag_omzet: 0, total_rp: 20000000, avg_harga_bibit: 5000 },
-          { month: 'SEP', pembesaran_batang: 7000, penjualan_batang: 5000, polybag_sold: 0, bibit_omzet: 25000000, polybag_omzet: 0, total_rp: 25000000, avg_harga_bibit: 5000 },
-          { month: 'OKT', pembesaran_batang: 8000, penjualan_batang: 4000, polybag_sold: 0, bibit_omzet: 20000000, polybag_omzet: 0, total_rp: 20000000, avg_harga_bibit: 5000 },
-          { month: 'NOV', pembesaran_batang: 7000, penjualan_batang: 4000, polybag_sold: 0, bibit_omzet: 20000000, polybag_omzet: 0, total_rp: 20000000, avg_harga_bibit: 5000 },
-          { month: 'DES', pembesaran_batang: 6045, penjualan_batang: 3395, polybag_sold: 0, bibit_omzet: 24975000, polybag_omzet: 0, total_rp: 24975000, avg_harga_bibit: 7356 },
-        ].filter((_, i) => i <= selectedMonthIdx);
-      }
-    }
-
     return result;
   }, [selectedProgram, salesData, selectedMonthIdx]);
 
   const pembibitanYTD = useMemo(() => {
-    const ytd = pembibitanOverviewData.reduce((acc, curr) => {
-      acc.total_penjualan += curr.penjualan_batang;
-      acc.total_polybag += curr.polybag_sold;
-      acc.total_omzet += curr.total_rp;
-      acc.total_bibit_omzet += curr.bibit_omzet;
-      acc.total_polybag_omzet += curr.polybag_omzet;
-      return acc;
-    }, { total_pembesaran: 0, total_penjualan: 0, total_polybag: 0, total_omzet: 0, total_bibit_omzet: 0, total_polybag_omzet: 0 });
+    const p = (selectedProgram || '').toLowerCase();
+    if (!p.includes("siba pembibitan")) return { 
+      currPembesaran: 0, prevPembesaran: 0,
+      currPenjualan: 0, prevPenjualan: 0,
+      currPolybag: 0, prevPolybag: 0,
+      currRevenue: 0, prevRevenue: 0,
+      currBibitOmzet: 0, prevBibitOmzet: 0,
+      currPolybagOmzet: 0, prevPolybagOmzet: 0
+    };
+    
+    let currPembesaran = 0, prevPembesaran = 0,
+        currPenjualan = 0, prevPenjualan = 0,
+        currPolybag = 0, prevPolybag = 0,
+        currRevenue = 0, prevRevenue = 0,
+        currBibitOmzet = 0, prevBibitOmzet = 0,
+        currPolybagOmzet = 0, prevPolybagOmzet = 0;
 
-    const lastValidMonth = [...pembibitanOverviewData].reverse().find(d => d.pembesaran_batang > 0 || d.penjualan_batang > 0 || d.total_rp > 0);
-    ytd.total_pembesaran = lastValidMonth ? lastValidMonth.pembesaran_batang : 0;
+    let currLastValidMonth = -1;
+    let prevLastValidMonth = -1;
+    let currPembesaranMap = {};
+    let prevPembesaranMap = {};
 
-    return ytd;
-  }, [pembibitanOverviewData]);
+    const processRow = (row, isPrev) => {
+      let monthStr = (row.Bulan || '').toUpperCase();
+      if (monthStr.includes('JAN')) monthStr = 'JAN';
+      if (monthStr.includes('FEB')) monthStr = 'FEB';
+      if (monthStr.includes('MAR')) monthStr = 'MAR';
+      if (monthStr.includes('APR')) monthStr = 'APR';
+      if (monthStr.includes('MAY') || monthStr.includes('MEI')) monthStr = 'MEI';
+      if (monthStr.includes('JUN')) monthStr = 'JUN';
+      if (monthStr.includes('JUL')) monthStr = 'JUL';
+      if (monthStr.includes('AUG') || monthStr.includes('AGS')) monthStr = 'AUG';
+      if (monthStr.includes('SEP')) monthStr = 'SEP';
+      if (monthStr.includes('OCT') || monthStr.includes('OKT')) monthStr = 'OKT';
+      if (monthStr.includes('NOV')) monthStr = 'NOV';
+      if (monthStr.includes('DEC') || monthStr.includes('DES')) monthStr = 'DES';
+
+      const monthIdx = MAGGOT_MONTH_NAMES.indexOf(monthStr);
+      if (monthIdx !== -1 && monthIdx <= selectedMonthIdx) {
+        
+        const cat = (row['Kategori Produk'] || '').toLowerCase();
+        const omzet = Number(row.Omzet) || 0;
+        const qty = Number(row.Jumlah) || 0;
+        
+        let hasData = false;
+
+        const op = (row.Operasional || '').toLowerCase();
+        if (op === "pembesaran_batang" || op === "pembesaran bibit") {
+          const val = Number(row['Value Operasional']) || 0;
+          if (isPrev) {
+            prevPembesaranMap[monthIdx] = (prevPembesaranMap[monthIdx] || 0) + val;
+          } else {
+            currPembesaranMap[monthIdx] = (currPembesaranMap[monthIdx] || 0) + val;
+          }
+          if (val > 0) hasData = true;
+        }
+
+        if (cat === 'bibit_tanaman' || cat === 'bibit tanaman') {
+          if (isPrev) { prevPenjualan += qty; prevBibitOmzet += omzet; prevRevenue += omzet; }
+          else { currPenjualan += qty; currBibitOmzet += omzet; currRevenue += omzet; }
+          if (qty > 0 || omzet > 0) hasData = true;
+        } else if (cat === 'produk_lainnya' || cat === 'media tanam') {
+          if (isPrev) { prevPolybag += qty; prevPolybagOmzet += omzet; prevRevenue += omzet; }
+          else { currPolybag += qty; currPolybagOmzet += omzet; currRevenue += omzet; }
+          if (qty > 0 || omzet > 0) hasData = true;
+        }
+
+        if (hasData) {
+          if (isPrev) {
+             if (monthIdx > prevLastValidMonth) prevLastValidMonth = monthIdx;
+          } else {
+             if (monthIdx > currLastValidMonth) currLastValidMonth = monthIdx;
+          }
+        }
+      }
+    };
+
+    currYearSalesData.forEach(r => processRow(r, false));
+    prevYearSalesData.forEach(r => processRow(r, true));
+
+    if (currLastValidMonth !== -1 && currPembesaranMap[currLastValidMonth] !== undefined) {
+      currPembesaran = currPembesaranMap[currLastValidMonth];
+    }
+    if (prevLastValidMonth !== -1 && prevPembesaranMap[prevLastValidMonth] !== undefined) {
+      prevPembesaran = prevPembesaranMap[prevLastValidMonth];
+    }
+
+    return { 
+      currPembesaran, prevPembesaran, 
+      currPenjualan, prevPenjualan, 
+      currPolybag, prevPolybag, 
+      currRevenue, prevRevenue,
+      currBibitOmzet, prevBibitOmzet,
+      currPolybagOmzet, prevPolybagOmzet
+    };
+  }, [selectedProgram, currYearSalesData, prevYearSalesData, selectedMonthIdx]);
 
   const quailOverviewData = useMemo(() => {
     const p = (selectedProgram || '').toLowerCase();
@@ -418,7 +547,7 @@ export function useDashboardData() {
       };
     });
 
-    salesData.forEach(row => {
+    currYearSalesData.forEach(row => {
       let monthStr = (row.Bulan || '').toUpperCase();
       if (monthStr.includes('JAN')) monthStr = 'JAN';
       if (monthStr.includes('FEB')) monthStr = 'FEB';
@@ -464,24 +593,74 @@ export function useDashboardData() {
   }, [selectedProgram, salesData, selectedMonthIdx]);
 
   const quailYTD = useMemo(() => {
-    const ytd = quailOverviewData.reduce((acc, curr) => {
-      acc.total_omzet += curr.total_omzet;
-      acc.total_qty_telur += curr.qty_telur;
-      acc.total_qty_kohe += curr.qty_kohe;
-      acc.total_omzet_telur += curr.omzet_telur;
-      acc.total_omzet_kohe += curr.omzet_kohe;
-      acc.total_omzet_lainnya += curr.omzet_lainnya;
-      return acc;
-    }, { 
-      total_omzet: 0, 
-      total_qty_telur: 0, 
-      total_qty_kohe: 0,
-      total_omzet_telur: 0,
-      total_omzet_kohe: 0,
-      total_omzet_lainnya: 0
-    });
-    return ytd;
-  }, [quailOverviewData]);
+    const p = (selectedProgram || '').toLowerCase();
+    if (!p.includes("puyuh")) return {
+      total_omzet: 0, prev_total_omzet: 0,
+      total_qty_telur: 0, prev_total_qty_telur: 0,
+      total_qty_kohe: 0, prev_total_qty_kohe: 0,
+      total_omzet_telur: 0, prev_total_omzet_telur: 0,
+      total_omzet_kohe: 0, prev_total_omzet_kohe: 0,
+      total_omzet_lainnya: 0, prev_total_omzet_lainnya: 0
+    };
+
+    let total_omzet = 0, prev_total_omzet = 0,
+        total_qty_telur = 0, prev_total_qty_telur = 0,
+        total_qty_kohe = 0, prev_total_qty_kohe = 0,
+        total_omzet_telur = 0, prev_total_omzet_telur = 0,
+        total_omzet_kohe = 0, prev_total_omzet_kohe = 0,
+        total_omzet_lainnya = 0, prev_total_omzet_lainnya = 0;
+
+    const processRow = (row, isPrev) => {
+      let monthStr = (row.Bulan || '').toUpperCase();
+      if (monthStr.includes('JAN')) monthStr = 'JAN';
+      if (monthStr.includes('FEB')) monthStr = 'FEB';
+      if (monthStr.includes('MAR')) monthStr = 'MAR';
+      if (monthStr.includes('APR')) monthStr = 'APR';
+      if (monthStr.includes('MAY') || monthStr.includes('MEI')) monthStr = 'MEI';
+      if (monthStr.includes('JUN')) monthStr = 'JUN';
+      if (monthStr.includes('JUL')) monthStr = 'JUL';
+      if (monthStr.includes('AUG') || monthStr.includes('AGS')) monthStr = 'AUG';
+      if (monthStr.includes('SEP')) monthStr = 'SEP';
+      if (monthStr.includes('OCT') || monthStr.includes('OKT')) monthStr = 'OKT';
+      if (monthStr.includes('NOV')) monthStr = 'NOV';
+      if (monthStr.includes('DEC') || monthStr.includes('DES')) monthStr = 'DES';
+
+      const monthIdx = MAGGOT_MONTH_NAMES.indexOf(monthStr);
+      if (monthIdx !== -1 && monthIdx <= selectedMonthIdx) {
+        const prod = (row.Produk || '').toLowerCase();
+        const cat = (row['Kategori Produk'] || '').toLowerCase();
+        const fullProdStr = prod + ' ' + cat;
+        const omzet = Number(row.Omzet) || 0;
+        const qty = Number(row.Jumlah) || 0;
+
+        if (fullProdStr.includes('telur')) {
+          if (isPrev) { prev_total_qty_telur += qty; prev_total_omzet_telur += omzet; }
+          else { total_qty_telur += qty; total_omzet_telur += omzet; }
+        } else if (fullProdStr.includes('kohe') || fullProdStr.includes('kotoran') || fullProdStr.includes('pupuk')) {
+          if (isPrev) { prev_total_qty_kohe += qty; prev_total_omzet_kohe += omzet; }
+          else { total_qty_kohe += qty; total_omzet_kohe += omzet; }
+        } else {
+          if (isPrev) { prev_total_omzet_lainnya += omzet; }
+          else { total_omzet_lainnya += omzet; }
+        }
+        
+        if (isPrev) { prev_total_omzet += omzet; }
+        else { total_omzet += omzet; }
+      }
+    };
+
+    currYearSalesData.forEach(row => processRow(row, false));
+    prevYearSalesData.forEach(row => processRow(row, true));
+
+    return {
+      total_omzet, prev_total_omzet,
+      total_qty_telur, prev_total_qty_telur,
+      total_qty_kohe, prev_total_qty_kohe,
+      total_omzet_telur, prev_total_omzet_telur,
+      total_omzet_kohe, prev_total_omzet_kohe,
+      total_omzet_lainnya, prev_total_omzet_lainnya
+    };
+  }, [selectedProgram, currYearSalesData, prevYearSalesData, selectedMonthIdx]);
 
   const tempeOverviewData = useMemo(() => {
     const p = (selectedProgram || '').toLowerCase();
@@ -500,7 +679,7 @@ export function useDashboardData() {
       };
     });
 
-    salesData.forEach(row => {
+    currYearSalesData.forEach(row => {
       let monthStr = (row.Bulan || '').toUpperCase();
       if (monthStr.includes('JAN')) monthStr = 'JAN';
       if (monthStr.includes('FEB')) monthStr = 'FEB';
@@ -564,6 +743,107 @@ export function useDashboardData() {
     return ytd;
   }, [tempeOverviewData]);
 
+  const ecogrowOverviewData = useMemo(() => {
+    const p = (selectedProgram || '').toLowerCase();
+    if (!p.includes("ecogrow")) return [];
+
+    const dataMap = {};
+    MAGGOT_MONTH_NAMES.forEach((m, i) => { 
+      dataMap[i] = { 
+        month: m, 
+        total_omzet: 0, 
+        items: {} 
+      };
+    });
+
+    currYearSalesData.forEach(row => {
+      let monthStr = (row.Bulan || '').toUpperCase();
+      if (monthStr.includes('JAN')) monthStr = 'JAN';
+      if (monthStr.includes('FEB')) monthStr = 'FEB';
+      if (monthStr.includes('MAR')) monthStr = 'MAR';
+      if (monthStr.includes('APR')) monthStr = 'APR';
+      if (monthStr.includes('MAY') || monthStr.includes('MEI')) monthStr = 'MEI';
+      if (monthStr.includes('JUN')) monthStr = 'JUN';
+      if (monthStr.includes('JUL')) monthStr = 'JUL';
+      if (monthStr.includes('AUG') || monthStr.includes('AGS')) monthStr = 'AUG';
+      if (monthStr.includes('SEP')) monthStr = 'SEP';
+      if (monthStr.includes('OCT') || monthStr.includes('OKT')) monthStr = 'OKT';
+      if (monthStr.includes('NOV')) monthStr = 'NOV';
+      if (monthStr.includes('DEC') || monthStr.includes('DES')) monthStr = 'DES';
+
+      const monthIdx = MAGGOT_MONTH_NAMES.indexOf(monthStr);
+      if (monthIdx !== -1 && monthIdx <= selectedMonthIdx) {
+        const prod = (row.Produk || '').trim() || 'Lainnya';
+        const omzet = Number(row.Omzet) || 0;
+        const qty = Number(row.Jumlah) || 0;
+        const harga = Number(row['Harga Satuan']) || 0;
+        const unit = row.Satuan_1 || row.Satuan || ''; 
+
+        dataMap[monthIdx].total_omzet += omzet;
+        
+        if (!dataMap[monthIdx].items[prod]) {
+          dataMap[monthIdx].items[prod] = { qty: 0, omzet: 0, unit: unit, harga: harga };
+        }
+        dataMap[monthIdx].items[prod].qty += qty;
+        dataMap[monthIdx].items[prod].omzet += omzet;
+        dataMap[monthIdx].items[prod].unit = unit; 
+        dataMap[monthIdx].items[prod].harga = Math.max(dataMap[monthIdx].items[prod].harga, harga);
+      }
+    });
+
+    return Object.values(dataMap).filter((_, i) => i <= selectedMonthIdx);
+  }, [selectedProgram, currYearSalesData, selectedMonthIdx]);
+
+  const ecogrowYTD = useMemo(() => {
+    const p = (selectedProgram || '').toLowerCase();
+    if (!p.includes("ecogrow")) return {
+      total_omzet: 0, prev_total_omzet: 0,
+      items: {}
+    };
+
+    let total_omzet = 0, prev_total_omzet = 0;
+    const items = {};
+
+    const processRow = (row, isPrev) => {
+      let monthStr = (row.Bulan || '').toUpperCase();
+      if (monthStr.includes('JAN')) monthStr = 'JAN';
+      if (monthStr.includes('FEB')) monthStr = 'FEB';
+      if (monthStr.includes('MAR')) monthStr = 'MAR';
+      if (monthStr.includes('APR')) monthStr = 'APR';
+      if (monthStr.includes('MAY') || monthStr.includes('MEI')) monthStr = 'MEI';
+      if (monthStr.includes('JUN')) monthStr = 'JUN';
+      if (monthStr.includes('JUL')) monthStr = 'JUL';
+      if (monthStr.includes('AUG') || monthStr.includes('AGS')) monthStr = 'AUG';
+      if (monthStr.includes('SEP')) monthStr = 'SEP';
+      if (monthStr.includes('OCT') || monthStr.includes('OKT')) monthStr = 'OKT';
+      if (monthStr.includes('NOV')) monthStr = 'NOV';
+      if (monthStr.includes('DEC') || monthStr.includes('DES')) monthStr = 'DES';
+
+      const monthIdx = MAGGOT_MONTH_NAMES.indexOf(monthStr);
+      if (monthIdx !== -1 && monthIdx <= selectedMonthIdx) {
+        const prod = (row.Produk || '').trim() || 'Lainnya';
+        const omzet = Number(row.Omzet) || 0;
+        const qty = Number(row.Jumlah) || 0;
+        const unit = row.Satuan_1 || row.Satuan || '';
+
+        if (isPrev) {
+          prev_total_omzet += omzet;
+        } else {
+          total_omzet += omzet;
+          if (!items[prod]) items[prod] = { qty: 0, omzet: 0, unit: unit };
+          items[prod].qty += qty;
+          items[prod].omzet += omzet;
+          items[prod].unit = unit;
+        }
+      }
+    };
+
+    currYearSalesData.forEach(row => processRow(row, false));
+    prevYearSalesData.forEach(row => processRow(row, true));
+
+    return { total_omzet, prev_total_omzet, items };
+  }, [selectedProgram, currYearSalesData, prevYearSalesData, selectedMonthIdx]);
+
 
 
   return {
@@ -572,6 +852,7 @@ export function useDashboardData() {
     maggotBioconversionData,
     maggotFinancialData,
     maggotPortfolioData,
+    maggotYTD,
     dynamicSalesChartData,
     totalWasteManaged,
     totalOmzet,
@@ -583,6 +864,8 @@ export function useDashboardData() {
     quailOverviewData,
     quailYTD,
     tempeOverviewData,
-    tempeYTD
+    tempeYTD,
+    ecogrowOverviewData,
+    ecogrowYTD
   };
 }

@@ -85,7 +85,7 @@ export const GenericDynamicTable = ({ title, headers, initialLabels, value = [],
 export default function DynamicTablesManager({ selectedProgram, tablesData, handleTableChange, extraFields, handleExtraFieldChange }) {
   const p = selectedProgram?.toLowerCase() || '';
   
-  if (p === "plts irigasi") {
+  if (p === "plts irigasi" || p === "proklim") {
     return null;
   }
 

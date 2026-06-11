@@ -115,10 +115,17 @@ const AdvancedFishAnalytics = React.memo(function AdvancedFishAnalytics() {
 
   // Fallback mock data for YTD Table
   const prevYear = Number(currentYear) - 1;
+  
+  const getPercentage = (curr, prev) => {
+    if (prev === 0) return '-';
+    const pct = ((curr - prev) / prev) * 100;
+    return `${pct > 0 ? '+' : ''}${pct.toFixed(0)}%`;
+  };
+
   const YTD_TABLE_DATA = [
-    { variabel: 'Penjualan Ikan Konsumsi (Kg)', prevYearData: 0, currYearData: fisheryYTD.total_konsumsi_kg, percent: '-' },
-    { variabel: 'Penjualan Bibit Ikan (Ekor)', prevYearData: 0, currYearData: fisheryYTD.total_bibit_ekor, percent: '-' },
-    { variabel: 'Total Omzet Keseluruhan', prevYearData: 0, currYearData: fisheryYTD.total_revenue, percent: '-' },
+    { variabel: 'Penjualan Ikan Konsumsi (Kg)', prevYearData: fisheryYTD?.prevKonsumsi || 0, currYearData: fisheryYTD?.currKonsumsi || 0, percent: getPercentage(fisheryYTD?.currKonsumsi || 0, fisheryYTD?.prevKonsumsi || 0), isCurrency: false },
+    { variabel: 'Penjualan Bibit Ikan (Ekor)', prevYearData: fisheryYTD?.prevBibit || 0, currYearData: fisheryYTD?.currBibit || 0, percent: getPercentage(fisheryYTD?.currBibit || 0, fisheryYTD?.prevBibit || 0), isCurrency: false },
+    { variabel: 'Total Omzet Keseluruhan', prevYearData: fisheryYTD?.prevRevenue || 0, currYearData: fisheryYTD?.currRevenue || 0, percent: getPercentage(fisheryYTD?.currRevenue || 0, fisheryYTD?.prevRevenue || 0), isCurrency: true },
   ];
 
   const renderLineLabelRp = (props) => {
@@ -174,7 +181,7 @@ const AdvancedFishAnalytics = React.memo(function AdvancedFishAnalytics() {
           <div className="flex-1 relative z-10">
             <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1">Total Revenue YTD</p>
             <h2 className="text-xl lg:text-2xl font-extrabold text-[#1e3a8a]">
-              {formatRupiah(fisheryYTD.total_revenue)}
+              {formatRupiah(fisheryYTD?.currRevenue || 0)}
             </h2>
           </div>
           {/* Doodle Art */}
@@ -189,7 +196,7 @@ const AdvancedFishAnalytics = React.memo(function AdvancedFishAnalytics() {
           <div className="flex-1 relative z-10">
             <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1">Total Ikan Konsumsi YTD</p>
             <h2 className="text-xl lg:text-2xl font-extrabold text-[#1e3a8a]">
-              {new Intl.NumberFormat('id-ID').format(fisheryYTD.total_konsumsi_kg)} <span className="text-lg text-slate-400 font-semibold">Kg</span>
+              {new Intl.NumberFormat('id-ID').format(fisheryYTD?.currKonsumsi || 0)} <span className="text-lg text-slate-400 font-semibold">Kg</span>
             </h2>
           </div>
           {/* Doodle Art */}
@@ -204,7 +211,7 @@ const AdvancedFishAnalytics = React.memo(function AdvancedFishAnalytics() {
           <div className="flex-1 relative z-10">
             <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1">Total Bibit Ikan YTD</p>
             <h2 className="text-xl lg:text-2xl font-extrabold text-[#1e3a8a]">
-              {new Intl.NumberFormat('id-ID').format(fisheryYTD.total_bibit_ekor)} <span className="text-lg text-slate-400 font-semibold">Ekor</span>
+              {new Intl.NumberFormat('id-ID').format(fisheryYTD?.currBibit || 0)} <span className="text-lg text-slate-400 font-semibold">Ekor</span>
             </h2>
           </div>
           {/* Doodle Art */}
@@ -235,41 +242,73 @@ const AdvancedFishAnalytics = React.memo(function AdvancedFishAnalytics() {
             {/* Sub-row: 2 Bar Charts */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               {/* Chart: Konsumsi */}
-              <div className="border border-slate-100 rounded-lg p-3 md:p-4 bg-slate-50/50">
-                <h4 className="text-[11px] font-bold text-[#1e3a8a] text-center mb-4 uppercase tracking-wider">Penjualan Ikan Konsumsi (Kg)</h4>
-                <div className="h-44 w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={filteredOverviewData} margin={{ top: 25, right: 10, left: 10, bottom: 0 }}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                      <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: '#64748b', fontWeight: 'bold' }} dy={10} interval={0} />
-                      <YAxis hide={true} domain={[0, dataMax => Math.max(10, Math.ceil((dataMax || 0) * 1.2))]} />
-                      <Tooltip cursor={{ fill: '#f8fafc' }} contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '12px' }} />
-                      <Bar dataKey="konsumsi_kg" name="Ikan Konsumsi" fill="#3b82f6" radius={[4, 4, 0, 0]} barSize={24} label={renderLabelKg} />
-                    </BarChart>
-                  </ResponsiveContainer>
+              <div className="border border-slate-100 rounded-lg p-3 md:p-4 bg-slate-50/50 flex flex-col">
+                <div className="flex-1 flex flex-col justify-end">
+                  <div className="h-28 w-full mb-1">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={filteredOverviewData} margin={{ top: 25, right: 10, left: 10, bottom: 0 }}>
+                        <XAxis dataKey="month" hide={true} />
+                        <YAxis hide={true} domain={[0, dataMax => Math.max(10, Math.ceil((dataMax || 0) * 1.2))]} />
+                        <Tooltip formatter={(val) => formatRupiah(val)} contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '12px' }} />
+                        <Line type="monotone" dataKey="konsumsi_rp" name="Omzet Konsumsi" stroke="#1e3a8a" strokeWidth={3} dot={{ r: 4, fill: '#1e3a8a' }} activeDot={{ r: 6 }} label={renderLineLabelRp} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                  <div className="h-32 w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={filteredOverviewData} margin={{ top: 25, right: 10, left: 10, bottom: 0 }}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                        <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: '#64748b', fontWeight: 'bold' }} dy={10} interval={0} />
+                        <YAxis hide={true} domain={[0, dataMax => Math.max(10, Math.ceil((dataMax || 0) * 1.2))]} />
+                        <Tooltip cursor={{ fill: '#f8fafc' }} contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '12px' }} />
+                        <Bar dataKey="konsumsi_kg" name="Ikan Konsumsi" fill="#60a5fa" radius={[4, 4, 0, 0]} barSize={24} label={renderLabelKg} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+                <div className="flex flex-wrap justify-center items-center gap-x-4 mt-4">
+                  <div className="flex items-center gap-1.5"><div className="w-3 h-3 bg-[#60a5fa] rounded-sm"></div><span className="text-[9px] font-bold text-gray-600 tracking-wider">KONSUMSI (KG)</span></div>
+                  <div className="flex items-center gap-1.5"><div className="w-4 h-0.5 bg-[#1e3a8a]"></div><div className="w-2 h-2 rounded-full bg-[#1e3a8a] -ml-2.5 border border-white"></div><span className="text-[9px] font-bold text-gray-600 tracking-wider">OMZET (RP)</span></div>
                 </div>
               </div>
 
               {/* Chart: Bibit */}
-              <div className="border border-slate-100 rounded-lg p-3 md:p-4 bg-slate-50/50">
-                <h4 className="text-[11px] font-bold text-[#1e3a8a] text-center mb-4 uppercase tracking-wider">Penjualan Bibit Ikan (Ekor)</h4>
-                <div className="h-44 w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={filteredOverviewData} margin={{ top: 25, right: 10, left: 10, bottom: 0 }}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                      <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: '#64748b', fontWeight: 'bold' }} dy={10} interval={0} />
-                      <YAxis hide={true} domain={[0, dataMax => Math.max(10, Math.ceil((dataMax || 0) * 1.2))]} />
-                      <Tooltip cursor={{ fill: '#f8fafc' }} contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '12px' }} />
-                      <Bar dataKey="bibit_ekor" name="Bibit Ikan" fill="#f43f5e" radius={[4, 4, 0, 0]} barSize={24} label={renderLabelEkor} />
-                    </BarChart>
-                  </ResponsiveContainer>
+              <div className="border border-slate-100 rounded-lg p-3 md:p-4 bg-slate-50/50 flex flex-col">
+                <div className="flex-1 flex flex-col justify-end">
+                  <div className="h-28 w-full mb-1">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={filteredOverviewData} margin={{ top: 25, right: 10, left: 10, bottom: 0 }}>
+                        <XAxis dataKey="month" hide={true} />
+                        <YAxis hide={true} domain={[0, dataMax => Math.max(10, Math.ceil((dataMax || 0) * 1.2))]} />
+                        <Tooltip formatter={(val) => formatRupiah(val)} contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '12px' }} />
+                        <Line type="monotone" dataKey="bibit_rp" name="Omzet Bibit" stroke="#be123c" strokeWidth={3} dot={{ r: 4, fill: '#be123c' }} activeDot={{ r: 6 }} label={renderLineLabelRp} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                  <div className="h-32 w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={filteredOverviewData} margin={{ top: 25, right: 10, left: 10, bottom: 0 }}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                        <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: '#64748b', fontWeight: 'bold' }} dy={10} interval={0} />
+                        <YAxis hide={true} domain={[0, dataMax => Math.max(10, Math.ceil((dataMax || 0) * 1.2))]} />
+                        <Tooltip cursor={{ fill: '#f8fafc' }} contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '12px' }} />
+                        <Bar dataKey="bibit_ekor" name="Bibit Ikan" fill="#fb7185" radius={[4, 4, 0, 0]} barSize={24} label={renderLabelEkor} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+                <div className="flex flex-wrap justify-center items-center gap-x-4 mt-4">
+                  <div className="flex items-center gap-1.5"><div className="w-3 h-3 bg-[#fb7185] rounded-sm"></div><span className="text-[9px] font-bold text-gray-600 tracking-wider">BIBIT (EKOR)</span></div>
+                  <div className="flex items-center gap-1.5"><div className="w-4 h-0.5 bg-[#be123c]"></div><div className="w-2 h-2 rounded-full bg-[#be123c] -ml-2.5 border border-white"></div><span className="text-[9px] font-bold text-gray-600 tracking-wider">OMZET (RP)</span></div>
                 </div>
               </div>
             </div>
 
-            {/* Sub-row: Total Omzet Line Chart */}
             <div className="border border-slate-100 rounded-lg p-3 md:p-4 bg-slate-50/50">
-              <h4 className="text-[11px] font-bold text-[#1e3a8a] text-center mb-4 uppercase tracking-wider">Total Omzet Keseluruhan (Rp)</h4>
+              <h4 className="text-[11px] font-bold text-[#1e3a8a] text-center mb-4 uppercase tracking-wider">Tren Omzet Keseluruhan (Rp)</h4>
+              <div className="flex flex-wrap justify-center items-center gap-x-3 mb-2">
+                <div className="flex items-center gap-1.5"><div className="w-3 h-0.5 bg-[#1e3a8a]"></div><span className="text-[9px] font-bold text-gray-600 tracking-wider">TOTAL OMZET</span></div>
+              </div>
               <div className="h-44 w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={filteredOverviewData} margin={{ top: 25, right: 10, left: 10, bottom: 0 }}>
@@ -278,7 +317,7 @@ const AdvancedFishAnalytics = React.memo(function AdvancedFishAnalytics() {
                     <YAxis hide={true} domain={[0, dataMax => Math.max(10, Math.ceil((dataMax || 0) * 1.2))]} />
                     <Tooltip 
                       cursor={{ fill: '#f8fafc', strokeDasharray: '3 3' }} 
-                      formatter={(val) => [formatRupiah(val), 'Total Omzet']} 
+                      formatter={(val, name) => [formatRupiah(val), name]} 
                       contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '12px' }} 
                     />
                     <Line type="monotone" dataKey="total_rp" name="Total Omzet" stroke="#1e3a8a" strokeWidth={3} dot={{ r: 4, fill: '#fff', stroke: '#1e3a8a', strokeWidth: 2 }} activeDot={{ r: 6 }} label={renderLineLabelRp} />
@@ -307,9 +346,17 @@ const AdvancedFishAnalytics = React.memo(function AdvancedFishAnalytics() {
                   {YTD_TABLE_DATA.map((row, idx) => (
                     <tr key={idx} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
                       <td className="p-3 md:p-4 font-semibold text-slate-600">{row.variabel}</td>
-                      <td className="p-3 md:p-4 text-center text-slate-500 font-medium">{row.prevYearData.toLocaleString('id-ID')}</td>
-                      <td className="p-3 md:p-4 text-center font-extrabold text-[#1e3a8a]">{row.currYearData.toLocaleString('id-ID')}</td>
-                      <td className={`p-3 md:p-4 text-center font-bold ${row.percent.startsWith('+') ? 'text-blue-600' : 'text-rose-500'}`}>
+                      <td className="p-3 md:p-4 text-center text-slate-500 font-medium">
+                        {row.isCurrency 
+                          ? formatRupiah(row.prevYearData) 
+                          : new Intl.NumberFormat('id-ID').format(row.prevYearData)}
+                      </td>
+                      <td className="p-3 md:p-4 text-center font-extrabold text-[#1e3a8a]">
+                        {row.isCurrency 
+                          ? formatRupiah(row.currYearData) 
+                          : new Intl.NumberFormat('id-ID').format(row.currYearData)}
+                      </td>
+                      <td className={`p-3 md:p-4 text-center font-bold ${row.percent.startsWith('+') ? 'text-blue-600' : (row.percent === '-' ? 'text-slate-400' : 'text-rose-500')}`}>
                         {row.percent}
                       </td>
                     </tr>

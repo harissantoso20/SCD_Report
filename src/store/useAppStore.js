@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { supabase } from '../lib/supabaseClient';
+import { MOCK_ECOGROW_DATA } from '../data/mockEcogrow';
 
 const monthMap = {
   0: ['Jan', 'January', 'Januari'],
@@ -64,6 +65,9 @@ const useAppStore = create((set, get) => ({
       
       if (!pErr && programsData) {
         const uniquePrograms = [...new Set(programsData.map(p => p.Program))];
+        if (!uniquePrograms.includes("PROKLIM")) {
+          uniquePrograms.push("PROKLIM");
+        }
         set({ programList: uniquePrograms });
       }
 
@@ -149,11 +153,14 @@ const useAppStore = create((set, get) => ({
       }
 
       // 5. Fetch Sales Data
+      const targetYearNum = Number(targetYear);
+      const prevYearStr = (targetYearNum - 1).toString();
+
       const { data: sData } = await supabase
         .from('SCD_Report_Sales_Data')
         .select('*')
         .ilike('Program', fuzzyKeyword)
-        .eq('Tahun', targetYear);
+        .in('Tahun', [targetYear, prevYearStr]);
 
       if (sData && sData.length > 0) {
         const extraFields = {};
@@ -179,9 +186,18 @@ const useAppStore = create((set, get) => ({
           }
         });
 
-        set({ extraFields, tablesData, salesData: sData });
+        let finalSalesData = sData || [];
+        if (globalProgram && globalProgram.toLowerCase().includes("ecogrow")) {
+          finalSalesData = [...finalSalesData, ...MOCK_ECOGROW_DATA];
+        }
+
+        set({ extraFields, tablesData, salesData: finalSalesData });
       } else {
-        set({ extraFields: {}, tablesData: {}, salesData: [] });
+        let finalSalesData = [];
+        if (globalProgram && globalProgram.toLowerCase().includes("ecogrow")) {
+          finalSalesData = [...MOCK_ECOGROW_DATA];
+        }
+        set({ extraFields: {}, tablesData: {}, salesData: finalSalesData });
       }
 
     } catch (error) {

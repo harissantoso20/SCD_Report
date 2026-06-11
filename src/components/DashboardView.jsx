@@ -8,6 +8,7 @@ import AdvancedFishAnalytics from './dashboard/AdvancedFishAnalytics';
 import AdvancedPembibitanAnalytics from './dashboard/AdvancedPembibitanAnalytics';
 import QuailAnalytics from './dashboard/QuailAnalytics';
 import TempeAnalytics from './dashboard/TempeAnalytics';
+import EcogrowAnalytics from './dashboard/EcogrowAnalytics';
 import ProgramSummary from './dashboard/ProgramSummary';
 import { useDashboardData } from '../hooks/useDashboardData';
 import { FileImage, FileText } from './Icons';
@@ -41,6 +42,8 @@ export default function DashboardView() {
         <QuailAnalytics />
       ) : p.includes("prabumenang") ? (
         <TempeAnalytics />
+      ) : p.includes("ecogrow") ? (
+        <EcogrowAnalytics />
       ) : isSalesProgram ? (
         <SalesVisualization />
       ) : (

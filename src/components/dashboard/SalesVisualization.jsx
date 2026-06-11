@@ -39,23 +39,13 @@ export default function SalesVisualization() {
                 <thead className="bg-[#f8f9fa] text-[#25326a] font-bold border-b border-gray-200">
                   <tr>
                     <th className="px-4 py-3 uppercase tracking-wider text-[11px]">VARIABEL</th>
-                    <th className="px-4 py-3 text-right uppercase tracking-wider text-[11px]">2025</th>
-                    <th className="px-4 py-3 text-right uppercase tracking-wider text-[11px]">2026</th>
-                    <th className="px-4 py-3 text-right uppercase tracking-wider text-[11px]">PERSENTASE</th>
+                    <th className="px-4 py-3 text-right uppercase tracking-wider text-[11px]">TOTAL</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr className="border-b border-gray-100 hover:bg-gray-50">
                     <td className="px-4 py-3 font-medium text-gray-800">Total Omzet Penjualan</td>
-                    <td className="px-4 py-3 text-right text-gray-600">Rp 12.710.000</td>
-                    <td className="px-4 py-3 text-right font-bold text-gray-900">Rp 57.100.000</td>
-                    <td className="px-4 py-3 text-right text-green-600 font-bold">+349%</td>
-                  </tr>
-                  <tr className="hover:bg-gray-50">
-                    <td className="px-4 py-3 font-medium text-gray-800">Capaian Target Produksi</td>
-                    <td className="px-4 py-3 text-right text-gray-600">65%</td>
-                    <td className="px-4 py-3 text-right font-bold text-gray-900">92%</td>
-                    <td className="px-4 py-3 text-right text-green-600 font-bold">+27%</td>
+                    <td className="px-4 py-3 text-right font-bold text-gray-900">{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(dynamicSalesChartData.reduce((sum, item) => sum + (item.Omzet || 0), 0))}</td>
                   </tr>
                 </tbody>
               </table>
