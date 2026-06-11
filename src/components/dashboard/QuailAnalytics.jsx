@@ -3,8 +3,8 @@ import {
   ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend,
   BarChart, Bar, LineChart, Line, CartesianGrid, XAxis, YAxis, ComposedChart
 } from 'recharts';
-import { useDashboardData } from '../../hooks/useDashboardData';
-import { Sparkles, DollarSign, Box, Bird } from 'lucide-react';
+import { useQuailData } from '../../hooks/programs/useQuailData';
+import { TrendingUp, Bird, Egg, Package, DollarSign, Info, Sparkles, Box } from 'lucide-react';
 
 const formatRupiah = (val) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(val);
 const formatJuta = (val) => `${(val / 1000000).toFixed(1)} Jt`;
@@ -27,7 +27,11 @@ const FilterButtons = ({ currentRange, setRange }) => (
 );
 
 const QuailAnalytics = React.memo(function QuailAnalytics() {
-  const { quailOverviewData, quailYTD, currentYear } = useDashboardData();
+  const { 
+    quailOverviewData, 
+    quailYTD,
+    currentYear
+  } = useQuailData();
   const [timeFilter, setTimeFilter] = useState(12);
 
   const filteredOverviewData = quailOverviewData.slice(-timeFilter);

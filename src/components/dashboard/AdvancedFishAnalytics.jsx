@@ -3,7 +3,7 @@ import {
   ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend,
   BarChart, Bar, LineChart, Line, CartesianGrid, XAxis, YAxis, LabelList
 } from 'recharts';
-import { useDashboardData } from '../../hooks/useDashboardData';
+import { useFisheryData } from '../../hooks/programs/useFisheryData';
 import { Sparkles, DollarSign, Package, ShoppingBag } from 'lucide-react'; // icons imported
 
 const formatRupiah = (val) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(val);
@@ -27,7 +27,7 @@ const FilterButtons = ({ currentRange, setRange }) => (
 );
 
 const AdvancedFishAnalytics = React.memo(function AdvancedFishAnalytics() {
-  const { fisheryOverviewData, fisheryPortfolioRaw, fisheryYTD, currentYear } = useDashboardData();
+  const { fisheryOverviewData, fisheryPortfolioRaw, fisheryYTD, currentYear } = useFisheryData();
   
   const [timeFilter, setTimeFilter] = useState(12);
 

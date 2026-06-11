@@ -12,14 +12,14 @@ import EcogrowAnalytics from './dashboard/EcogrowAnalytics';
 import CahayaTaniAnalytics from './dashboard/CahayaTaniAnalytics';
 import ItikAnalytics from './dashboard/ItikAnalytics';
 import ProgramSummary from './dashboard/ProgramSummary';
-import { useDashboardData } from '../hooks/useDashboardData';
+import { useSharedDashboard } from '../hooks/useSharedDashboard';
 import { FileImage, FileText } from './Icons';
 
 export default function DashboardView() {
   const selectedProgram = useAppStore((state) => state.globalProgram);
   const fetchData = useAppStore((state) => state.fetchData);
   
-  const { isSalesProgram } = useDashboardData();
+  const { isSalesProgram } = useSharedDashboard();
 
   useEffect(() => {
     fetchData();

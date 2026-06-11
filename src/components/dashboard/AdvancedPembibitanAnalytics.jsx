@@ -3,7 +3,7 @@ import {
   ResponsiveContainer, ComposedChart, BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, Tooltip, Legend,
   CartesianGrid, XAxis, YAxis, LabelList
 } from 'recharts';
-import { useDashboardData } from '../../hooks/useDashboardData';
+import { usePembibitanData } from '../../hooks/programs/usePembibitanData';
 import { TrendingUp, AlertTriangle } from '../Icons';
 import { Sparkles, DollarSign, ShoppingBag, Sprout } from 'lucide-react';
 
@@ -29,7 +29,11 @@ const FilterButtons = ({ currentRange, setRange }) => (
 );
 
 const AdvancedPembibitanAnalytics = React.memo(function AdvancedPembibitanAnalytics() {
-  const { pembibitanOverviewData, pembibitanYTD, currentYear } = useDashboardData();
+  const { 
+    pembibitanOverviewData, 
+    pembibitanYTD,
+    currentYear
+  } = usePembibitanData();
   const [timeFilter, setTimeFilter] = useState(12);
 
   const filteredOverviewData = useMemo(() => {

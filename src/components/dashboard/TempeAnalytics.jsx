@@ -3,7 +3,7 @@ import {
   ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend,
   BarChart, Bar, LineChart, Line, CartesianGrid, XAxis, YAxis, ComposedChart
 } from 'recharts';
-import { useDashboardData } from '../../hooks/useDashboardData';
+import { useTempeData } from '../../hooks/programs/useTempeData';
 import { Sparkles, DollarSign, Box, ShoppingBag } from 'lucide-react';
 
 const formatRupiah = (val) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(val);
@@ -27,7 +27,11 @@ const FilterButtons = ({ currentRange, setRange }) => (
 );
 
 const TempeAnalytics = React.memo(function TempeAnalytics() {
-  const { tempeOverviewData, tempeYTD, currentYear } = useDashboardData();
+  const { 
+    tempeOverviewData, 
+    tempeYTD,
+    currentYear
+  } = useTempeData();
   const [timeFilter, setTimeFilter] = useState(12);
 
   const filteredOverviewData = useMemo(() => {

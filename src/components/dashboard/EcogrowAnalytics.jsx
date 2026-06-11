@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { AreaChart, Area, BarChart, Bar, ComposedChart, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, LabelList } from 'recharts';
-import { useDashboardData } from '../../hooks/useDashboardData';
+import { useEcogrowData } from '../../hooks/programs/useEcogrowData';
 import { DollarSign, TrendingUp, TrendingDown, PieChart as PieChartIcon, Sparkles } from 'lucide-react';
 
 // Helpers
@@ -59,7 +59,11 @@ const CustomVolumeTrendTooltip = ({ active, payload, label, ecogrowYTD }) => {
 };
 
 const EcogrowAnalytics = () => {
-  const { currentYear, ecogrowOverviewData, ecogrowYTD } = useDashboardData();
+  const { 
+    ecogrowOverviewData, 
+    ecogrowYTD,
+    currentYear
+  } = useEcogrowData();
   const [timeFilter, setTimeFilter] = useState(3);
   const filteredData = ecogrowOverviewData.slice(-timeFilter);
 

@@ -1,8 +1,6 @@
 import { create } from 'zustand';
 import { supabase } from '../lib/supabaseClient';
-import { MOCK_ECOGROW_DATA } from '../data/mockEcogrow';
-import { MOCK_CAHAYA_TANI_DATA } from '../data/mockCahayaTani';
-import { mockItikData as MOCK_ITIK_DATA } from '../data/mockItik';
+import { MOCK_ECOGROW_DATA, MOCK_CAHAYA_TANI_DATA, mockItikData as MOCK_ITIK_DATA } from '../data/mockData';
 
 const monthMap = {
   0: ['Jan', 'January', 'Januari'],

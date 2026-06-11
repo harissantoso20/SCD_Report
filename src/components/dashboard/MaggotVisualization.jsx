@@ -3,7 +3,7 @@ import { ResponsiveContainer, BarChart, Bar, CartesianGrid, XAxis, YAxis, Toolti
 import useAppStore from '../../store/useAppStore';
 import { PROGRAM_IMAGES, PROGRAM_DETAILS } from '../../data/mockData';
 import { Zap, TrendingUp, Sparkles, Box, DollarSign, Recycle, Bug } from 'lucide-react';
-import { useDashboardData } from '../../hooks/useDashboardData';
+import { useMaggotData } from '../../hooks/programs/useMaggotData';
 
 // Chart Helpers
 const FilterButtons = ({ currentRange, setRange }) => (
@@ -43,15 +43,22 @@ const renderLineLabelRp = (props) => {
   );
 };
 
+const getPercentage = (curr, prev) => {
+  if (prev === 0) return '-';
+  const pct = ((curr - prev) / prev) * 100;
+  return `${pct > 0 ? '+' : ''}${pct.toFixed(0)}%`;
+};
+
 const MaggotVisualization = React.memo(function MaggotVisualization() {
   const selectedProgram = useAppStore((state) => state.globalProgram);
   
   const { 
     maggotBioconversionData, 
     maggotFinancialData, 
+    maggotPortfolioData: portfolioData,
     maggotYTD,
     currentYear
-  } = useDashboardData();
+  } = useMaggotData();
 
   const bannerImage = React.useMemo(() => PROGRAM_IMAGES[selectedProgram] || PROGRAM_IMAGES["default"], [selectedProgram]);
   const details = React.useMemo(() => PROGRAM_DETAILS[selectedProgram] || PROGRAM_DETAILS["default"], [selectedProgram]);
@@ -65,11 +72,7 @@ const MaggotVisualization = React.memo(function MaggotVisualization() {
 
   const selectedWasteManaged = bioData.reduce((sum, item) => sum + (Number(item.sampah) || 0), 0);
 
-  const getPercentage = (curr, prev) => {
-    if (prev === 0) return '-';
-    const pct = ((curr - prev) / prev) * 100;
-    return `${pct > 0 ? '+' : ''}${pct.toFixed(0)}%`;
-  };
+
 
   const generateSmartAnalogy = (kg) => {
     if (!kg) return "Belum ada data konversi sampah organik pada periode ini.";
@@ -244,35 +247,7 @@ const MaggotVisualization = React.memo(function MaggotVisualization() {
           </div>
         </div>
 
-        {/* CHART 2: Tren Penjualan (Volume) */}
-        <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 md:p-5 flex flex-col">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-2 mb-4">
-            <h2 className="text-[13px] font-bold text-[#1e3a8a] uppercase tracking-wider flex items-center gap-2">
-              <Box size={16} className="text-[#1e3a8a]" />
-              Tren Volume Penjualan
-            </h2>
-          </div>
-          <div className="w-full flex-1 min-h-[220px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={filteredFinancialData} margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis dataKey="bulan" axisLine={false} tickLine={false} tick={{fontSize: 10, fill: '#64748b', fontWeight: 'bold'}} dy={10} padding={{ left: 30, right: 30 }} />
-                <YAxis hide domain={[0, dataMax => Math.max(10, Math.ceil((dataMax || 0) * 1.2))]} />
-                <Tooltip cursor={{fill: '#f8fafc'}} contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '12px' }} />
-                <Bar dataKey="kasgot" name="Kasgot (Kg)" stackId="a" fill="#1e3a8a" barSize={24} />
-                <Bar dataKey="kering" name="Maggot Kering (Kg)" stackId="a" fill="#f43f5e" barSize={24} />
-                <Bar dataKey="fresh" name="Fresh Maggot (Kg)" stackId="a" fill="#3b82f6" barSize={24} radius={[4, 4, 0, 0]} label={renderLabelKg} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-          <div className="flex flex-wrap justify-center items-center gap-x-3 mt-4">
-            <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 bg-[#3b82f6] rounded-sm"></div><span className="text-[9px] font-bold text-gray-600 tracking-wider">FRESH</span></div>
-            <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 bg-[#f43f5e] rounded-sm"></div><span className="text-[9px] font-bold text-gray-600 tracking-wider">KERING</span></div>
-            <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 bg-[#1e3a8a] rounded-sm"></div><span className="text-[9px] font-bold text-gray-600 tracking-wider">KASGOT</span></div>
-          </div>
-        </div>
-
-        {/* CHART 3: Tren Omzet (Revenue) */}
+        {/* CHART 2: Tren Omzet (Revenue) */}
         <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 md:p-5 flex flex-col">
           <div className="flex items-center justify-between border-b border-slate-100 pb-2 mb-4">
             <h2 className="text-[13px] font-bold text-[#1e3a8a] uppercase tracking-wider flex items-center gap-2">
@@ -282,9 +257,9 @@ const MaggotVisualization = React.memo(function MaggotVisualization() {
           </div>
           <div className="w-full flex-1 min-h-[220px]">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={filteredFinancialData} margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
+              <LineChart syncId="maggotSync" data={filteredFinancialData} margin={{ top: 25, right: 20, left: 0, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis dataKey="bulan" axisLine={false} tickLine={false} tick={{fontSize: 10, fill: '#64748b', fontWeight: 'bold'}} dy={10} padding={{ left: 30, right: 30 }} />
+                <XAxis dataKey="bulan" axisLine={false} tickLine={false} tick={{fontSize: 10, fill: '#64748b', fontWeight: 'bold'}} dy={10} padding={{ left: 20, right: 20 }} />
                 <YAxis hide domain={[0, dataMax => Math.max(10, Math.ceil((dataMax || 0) * 1.2))]} />
                 <Tooltip cursor={{fill: '#f8fafc', strokeWidth: 1, strokeDasharray: '3 3'}} contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '12px' }} formatter={(val) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(val)} />
                 <Line type="monotone" dataKey="omzet_kasgot" name="Omzet Kasgot" stroke="#1e3a8a" strokeWidth={3} dot={{ r: 3 }} activeDot={{ r: 5 }} label={renderLineLabelRp} />
@@ -297,6 +272,34 @@ const MaggotVisualization = React.memo(function MaggotVisualization() {
             <div className="flex items-center gap-1.5"><div className="w-3 h-0.5 bg-[#3b82f6]"></div><span className="text-[9px] font-bold text-gray-600 tracking-wider">FRESH</span></div>
             <div className="flex items-center gap-1.5"><div className="w-3 h-0.5 bg-[#f43f5e]"></div><span className="text-[9px] font-bold text-gray-600 tracking-wider">KERING</span></div>
             <div className="flex items-center gap-1.5"><div className="w-3 h-0.5 bg-[#1e3a8a]"></div><span className="text-[9px] font-bold text-gray-600 tracking-wider">KASGOT</span></div>
+          </div>
+        </div>
+
+        {/* CHART 3: Tren Volume Penjualan */}
+        <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 md:p-5 flex flex-col">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-2 mb-4">
+            <h2 className="text-[13px] font-bold text-[#1e3a8a] uppercase tracking-wider flex items-center gap-2">
+              <Box size={16} className="text-[#1e3a8a]" />
+              Tren Volume Penjualan
+            </h2>
+          </div>
+          <div className="w-full flex-1 min-h-[220px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart syncId="maggotSync" data={filteredFinancialData} margin={{ top: 25, right: 20, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                <XAxis dataKey="bulan" axisLine={false} tickLine={false} tick={{fontSize: 10, fill: '#64748b', fontWeight: 'bold'}} dy={10} padding={{ left: 20, right: 20 }} />
+                <YAxis hide domain={[0, dataMax => Math.max(10, Math.ceil((dataMax || 0) * 1.2))]} />
+                <Tooltip cursor={{fill: '#f8fafc'}} contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '12px' }} />
+                <Bar dataKey="kasgot" name="Kasgot (Kg)" stackId="a" fill="#1e3a8a" barSize={24} />
+                <Bar dataKey="kering" name="Maggot Kering (Kg)" stackId="a" fill="#f43f5e" barSize={24} />
+                <Bar dataKey="fresh" name="Fresh Maggot (Kg)" stackId="a" fill="#3b82f6" barSize={24} radius={[4, 4, 0, 0]} label={renderLabelKg} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="flex flex-wrap justify-center items-center gap-x-3 mt-4">
+            <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 bg-[#3b82f6] rounded-sm"></div><span className="text-[9px] font-bold text-gray-600 tracking-wider">FRESH</span></div>
+            <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 bg-[#f43f5e] rounded-sm"></div><span className="text-[9px] font-bold text-gray-600 tracking-wider">KERING</span></div>
+            <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 bg-[#1e3a8a] rounded-sm"></div><span className="text-[9px] font-bold text-gray-600 tracking-wider">KASGOT</span></div>
           </div>
         </div>
 

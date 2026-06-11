@@ -1,9 +1,9 @@
 import React, { useState, useMemo } from 'react';
 import {
-  ResponsiveContainer, ComposedChart, Bar, Line, PieChart, Pie, Tooltip, Legend,
+  ResponsiveContainer, BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, Tooltip, Legend,
   CartesianGrid, XAxis, YAxis, LabelList
 } from 'recharts';
-import { useItikData } from '../../hooks/programs/useItikData';
+import { useDashboardData } from '../../hooks/useDashboardData';
 import { Sparkles, DollarSign, Package, Activity, Info } from 'lucide-react';
 
 const formatRupiah = (val) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(val);
@@ -38,11 +38,7 @@ const getPercentageJSX = (curr, prev) => {
 };
 
 const ItikAnalytics = React.memo(function ItikAnalytics() {
-  const { 
-    itikPetelurOverviewData, 
-    itikPetelurYTD,
-    currentYear
-  } = useItikData();
+  const { currentYear, itikPetelurOverviewData, itikPetelurYTD } = useDashboardData();
   const [timeFilter, setTimeFilter] = useState(12);
 
   const filteredOverviewData = useMemo(() => {
@@ -62,6 +58,7 @@ const ItikAnalytics = React.memo(function ItikAnalytics() {
 
   const yoyOmzetPct = prev_total_omzet ? (((total_omzet - prev_total_omzet) / prev_total_omzet) * 100).toFixed(0) : '-';
 
+  // Omzet Composition Data for Donut Chart
   const compositionData = [
     { name: 'Telur Mentah', value: mentah_omzet, fill: '#93c5fd' }, 
     { name: 'Telur Asin Mentah', value: asin_mentah_omzet, fill: '#3b82f6' }, 
@@ -71,6 +68,7 @@ const ItikAnalytics = React.memo(function ItikAnalytics() {
   const renderPieLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }) => {
     if (percent < 0.05) return null;
     const RADIAN = Math.PI / 180;
+    // For donut chart, place label perfectly in the middle of the ring
     const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
     const x = cx + radius * Math.cos(-midAngle * RADIAN);
     const y = cy + radius * Math.sin(-midAngle * RADIAN);
@@ -83,6 +81,8 @@ const ItikAnalytics = React.memo(function ItikAnalytics() {
 
   const generateItikInsight = () => {
     if (compositionData.length === 0) return "Belum ada penjualan tercatat.";
+    
+    // Sort to find top product
     const sortedProducts = [...compositionData].sort((a, b) => b.value - a.value);
     const topProduct = sortedProducts[0];
     const topPercent = ((topProduct.value / total_omzet) * 100).toFixed(0);
@@ -105,77 +105,69 @@ const ItikAnalytics = React.memo(function ItikAnalytics() {
   };
 
   const YTD_TABLE_DATA = [
-    { variabel: 'Penjualan Telur Mentah (Butir)', prevYearData: 0, currYearData: mentah_vol, percent: getPercentageJSX(mentah_vol, 0), isCurrency: false },
-    { variabel: 'Penjualan Telur Asin Mentah (Butir)', prevYearData: 0, currYearData: asin_mentah_vol, percent: getPercentageJSX(asin_mentah_vol, 0), isCurrency: false },
-    { variabel: 'Penjualan Telur Asin Matang (Butir)', prevYearData: 0, currYearData: asin_matang_vol, percent: getPercentageJSX(asin_matang_vol, 0), isCurrency: false },
-    { variabel: 'Total Distribusi Keseluruhan (Butir)', prevYearData: prev_total_vol || 0, currYearData: total_vol || 0, percent: getPercentageJSX(total_vol || 0, prev_total_vol || 0), isCurrency: false },
-    { variabel: 'Total Omzet Penjualan', prevYearData: prev_total_omzet || 0, currYearData: total_omzet || 0, percent: getPercentageJSX(total_omzet || 0, prev_total_omzet || 0), isCurrency: true }
+    { 
+      variabel: 'Penjualan Telur Mentah (Butir)', 
+      prevYearData: 0, 
+      currYearData: mentah_vol, 
+      percent: getPercentageJSX(mentah_vol, 0), 
+      isCurrency: false 
+    },
+    { 
+      variabel: 'Penjualan Telur Asin Mentah (Butir)', 
+      prevYearData: 0, 
+      currYearData: asin_mentah_vol, 
+      percent: getPercentageJSX(asin_mentah_vol, 0), 
+      isCurrency: false 
+    },
+    { 
+      variabel: 'Penjualan Telur Asin Matang (Butir)', 
+      prevYearData: 0, 
+      currYearData: asin_matang_vol, 
+      percent: getPercentageJSX(asin_matang_vol, 0), 
+      isCurrency: false 
+    },
+    { 
+      variabel: 'Total Distribusi Keseluruhan (Butir)', 
+      prevYearData: prev_total_vol || 0, 
+      currYearData: total_vol || 0, 
+      percent: getPercentageJSX(total_vol || 0, prev_total_vol || 0), 
+      isCurrency: false 
+    },
+    { 
+      variabel: 'Total Omzet Penjualan', 
+      prevYearData: prev_total_omzet || 0, 
+      currYearData: total_omzet || 0, 
+      percent: getPercentageJSX(total_omzet || 0, prev_total_omzet || 0), 
+      isCurrency: true 
+    }
   ];
 
-  const CustomChartTooltip = ({ active, payload, label }) => {
+  const CustomChartTooltip = ({ active, payload, label, isCurrency }) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-white p-3 rounded-lg shadow-lg border border-slate-100 text-xs z-50 relative">
+        <div className="bg-white p-3 rounded-lg shadow-lg border border-slate-100 text-xs">
           <p className="font-bold text-slate-700 mb-1 border-b border-slate-100 pb-1">{label}</p>
-          {payload.map((entry, index) => {
-            // Determine if the value is omzet based on dataKey or name
-            const isCurrency = entry.name === 'Omzet';
-            return (
-              <div key={index} className="flex items-center gap-2 mb-1">
-                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }}></div>
-                <span className="text-slate-500">{entry.name}:</span>
-                <span className="font-bold text-[#1e3a8a]">
-                  {isCurrency ? formatRupiah(entry.value) : formatNumber(entry.value)}
-                </span>
-              </div>
-            );
-          })}
+          {payload.map((entry, index) => (
+            <div key={index} className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }}></div>
+              <span className="text-slate-500">{entry.name}:</span>
+              <span className="font-bold text-[#1e3a8a]">
+                {isCurrency ? formatRupiah(entry.value) : formatNumber(entry.value)}
+              </span>
+            </div>
+          ))}
         </div>
       );
     }
     return null;
   };
 
-  // Helper function to render a product panel as a single ComposedChart with dual Y-axes
-  const renderProductPanel = (title, titleColor, volKey, omzetKey, barColor) => (
-    <div className="bg-white p-4 md:p-5 rounded-lg shadow-sm border border-slate-200 flex flex-col h-[420px]">
-      <h4 className={`text-[11px] uppercase tracking-widest font-extrabold ${titleColor} mb-4 border-b border-slate-100 pb-2`}>
-        {title}
-      </h4>
-      
-      <div className="flex-1 w-full relative">
-        <ResponsiveContainer width="100%" height="100%">
-          <ComposedChart data={filteredOverviewData} margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-            <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: '#94a3b8', fontWeight: 600 }} dy={5} />
-            
-            {/* 
-              Fake Separation Trick: 
-              - Bar axis (left) scales to 2.5x max so bars stay in bottom 40%.
-              - Line axis (right) scales such that 0 is offset heavily, keeping the line in top 45%.
-            */}
-            <YAxis yAxisId="left" hide domain={[0, dataMax => dataMax * 2.5]} />
-            <YAxis yAxisId="right" orientation="right" hide domain={[dataMax => -dataMax * 1.0, dataMax => dataMax * 1.2]} />
-            
-            <Tooltip content={<CustomChartTooltip />} cursor={{ fill: '#f8fafc' }} />
-            
-            <Bar yAxisId="left" dataKey={volKey} name="Volume" fill={barColor} radius={[3, 3, 0, 0]} maxBarSize={30}>
-              <LabelList dataKey={volKey} position="top" style={{ fontSize: '9px', fill: '#64748b', fontWeight: 'bold' }} formatter={(v) => formatNumber(v)} />
-            </Bar>
-
-            <Line yAxisId="right" type="monotone" dataKey={omzetKey} name="Omzet" stroke="#10b981" strokeWidth={3} dot={{ r: 3, fill: '#10b981', strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 5 }}>
-              <LabelList dataKey={omzetKey} position="top" style={{ fontSize: '9px', fill: '#059669', fontWeight: 'bold' }} formatter={(v) => formatJuta(v).replace(' Jt','J')} />
-            </Line>
-          </ComposedChart>
-        </ResponsiveContainer>
-      </div>
-    </div>
-  );
-
   return (
     <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-10">
       
+      {/* LAYER 1: Executive KPIs */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Total Omzet Penjualan YTD */}
         <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-200 border-t-4 border-t-emerald-500 relative overflow-hidden group hover:-translate-y-1 hover:shadow-md transition-all duration-300">
           <div className="absolute -right-4 -bottom-4 text-emerald-50/50 group-hover:scale-110 transition-transform duration-500 pointer-events-none">
             <DollarSign size={100} />
@@ -198,6 +190,7 @@ const ItikAnalytics = React.memo(function ItikAnalytics() {
           </div>
         </div>
         
+        {/* Total Distribusi Telur YTD */}
         <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-200 border-t-4 border-t-sky-500 relative overflow-hidden group hover:-translate-y-1 hover:shadow-md transition-all duration-300">
           <div className="absolute -right-4 -bottom-4 text-sky-50/50 group-hover:scale-110 transition-transform duration-500 pointer-events-none">
             <Package size={100} />
@@ -214,7 +207,10 @@ const ItikAnalytics = React.memo(function ItikAnalytics() {
         </div>
       </div>
 
+      {/* LAYER 2: Portofolio Pendapatan & Insight Analitik */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 items-stretch">
+        
+        {/* Panel Portofolio Pendapatan (Donut Chart) */}
         <div className="xl:col-span-1 bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex flex-col h-[340px]">
           <h3 className="text-[13px] font-bold text-[#1e3a8a] uppercase tracking-widest mb-2 flex items-center gap-2">
             <Sparkles size={16} className="text-blue-500" /> Distribusi Omzet
@@ -232,7 +228,7 @@ const ItikAnalytics = React.memo(function ItikAnalytics() {
                     isAnimationActive={true}
                   >
                   </Pie>
-                  <Tooltip content={<CustomChartTooltip />} />
+                  <Tooltip content={<CustomChartTooltip isCurrency={true} />} />
                   <Legend verticalAlign="bottom" height={20} iconType="circle" wrapperStyle={{ fontSize: '11px', fontWeight: 'bold' }} />
                 </PieChart>
               </ResponsiveContainer>
@@ -242,6 +238,7 @@ const ItikAnalytics = React.memo(function ItikAnalytics() {
           </div>
         </div>
 
+        {/* Panel Insight Analitik Dinamis */}
         <div className="xl:col-span-2 bg-white rounded-lg shadow-sm border border-slate-200 p-4 md:p-5 flex flex-col relative overflow-hidden group hover:-translate-y-1 hover:shadow-md transition-all duration-300">
           <div className="flex justify-between items-center mb-4 relative z-10 border-b border-slate-100 pb-3">
             <h3 className="text-[13px] font-bold text-[#1e3a8a] uppercase tracking-widest flex items-center gap-2">
@@ -268,15 +265,121 @@ const ItikAnalytics = React.memo(function ItikAnalytics() {
         </div>
       </div>
 
+      {/* LAYER 3: Tren Penjualan Spesifik per Produk (Atas Bawah Layout) */}
       <h3 className="text-[13px] font-bold text-[#1e3a8a] uppercase tracking-widest mt-2 border-b border-slate-200 pb-2">
         Tren Penjualan Spesifik (Volume vs Omzet)
       </h3>
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 items-stretch">
-        {renderProductPanel('Telur Mentah', 'text-slate-500', 'mentah_vol', 'mentah_omzet', '#93c5fd')}
-        {renderProductPanel('Telur Asin Mentah', 'text-[#3b82f6]', 'asin_mentah_vol', 'asin_mentah_omzet', '#3b82f6')}
-        {renderProductPanel('Telur Asin Matang', 'text-[#1e3a8a]', 'asin_matang_vol', 'asin_matang_omzet', '#1e3a8a')}
+        
+        {/* Panel Mentah */}
+        <div className="bg-white p-4 md:p-5 rounded-lg shadow-sm border border-slate-200 flex flex-col h-[420px]">
+          <h4 className="text-[11px] uppercase tracking-widest font-extrabold text-slate-500 mb-4 border-b border-slate-100 pb-2">
+            Telur Mentah
+          </h4>
+          
+          {/* Top Chart: Volume Bar */}
+          <div className="flex-1 w-full min-h-0 relative mb-4">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={filteredOverviewData} margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: '#94a3b8', fontWeight: 600 }} dy={5} />
+                <YAxis hide />
+                <Tooltip content={<CustomChartTooltip isCurrency={false} />} />
+                <Bar dataKey="mentah_vol" name="Volume" fill="#93c5fd" radius={[3, 3, 0, 0]} maxBarSize={30}>
+                  <LabelList dataKey="mentah_vol" position="top" style={{ fontSize: '9px', fill: '#64748b', fontWeight: 'bold' }} formatter={(v) => formatJuta(v).replace(' Jt','J')} />
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+          
+          {/* Bottom Chart: Omzet Line */}
+          <div className="flex-1 w-full min-h-0 relative border-t border-slate-50 pt-4">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={filteredOverviewData} margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: '#94a3b8', fontWeight: 600 }} dy={5} />
+                <YAxis hide />
+                <Tooltip content={<CustomChartTooltip isCurrency={true} />} />
+                <Line type="monotone" dataKey="mentah_omzet" name="Omzet" stroke="#10b981" strokeWidth={3} dot={{ r: 3, fill: '#10b981', strokeWidth: 2, stroke: '#fff' }}>
+                  <LabelList dataKey="mentah_omzet" position="top" style={{ fontSize: '9px', fill: '#059669', fontWeight: 'bold' }} formatter={(v) => formatJuta(v).replace(' Jt','J')} />
+                </Line>
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Panel Asin Mentah */}
+        <div className="bg-white p-4 md:p-5 rounded-lg shadow-sm border border-slate-200 flex flex-col h-[420px]">
+          <h4 className="text-[11px] uppercase tracking-widest font-extrabold text-[#3b82f6] mb-4 border-b border-slate-100 pb-2">
+            Telur Asin Mentah
+          </h4>
+          
+          <div className="flex-1 w-full min-h-0 relative mb-4">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={filteredOverviewData} margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: '#94a3b8', fontWeight: 600 }} dy={5} />
+                <YAxis hide />
+                <Tooltip content={<CustomChartTooltip isCurrency={false} />} />
+                <Bar dataKey="asin_mentah_vol" name="Volume" fill="#3b82f6" radius={[3, 3, 0, 0]} maxBarSize={30}>
+                  <LabelList dataKey="asin_mentah_vol" position="top" style={{ fontSize: '9px', fill: '#64748b', fontWeight: 'bold' }} formatter={(v) => formatJuta(v).replace(' Jt','J')} />
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+          
+          <div className="flex-1 w-full min-h-0 relative border-t border-slate-50 pt-4">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={filteredOverviewData} margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: '#94a3b8', fontWeight: 600 }} dy={5} />
+                <YAxis hide />
+                <Tooltip content={<CustomChartTooltip isCurrency={true} />} />
+                <Line type="monotone" dataKey="asin_mentah_omzet" name="Omzet" stroke="#10b981" strokeWidth={3} dot={{ r: 3, fill: '#10b981', strokeWidth: 2, stroke: '#fff' }}>
+                  <LabelList dataKey="asin_mentah_omzet" position="top" style={{ fontSize: '9px', fill: '#059669', fontWeight: 'bold' }} formatter={(v) => formatJuta(v).replace(' Jt','J')} />
+                </Line>
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Panel Asin Matang */}
+        <div className="bg-white p-4 md:p-5 rounded-lg shadow-sm border border-slate-200 flex flex-col h-[420px]">
+          <h4 className="text-[11px] uppercase tracking-widest font-extrabold text-[#1e3a8a] mb-4 border-b border-slate-100 pb-2">
+            Telur Asin Matang
+          </h4>
+          
+          <div className="flex-1 w-full min-h-0 relative mb-4">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={filteredOverviewData} margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: '#94a3b8', fontWeight: 600 }} dy={5} />
+                <YAxis hide />
+                <Tooltip content={<CustomChartTooltip isCurrency={false} />} />
+                <Bar dataKey="asin_matang_vol" name="Volume" fill="#1e3a8a" radius={[3, 3, 0, 0]} maxBarSize={30}>
+                  <LabelList dataKey="asin_matang_vol" position="top" style={{ fontSize: '9px', fill: '#64748b', fontWeight: 'bold' }} formatter={(v) => formatJuta(v).replace(' Jt','J')} />
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+          
+          <div className="flex-1 w-full min-h-0 relative border-t border-slate-50 pt-4">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={filteredOverviewData} margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: '#94a3b8', fontWeight: 600 }} dy={5} />
+                <YAxis hide />
+                <Tooltip content={<CustomChartTooltip isCurrency={true} />} />
+                <Line type="monotone" dataKey="asin_matang_omzet" name="Omzet" stroke="#10b981" strokeWidth={3} dot={{ r: 3, fill: '#10b981', strokeWidth: 2, stroke: '#fff' }}>
+                  <LabelList dataKey="asin_matang_omzet" position="top" style={{ fontSize: '9px', fill: '#059669', fontWeight: 'bold' }} formatter={(v) => formatJuta(v).replace(' Jt','J')} />
+                </Line>
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
       </div>
 
+      {/* LAYER 4: Rekapitulasi YTD Table */}
       <div className="bg-white p-4 md:p-5 rounded-lg shadow-sm border border-slate-200 mt-2">
         <h3 className="text-[13px] font-bold text-[#1e3a8a] uppercase tracking-widest border-b border-slate-100 pb-4 mb-4">
           Rekapitulasi Year to Date (YTD)
@@ -296,7 +399,6 @@ const ItikAnalytics = React.memo(function ItikAnalytics() {
                 <tr key={idx} className="hover:bg-slate-50/50 transition-colors">
                   <td className="px-6 py-4 font-medium text-slate-700">{row.variabel}</td>
                   <td className="px-6 py-4 text-right text-slate-500">
-                    {/* Reusing existing logic for currency rendering */}
                     {row.isCurrency ? formatRupiah(row.prevYearData) : formatNumber(row.prevYearData)}
                   </td>
                   <td className="px-6 py-4 text-right font-bold text-[#1e3a8a]">

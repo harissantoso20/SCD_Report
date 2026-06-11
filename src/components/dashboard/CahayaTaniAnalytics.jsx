@@ -3,7 +3,7 @@ import {
   ResponsiveContainer, ComposedChart, BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, Tooltip, Legend,
   CartesianGrid, XAxis, YAxis, LabelList
 } from 'recharts';
-import { useDashboardData } from '../../hooks/useDashboardData';
+import { useCahayaTaniData } from '../../hooks/programs/useCahayaTaniData';
 import { Sparkles, DollarSign, ShoppingBag, Sprout, TrendingUp, Info } from 'lucide-react';
 
 const formatRupiah = (val) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(val);
@@ -28,7 +28,11 @@ const FilterButtons = ({ currentRange, setRange }) => (
 );
 
 const CahayaTaniAnalytics = React.memo(function CahayaTaniAnalytics() {
-  const { cahayaTaniOverviewData, cahayaTaniYTD, currentYear } = useDashboardData();
+  const { 
+    cahayaTaniOverviewData, 
+    cahayaTaniYTD,
+    currentYear
+  } = useCahayaTaniData();
   const [timeFilter, setTimeFilter] = useState(12);
 
   const filteredOverviewData = useMemo(() => {

@@ -2,10 +2,10 @@ import React, { useCallback } from 'react';
 import { ResponsiveContainer, LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip } from 'recharts';
 import { CHART_DATA_SALES } from '../../data/mockData';
 import { TrendingUp, FileImage } from '../Icons';
-import { useDashboardData } from '../../hooks/useDashboardData';
+import { useSharedDashboard } from '../../hooks/useSharedDashboard';
 
-export default function SalesVisualization() {
-  const { dynamicSalesChartData } = useDashboardData();
+export default React.memo(function SalesVisualization() {
+  const { dynamicSalesChartData } = useSharedDashboard();
 
   const formatRupiahChart = useCallback((value) => `Rp ${(value / 1000000).toFixed(1)} Jt`, []);
 
@@ -62,4 +62,4 @@ export default function SalesVisualization() {
       </div>
     </section>
   );
-}
+});
