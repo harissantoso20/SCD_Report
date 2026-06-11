@@ -152,6 +152,20 @@ const EcogrowAnalytics = () => {
   };
 
   // LAYER 2: Product Mix (Donut Chart)
+  const getPercentage = (curr, prev) => {
+    if (prev === 0) return '-';
+    const pct = ((curr - prev) / prev) * 100;
+    return (
+      <span className={pct > 0 ? 'text-blue-600' : pct < 0 ? 'text-rose-600' : 'text-slate-500'}>
+        {pct > 0 ? '+' : ''}{pct.toFixed(0)}%
+      </span>
+    );
+  };
+
+  const YTD_TABLE_DATA = [
+    { variabel: 'Total Omzet Keseluruhan', prevYearData: ecogrowYTD.prev_total_omzet || 0, currYearData: ecogrowYTD.total_omzet || 0, percent: getPercentage(ecogrowYTD.total_omzet || 0, ecogrowYTD.prev_total_omzet || 0), isCurrency: true }
+  ];
+
   const pieData = useMemo(() => {
     return Object.entries(ecogrowYTD.items)
       .filter(([_, data]) => data.omzet > 0)
@@ -323,6 +337,41 @@ const EcogrowAnalytics = () => {
               </Area>
             </AreaChart>
           </ResponsiveContainer>
+        </div>
+      </div>
+
+      {/* Row: Rekapitulasi YTD Table */}
+      <div className="bg-white p-4 md:p-5 rounded-lg shadow-sm border border-slate-200 mt-4">
+        <h3 className="text-[13px] font-bold text-[#1e3a8a] uppercase tracking-widest border-b border-slate-100 pb-4 mb-4">
+          Rekapitulasi Year to Date (YTD)
+        </h3>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm text-slate-600">
+            <thead className="text-[11px] uppercase bg-slate-50 text-[#1e3a8a] font-extrabold tracking-wider">
+              <tr>
+                <th className="px-6 py-4 rounded-tl-lg">Variabel</th>
+                <th className="px-6 py-4 text-right">{prevYear}</th>
+                <th className="px-6 py-4 text-right">{currentYear}</th>
+                <th className="px-6 py-4 text-right rounded-tr-lg">Persentase YoY</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {YTD_TABLE_DATA.map((row, idx) => (
+                <tr key={idx} className="hover:bg-slate-50/50 transition-colors">
+                  <td className="px-6 py-4 font-medium text-slate-700">{row.variabel}</td>
+                  <td className="px-6 py-4 text-right text-slate-500">
+                    {row.isCurrency ? formatRupiah(row.prevYearData) : formatNumber(row.prevYearData)}
+                  </td>
+                  <td className="px-6 py-4 text-right font-bold text-[#1e3a8a]">
+                    {row.isCurrency ? formatRupiah(row.currYearData) : formatNumber(row.currYearData)}
+                  </td>
+                  <td className="px-6 py-4 text-right font-bold">
+                    {row.percent}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
 

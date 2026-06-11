@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { supabase } from '../lib/supabaseClient';
 import { MOCK_ECOGROW_DATA } from '../data/mockEcogrow';
+import { MOCK_CAHAYA_TANI_DATA } from '../data/mockCahayaTani';
 
 const monthMap = {
   0: ['Jan', 'January', 'Januari'],
@@ -190,12 +191,18 @@ const useAppStore = create((set, get) => ({
         if (globalProgram && globalProgram.toLowerCase().includes("ecogrow")) {
           finalSalesData = [...finalSalesData, ...MOCK_ECOGROW_DATA];
         }
+        if (globalProgram && globalProgram.toLowerCase().includes("cahaya tani")) {
+          finalSalesData = [...finalSalesData, ...MOCK_CAHAYA_TANI_DATA];
+        }
 
         set({ extraFields, tablesData, salesData: finalSalesData });
       } else {
         let finalSalesData = [];
         if (globalProgram && globalProgram.toLowerCase().includes("ecogrow")) {
           finalSalesData = [...MOCK_ECOGROW_DATA];
+        }
+        if (globalProgram && globalProgram.toLowerCase().includes("cahaya tani")) {
+          finalSalesData = [...MOCK_CAHAYA_TANI_DATA];
         }
         set({ extraFields: {}, tablesData: {}, salesData: finalSalesData });
       }
