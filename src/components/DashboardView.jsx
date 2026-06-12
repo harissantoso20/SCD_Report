@@ -14,6 +14,7 @@ import ItikAnalytics from './dashboard/ItikAnalytics';
 import ProgramSummary from './dashboard/ProgramSummary';
 import { useSharedDashboard } from '../hooks/useSharedDashboard';
 import { FileImage, FileText } from './Icons';
+import EvidenceGallery from './dashboard/EvidenceGallery';
 
 export default function DashboardView() {
   const selectedProgram = useAppStore((state) => state.globalProgram);
@@ -67,7 +68,10 @@ export default function DashboardView() {
         </section>
       )}
 
-      {/* RINGKASAN PROGRAM (Level 3) */}
+      {/* EVIDEN FOTO (Level 3) */}
+      <EvidenceGallery />
+
+      {/* RINGKASAN PROGRAM (Level 4) */}
       <ProgramSummary />
     </div>
   );

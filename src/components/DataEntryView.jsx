@@ -33,7 +33,7 @@ export default function DataEntryView() {
     const months = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Ags", "Sep", "Okt", "Nov", "Des"];
     const currentMonthIndex = d.getMonth();
     return { 
-      prev: months[currentMonthIndex === 0 ? 11 : currentMonthIndex - 1], 
+      current: months[currentMonthIndex], 
       next: months[currentMonthIndex === 11 ? 0 : currentMonthIndex + 1] 
     };
   }, [selectedDate]);

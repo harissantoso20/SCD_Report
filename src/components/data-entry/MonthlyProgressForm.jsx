@@ -16,7 +16,7 @@ export default function MonthlyProgressForm({ monthLabels, monthlyState, setMont
       </div>
       <div className="flex flex-col gap-5">
         <div>
-          <label className="block text-[13px] font-bold mb-1.5">Realisasi Bulan {monthLabels.prev}</label>
+          <label className="block text-[13px] font-bold mb-1.5">Realisasi Bulan {monthLabels.current}</label>
           <textarea className="w-full border border-gray-300 rounded-sm p-3 text-[13px] min-h-[120px]" value={monthlyState.past_month_realization} onChange={(e) => setMonthlyState(prev => ({...prev, past_month_realization: e.target.value}))} />
         </div>
         <div>

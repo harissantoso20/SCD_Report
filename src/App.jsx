@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense, lazy, useEffect } from 'react';
 import useAppStore from './store/useAppStore';
 import logoPTBA from './assets/logo-ptba.png';
 
@@ -36,10 +36,35 @@ class GlobalErrorBoundary extends React.Component {
 
 const DashboardView = lazy(() => import('./components/DashboardView'));
 const DataEntryView = lazy(() => import('./components/DataEntryView'));
+import LoginView from './components/LoginView';
 
 export default function App() {
   const activeTab = useAppStore((state) => state.activeTab);
   const setActiveTab = useAppStore((state) => state.setActiveTab);
+  const user = useAppStore((state) => state.user);
+  const isAuthLoading = useAppStore((state) => state.isAuthLoading);
+  const initializeAuth = useAppStore((state) => state.initializeAuth);
+  const logout = useAppStore((state) => state.logout);
+
+  useEffect(() => {
+    initializeAuth();
+  }, [initializeAuth]);
+
+  if (isAuthLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#f8f9fa]">
+        <div className="w-10 h-10 border-4 border-[#1e3a8a] border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <GlobalErrorBoundary>
+        <LoginView />
+      </GlobalErrorBoundary>
+    );
+  }
 
   return (
     <GlobalErrorBoundary>
@@ -48,7 +73,7 @@ export default function App() {
           <div className="flex items-center gap-3">
             <img src={logoPTBA} alt="Logo PTBA" className="h-12 md:h-16 w-auto object-contain" />
           </div>
-          <nav className="flex gap-4 md:gap-6 font-bold text-xs md:text-sm uppercase tracking-wide">
+          <nav className="flex items-center gap-4 md:gap-6 font-bold text-xs md:text-sm uppercase tracking-wide">
             <button 
               onClick={() => setActiveTab("Dashboard")}
               className={`transition-colors ${activeTab === "Dashboard" ? "text-[#1e3a8a] border-b-2 border-[#1e3a8a] pb-1" : "text-gray-400 hover:text-[#1e3a8a]"}`}
@@ -60,6 +85,13 @@ export default function App() {
               className={`transition-colors ${activeTab === "Data Entry" ? "text-[#1e3a8a] border-b-2 border-[#1e3a8a] pb-1" : "text-gray-400 hover:text-[#1e3a8a]"}`}
             >
               Data Entry
+            </button>
+            <div className="w-[1px] h-6 bg-gray-300 mx-1 hidden md:block"></div>
+            <button 
+              onClick={logout}
+              className="text-red-600 hover:text-red-800 transition-colors"
+            >
+              Logout
             </button>
           </nav>
         </header>
