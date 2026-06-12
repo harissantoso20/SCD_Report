@@ -54,6 +54,7 @@ export default function DataEntryView() {
   const [tablesData, setTablesData] = useState({});
   const [extraFields, setExtraFields] = useState({});
   const [isPltsEditing, setIsPltsEditing] = useState(false);
+  const [evidenceFiles, setEvidenceFiles] = useState([]);
 
   useEffect(() => {
     if (programContext) {
@@ -116,7 +117,8 @@ export default function DataEntryView() {
       pltsLocations: pltsLocations,
       monthlyProgress: monthlyState,
       tablesData: tablesData,
-      extraFields: extraFields
+      extraFields: extraFields,
+      evidenceFiles: evidenceFiles
     });
     
     setIsSaving(false);
@@ -164,7 +166,7 @@ export default function DataEntryView() {
         </section>
       )}
 
-      <EvidenceUpload />
+      <EvidenceUpload files={evidenceFiles} setFiles={setEvidenceFiles} />
 
       <div className="flex justify-end pt-5 border-t border-gray-200">
         <div className="flex items-center gap-3">

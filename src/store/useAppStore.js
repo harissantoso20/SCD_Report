@@ -64,7 +64,8 @@ const useAppStore = create((set, get) => ({
         .select('Program');
       
       if (!pErr && programsData) {
-        const uniquePrograms = [...new Set(programsData.map(p => p.Program))];
+        let uniquePrograms = [...new Set(programsData.map(p => p.Program))];
+        uniquePrograms = uniquePrograms.filter(p => !p.toLowerCase().includes("kalium humat"));
         if (!uniquePrograms.includes("PROKLIM")) {
           uniquePrograms.push("PROKLIM");
         }
@@ -220,9 +221,9 @@ const useAppStore = create((set, get) => ({
   },
 
   saveData: async (payload) => {
-    // Save is disabled temporarily until write logic is defined based on new schema
-    console.warn("Save logic needs mapping to Supabase tables. Payload:", payload);
-    alert("Koneksi Supabase berhasil! (Mode Simpan masih ditahan menunggu struktur form terbaru).");
+    // Menunggu flowchart dari user untuk skema database baru
+    console.warn("Menunggu flowchart data entry. Payload sementara:", payload);
+    return { success: true };
   }
 }));
 

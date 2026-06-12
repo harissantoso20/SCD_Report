@@ -82,10 +82,149 @@ export const GenericDynamicTable = ({ title, headers, initialLabels, value = [],
   );
 };
 
+export const SimpleQtyTable = ({ title, headers, initialLabels, value = [], onChange }) => {
+  useEffect(() => {
+    if (value.length === 0 && initialLabels.length > 0) {
+      const initialRows = initialLabels.map((label, i) => ({ 
+        id: i + 1, 
+        product_name: label === "Lainnya" ? "" : label, 
+        isOthers: label === "Lainnya", 
+        qty: ""
+      }));
+      onChange(initialRows);
+    }
+  }, [initialLabels, value.length, onChange]); 
+
+  const handleFieldChange = (id, field, val) => {
+    const newRows = [...value]; 
+    const rowIndex = newRows.findIndex(r => r.id === id);
+    if (rowIndex === -1) return; 
+    newRows[rowIndex] = { ...newRows[rowIndex], [field]: val };
+    
+    if (field === 'product_name' && newRows[rowIndex].isOthers && rowIndex === newRows.length - 1 && val.trim() !== "") {
+      newRows.push({ 
+        id: Date.now(), 
+        product_name: "", 
+        isOthers: true, 
+        qty: ""
+      });
+    }
+    onChange(newRows);
+  };
+
+  return (
+    <div className="mb-8 flex flex-col last:mb-0">
+      <h3 className="text-[14px] font-bold text-[#25326a] uppercase tracking-wider border-b border-gray-200 pb-2 mb-4 flex-none flex items-center gap-2">
+        <TableIcon size={18} className="text-[#1e3a8a]" />{title}
+      </h3>
+      <div className="overflow-x-auto border-y border-gray-300 shadow-sm bg-white rounded-sm minimal-scrollbar">
+        <table className="w-full text-[13px] text-left border-collapse">
+          <thead className="bg-[#f8f9fa] text-[#25326a] uppercase font-bold">
+            <tr>{headers.map((h, i) => <th key={i} className={`px-4 py-3.5 border-b border-gray-200 ${i === 0 ? 'w-1/2' : ''}`}>{h}</th>)}</tr>
+          </thead>
+          <tbody>
+            {value.map((row) => (
+              <tr key={row.id} className="border-b border-gray-100 hover:bg-blue-50/60">
+                <td className="px-4 py-2.5 font-semibold text-gray-800">
+                  {row.isOthers ? 
+                    <input type="text" className="w-full border border-gray-300 p-1.5 rounded focus:border-[#25326a]" placeholder="Lainnya..." value={row.product_name} onChange={(e) => handleFieldChange(row.id, 'product_name', e.target.value)} /> 
+                    : row.product_name}
+                </td>
+                <td className="px-3 py-2.5">
+                  <input type="number" className="w-full border border-gray-300 p-1.5 rounded focus:border-[#25326a]" value={row.qty} onChange={(e) => handleFieldChange(row.id, 'qty', e.target.value)} />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
+
+export const PrabumenangDynamicTable = ({ title, value = [], onChange }) => {
+  const headers = ["Jenis Produk", "Nama Produk", "Qty (Kg)", "Harga Satuan (Rp)", "Omzet"];
+  const jenisProdukOptions = ["Produk Setengah Jadi", "Produk Olahan"];
+
+  useEffect(() => {
+    if (value.length === 0) {
+      onChange([{ 
+        id: 1, 
+        jenis_produk: jenisProdukOptions[0],
+        product_name: "", 
+        qty: "", 
+        unit_price: "", 
+        revenue: ""
+      }]);
+    }
+  }, [value.length, onChange]); 
+
+  const handleFieldChange = (id, field, val) => {
+    const newRows = [...value]; 
+    const rowIndex = newRows.findIndex(r => r.id === id);
+    if (rowIndex === -1) return; 
+    newRows[rowIndex] = { ...newRows[rowIndex], [field]: val };
+    
+    if (field === 'product_name' && rowIndex === newRows.length - 1 && val.trim() !== "") {
+      newRows.push({ 
+        id: Date.now(), 
+        jenis_produk: jenisProdukOptions[0],
+        product_name: "", 
+        qty: "", 
+        unit_price: "", 
+        revenue: ""
+      });
+    }
+    onChange(newRows);
+  };
+
+  return (
+    <div className="mb-8 flex flex-col last:mb-0">
+      <h3 className="text-[14px] font-bold text-[#25326a] uppercase tracking-wider border-b border-gray-200 pb-2 mb-4 flex-none flex items-center gap-2">
+        <TableIcon size={18} className="text-[#1e3a8a]" />{title}
+      </h3>
+      <div className="overflow-x-auto border-y border-gray-300 shadow-sm bg-white rounded-sm minimal-scrollbar">
+        <table className="w-full text-[13px] text-left border-collapse">
+          <thead className="bg-[#f8f9fa] text-[#25326a] uppercase font-bold">
+            <tr>{headers.map((h, i) => <th key={i} className="px-4 py-3.5 border-b border-gray-200">{h}</th>)}</tr>
+          </thead>
+          <tbody>
+            {value.map((row) => (
+              <tr key={row.id} className="border-b border-gray-100 hover:bg-blue-50/60">
+                <td className="px-3 py-2.5">
+                  <select 
+                    className="w-full border border-gray-300 p-1.5 rounded focus:border-[#25326a] bg-white cursor-pointer" 
+                    value={row.jenis_produk || jenisProdukOptions[0]} 
+                    onChange={(e) => handleFieldChange(row.id, 'jenis_produk', e.target.value)}
+                  >
+                    {jenisProdukOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                  </select>
+                </td>
+                <td className="px-3 py-2.5">
+                  <input type="text" className="w-full border border-gray-300 p-1.5 rounded focus:border-[#25326a]" placeholder="Nama Produk..." value={row.product_name} onChange={(e) => handleFieldChange(row.id, 'product_name', e.target.value)} />
+                </td>
+                <td className="px-3 py-2.5">
+                  <input type="number" className="w-full border border-gray-300 p-1.5 rounded focus:border-[#25326a]" value={row.qty} onChange={(e) => handleFieldChange(row.id, 'qty', e.target.value)} />
+                </td>
+                <td className="px-3 py-2.5">
+                  <input type="number" className="w-full border border-gray-300 p-1.5 rounded focus:border-[#25326a]" value={row.unit_price} onChange={(e) => handleFieldChange(row.id, 'unit_price', e.target.value)} />
+                </td>
+                <td className="px-3 py-2.5">
+                  <input type="number" className="w-full border border-gray-300 p-1.5 rounded focus:border-[#25326a]" value={row.revenue} onChange={(e) => handleFieldChange(row.id, 'revenue', e.target.value)} />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
+
 export default function DynamicTablesManager({ selectedProgram, tablesData, handleTableChange, extraFields, handleExtraFieldChange }) {
   const p = selectedProgram?.toLowerCase() || '';
   
-  if (p === "plts irigasi" || p === "proklim") {
+  if (p === "plts irigasi" || p.includes("proklim") || p.includes("ras system") || p.includes("ba-maxi") || p.includes("sirah pulau") || p.includes("bedegung")) {
     return null;
   }
 
@@ -113,7 +252,7 @@ export default function DynamicTablesManager({ selectedProgram, tablesData, hand
     );
   }
   
-  if (p.includes("ikan air tawar") || p.includes("ras system")) {
+  if (p.includes("ikan air tawar")) {
     return (
       <div className="flex flex-col gap-4 w-full">
         <GenericDynamicTable 
@@ -137,10 +276,13 @@ export default function DynamicTablesManager({ selectedProgram, tablesData, hand
   if (p.includes("pembibitan")) {
     return (
       <div className="flex flex-col gap-4 w-full">
-        <div className="w-1/2 pr-2 mb-2">
-          <label className="block text-sm font-bold text-gray-800 mb-1.5">Jumlah Pembesaran (Batang)</label>
-          <input type="number" className="w-full border border-gray-300 p-2.5 rounded-sm focus:outline-none focus:border-[#25326a]" value={extraFields['pembesaran_batang'] || ''} onChange={e => handleExtraFieldChange('pembesaran_batang', e.target.value)} />
-        </div>
+        <SimpleQtyTable 
+          title="Jumlah Pembesaran (Batang)" 
+          headers={["Jenis Tanaman", "Qty (Batang)"]} 
+          initialLabels={["Kaliandra", "Lainnya"]} 
+          value={tablesData['pembesaran_batang']}
+          onChange={(rows) => handleTableChange('pembesaran_batang', rows)}
+        />
         <GenericDynamicTable 
           title="Penjualan Bibit Tanaman" 
           headers={["Produk", "Qty (Batang)", "Harga Satuan (Rp)", "Omzet"]} 
@@ -183,6 +325,13 @@ export default function DynamicTablesManager({ selectedProgram, tablesData, hand
   if (p.includes("cahaya tani")) {
     return (
       <div className="flex flex-col gap-4 w-full">
+        <SimpleQtyTable 
+          title="Jumlah Pembesaran (Batang)" 
+          headers={["Jenis Tanaman", "Qty (Batang)"]} 
+          initialLabels={["Sawit", "Kayu Putih", "Lainnya"]} 
+          value={tablesData['pembesaran_batang']}
+          onChange={(rows) => handleTableChange('pembesaran_batang', rows)}
+        />
         <GenericDynamicTable 
           title="Penjualan Bibit Tanaman" 
           headers={["Produk", "Qty (Batang)", "Harga Satuan (Rp)", "Omzet"]} 
@@ -208,7 +357,19 @@ export default function DynamicTablesManager({ selectedProgram, tablesData, hand
     );
   }
 
-  if (p.includes("prabumenang") || p.includes("ecogrow")) {
+  if (p.includes("prabumenang")) {
+    return (
+      <div className="flex flex-col gap-4 w-full">
+        <PrabumenangDynamicTable 
+          title="Penjualan Produk" 
+          value={tablesData['produk_olahan']}
+          onChange={(rows) => handleTableChange('produk_olahan', rows)}
+        />
+      </div>
+    );
+  }
+
+  if (p.includes("ecogrow")) {
     return (
       <div className="flex flex-col gap-4 w-full">
         <GenericDynamicTable 
