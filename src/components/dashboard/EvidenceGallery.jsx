@@ -7,16 +7,15 @@ export default function EvidenceGallery() {
   const [selectedImage, setSelectedImage] = useState(null);
 
   if (!evidenceData || evidenceData.length === 0) {
-    return null;
+    return (
+      <div className="bg-gray-50 p-4 rounded border border-gray-200 text-[13px] text-gray-600 italic">
+        Belum ada foto progres.
+      </div>
+    );
   }
 
   return (
-    <section className="bg-white rounded-md shadow-sm border border-gray-200 p-5 md:p-6 mt-6">
-      <h2 className="text-[14px] font-bold text-[#25326a] uppercase tracking-wider border-b border-gray-200 pb-2 mb-5 flex items-center gap-2">
-        <FileImage size={18} className="text-[#1e3a8a]" />
-        EVIDEN FOTO PROGRES
-      </h2>
-      
+    <>
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
         {evidenceData.map((ev, idx) => (
           <div 
@@ -55,6 +54,6 @@ export default function EvidenceGallery() {
           />
         </div>
       )}
-    </section>
+    </>
   );
 }

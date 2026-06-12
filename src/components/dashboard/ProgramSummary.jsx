@@ -2,6 +2,7 @@ import React from 'react';
 import useAppStore from '../../store/useAppStore';
 import { PROGRAM_DETAILS } from '../../data/mockData';
 import { MapPin, Users, CheckCircle, TrendingUp, TableIcon, Paperclip, Plus } from '../Icons';
+import EvidenceGallery from './EvidenceGallery';
 
 export default function ProgramSummary() {
   const selectedProgram = useAppStore((state) => state.globalProgram);
@@ -80,17 +81,7 @@ export default function ProgramSummary() {
         <p className="text-[14px] font-bold text-[#25326a] uppercase tracking-wider border-b border-gray-200 pb-2 mb-4 flex items-center gap-2">
           <Paperclip size={18} className="text-[#1e3a8a]" /> EVIDEN PROGRES (GALERI)
         </p>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="h-32 bg-gray-200 rounded-md bg-cover bg-center shadow-sm cursor-pointer hover:opacity-90 transition-opacity" style={{backgroundImage: `url('https://images.unsplash.com/photo-1509391366360-1e97b524c5bb?auto=format&fit=crop&w=400&q=80')`}}></div>
-          <div className="h-32 bg-gray-200 rounded-md bg-cover bg-center shadow-sm cursor-pointer hover:opacity-90 transition-opacity" style={{backgroundImage: `url('https://images.unsplash.com/photo-1592424001807-6b45f448b1bb?auto=format&fit=crop&w=400&q=80')`}}></div>
-          <div className="h-32 bg-gray-200 rounded-md bg-cover bg-center shadow-sm cursor-pointer hover:opacity-90 transition-opacity" style={{backgroundImage: `url('https://images.unsplash.com/photo-1524704654690-b56c05c78a00?auto=format&fit=crop&w=400&q=80')`}}></div>
-          <div className="h-32 flex items-center justify-center border-2 border-dashed border-gray-300 rounded-md bg-gray-50 text-gray-500 hover:text-[#1e3a8a] hover:border-[#1e3a8a] hover:bg-blue-50/30 transition-all cursor-pointer shadow-sm">
-            <div className="flex flex-col items-center">
-              <Plus size={24} className="mb-1" />
-              <span className="text-sm font-semibold tracking-wide">3 FOTO LAINNYA</span>
-            </div>
-          </div>
-        </div>
+        <EvidenceGallery />
       </div>
     </section>
   );
