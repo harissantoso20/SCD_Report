@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabaseClient';
-import { MOCK_ECOGROW_DATA, MOCK_CAHAYA_TANI_DATA, mockItikData as MOCK_ITIK_DATA } from '../data/mockData';
+
 import { safeNumber, safeString } from '../utils/sanitize';
 
 export const salesService = {
@@ -38,12 +38,7 @@ export const salesService = {
       });
     }
 
-    if (globalProgram) {
-      const pLow = globalProgram.toLowerCase();
-      if (pLow.includes("ecogrow")) salesData = [...salesData, ...MOCK_ECOGROW_DATA];
-      if (pLow.includes("cahaya tani")) salesData = [...salesData, ...MOCK_CAHAYA_TANI_DATA];
-      if (pLow.includes("itik")) salesData = [...salesData, ...MOCK_ITIK_DATA];
-    }
+    // Removed mock data appending as per request
 
     return { extraFields, tablesData, salesData };
   },

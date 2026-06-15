@@ -34,6 +34,7 @@ class GlobalErrorBoundary extends React.Component {
   }
 }
 
+const HomeView = lazy(() => import('./components/HomeView'));
 const DashboardView = lazy(() => import('./components/DashboardView'));
 const DataEntryView = lazy(() => import('./components/DataEntryView'));
 import LoginView from './components/LoginView';
@@ -75,6 +76,12 @@ export default function App() {
           </div>
           <nav className="flex items-center gap-4 md:gap-6 font-bold text-xs md:text-sm uppercase tracking-wide">
             <button 
+              onClick={() => setActiveTab("Home")}
+              className={`transition-colors ${activeTab === "Home" ? "text-[#1e3a8a] border-b-2 border-[#1e3a8a] pb-1" : "text-gray-400 hover:text-[#1e3a8a]"}`}
+            >
+              Home
+            </button>
+            <button 
               onClick={() => setActiveTab("Dashboard")}
               className={`transition-colors ${activeTab === "Dashboard" ? "text-[#1e3a8a] border-b-2 border-[#1e3a8a] pb-1" : "text-gray-400 hover:text-[#1e3a8a]"}`}
             >
@@ -102,7 +109,9 @@ export default function App() {
               <div className="w-8 h-8 border-4 border-[#1e3a8a] border-t-transparent rounded-full animate-spin"></div>
             </div>
           }>
-            {activeTab === "Dashboard" ? <DashboardView /> : <DataEntryView />}
+            {activeTab === "Home" && <HomeView />}
+            {activeTab === "Dashboard" && <DashboardView />}
+            {activeTab === "Data Entry" && <DataEntryView />}
           </Suspense>
         </main>
 

@@ -4,12 +4,18 @@ import { programService } from '../services/programService';
 import { progressService } from '../services/progressService';
 import { salesService } from '../services/salesService';
 import { evidenceService } from '../services/evidenceService';
+import { homeService } from '../services/homeService';
 import { getMonthStrings, getYear } from '../utils/dateUtils';
 import { getFuzzyKeyword } from '../utils/programUtils';
 
 const useAppStore = create((set, get) => ({
-  activeTab: "Dashboard",
+  activeTab: "Home",
   setActiveTab: (tab) => set({ activeTab: tab }),
+
+  // Home Data State
+  homeData: null,
+  isHomeLoading: false,
+  isReportLoading: false,
 
   // --- AUTH ACTIONS ---
   initializeAuth: () => {
@@ -37,6 +43,9 @@ const useAppStore = create((set, get) => ({
   globalDate: new Date().toISOString().split('T')[0],
   setGlobalDate: (date) => {
     set({ globalDate: date });
+    if (get().activeTab === 'Home') {
+      get().fetchHomeData();
+    }
     get().fetchData();
   },
 
@@ -52,6 +61,29 @@ const useAppStore = create((set, get) => ({
   tablesData: [],
   extraFields: {},
   evidenceData: [],
+
+  // --- HOME ACTIONS ---
+  fetchHomeData: async () => {
+    const { globalDate, homeData } = get();
+    const targetYear = getYear(globalDate);
+    const monthNames = getMonthStrings(globalDate);
+
+    if (!homeData) {
+      set({ isHomeLoading: true, error: null });
+    } else {
+      set({ isReportLoading: true, error: null });
+    }
+
+    try {
+      const data = await homeService.fetchHomeData(monthNames, targetYear);
+      set({ homeData: data });
+    } catch (err) {
+      console.error('Error fetching home data:', err);
+      set({ error: err.message });
+    } finally {
+      set({ isHomeLoading: false, isReportLoading: false });
+    }
+  },
 
   fetchData: async () => {
     const { globalProgram, globalDate } = get();

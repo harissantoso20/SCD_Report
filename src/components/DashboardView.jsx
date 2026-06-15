@@ -13,7 +13,7 @@ import CahayaTaniAnalytics from './dashboard/CahayaTaniAnalytics';
 import ItikAnalytics from './dashboard/ItikAnalytics';
 import ProgramSummary from './dashboard/ProgramSummary';
 import { useSharedDashboard } from '../hooks/useSharedDashboard';
-import { FileText } from './Icons';
+import { FileText, FileImage } from './Icons';
 
 export default function DashboardView() {
   const selectedProgram = useAppStore((state) => state.globalProgram);
