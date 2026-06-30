@@ -4,10 +4,11 @@ import {
   CartesianGrid, XAxis, YAxis, LabelList
 } from 'recharts';
 import { useCahayaTaniData } from '../../hooks/programs/useCahayaTaniData';
-import { Sparkles, DollarSign, ShoppingBag, Sprout, TrendingUp, Info } from 'lucide-react';
+import GeminiInsight from './GeminiInsight';
+import { Sparkles, ShoppingBag, Sprout, TrendingUp, Info } from 'lucide-react';
 
-const formatRupiah = (val) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(val);
-const formatJuta = (val) => `${(val / 1000000).toFixed(1)} Jt`;
+const formatRupiah = (val) => new Intl.NumberFormat('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(val);
+const formatJuta = (val) => new Intl.NumberFormat('id-ID').format(val);
 const formatNumber = (val) => new Intl.NumberFormat('id-ID').format(val);
 
 const FilterButtons = ({ currentRange, setRange }) => (
@@ -114,7 +115,7 @@ const CahayaTaniAnalytics = React.memo(function CahayaTaniAnalytics() {
       {/* ROW 1: TOP 3 KPIs (Siba Pembibitan Style) */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-white p-4 md:p-5 rounded-lg shadow-sm border border-slate-200 border-t-4 border-t-blue-600 hover:-translate-y-1 hover:shadow-md transition-all duration-300 flex items-start gap-4 relative overflow-hidden group">
-          <div className="bg-blue-50/50 p-3 rounded-lg text-blue-600 border border-blue-100 relative z-10"><DollarSign size={24} className="animate-[pulse_2s_ease-in-out_infinite]" /></div>
+          <div className="bg-blue-50/50 p-3 rounded-lg text-blue-600 border border-blue-100 relative z-10"><span className="text-xl font-bold animate-[pulse_2s_ease-in-out_infinite]">Rp</span></div>
           <div className="flex-1 relative z-10">
             <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1">Total Revenue YTD</p>
             <h2 className="text-xl lg:text-2xl font-extrabold text-[#1e3a8a]">
@@ -252,31 +253,18 @@ const CahayaTaniAnalytics = React.memo(function CahayaTaniAnalytics() {
         </div>
 
         {/* Right Column: Insight Analitik */}
-        <div className="xl:col-span-1 flex flex-col gap-4">
-          <div className="bg-white p-4 md:p-5 rounded-lg shadow-sm border border-slate-200 flex-1 flex flex-col h-full">
-            <div className="flex items-center justify-between gap-2 mb-4 relative z-10 border-b border-slate-100 pb-2">
-              <div className="flex items-center gap-2">
-                <Sparkles size={16} className="text-blue-500" />
-                <h3 className="text-[13px] font-bold text-[#1e3a8a] uppercase tracking-widest">
-                  Insight Analitik
-                </h3>
-              </div>
-              <FilterButtons currentRange={timeFilter} setRange={setTimeFilter} />
-            </div>
-            <div className="text-[13px] text-slate-600 space-y-3 leading-relaxed font-medium flex-1 overflow-y-auto">
-              <p>
-                Total omzet Poktan dalam {timeFilter} bulan terakhir menembus <span className="font-bold text-emerald-700">{formatRupiah(filteredOverviewData.reduce((acc, curr) => acc + curr.total_omzet, 0))}</span>.
-              </p>
-              <p>
-                Komposisi penjualan didominasi oleh <span className="font-bold text-[#f59e0b]">Sawit</span> dan <span className="font-bold text-[#10b981]">Kayu Putih</span>. Volume penyerapan saat ini mencerminkan rasio jual sebesar <span className="font-bold text-[#1e3a8a]">{stockToSalesRatio}%</span> dari total bibit yang dibesarkan.
-              </p>
-              <div className="mt-4 bg-blue-50/60 p-3 rounded border border-blue-100 flex gap-3 items-start shadow-sm">
-                <Info className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
-                <p className="text-xs italic text-blue-900">
-                  "Pantau lonjakan tren volume di musim tanam. Pergerakan kurva volume pembesaran yang mendahului penjualan memberi sinyal kuat untuk menyemai bibit dengan timing yang tepat."
-                </p>
-              </div>
-            </div>
+        <div className="xl:col-span-1 flex flex-col relative min-h-[300px] xl:min-h-0">
+          <div className="xl:absolute xl:inset-0 flex flex-col h-full">
+            <GeminiInsight 
+              programName="Cahaya Tani"
+              period={`${timeFilter} Bulan Terakhir (${currentYear})`}
+              quantitativeData={{
+                overview: filteredOverviewData,
+                ytd: cahayaTaniYTD,
+                ratio: stockToSalesRatio
+              }}
+              headerAction={<FilterButtons currentRange={timeFilter} setRange={setTimeFilter} />}
+            />
           </div>
         </div>
 

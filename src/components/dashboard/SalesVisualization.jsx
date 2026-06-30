@@ -7,7 +7,7 @@ import { useSharedDashboard } from '../../hooks/useSharedDashboard';
 export default React.memo(function SalesVisualization() {
   const { dynamicSalesChartData } = useSharedDashboard();
 
-  const formatRupiahChart = useCallback((value) => `Rp ${(value / 1000000).toFixed(1)} Jt`, []);
+  const formatRupiahChart = useCallback((value) => new Intl.NumberFormat('id-ID').format(value), []);
 
   return (
     <section className="bg-white rounded-md shadow-sm border border-gray-200 p-5 md:p-6">
@@ -24,7 +24,7 @@ export default React.memo(function SalesVisualization() {
                 <XAxis dataKey="bulan" axisLine={false} tickLine={false} tick={{fontSize: 12, fill: '#6b7280'}} dy={10} />
                 <YAxis tickFormatter={formatRupiahChart} axisLine={false} tickLine={false} tick={{fontSize: 12, fill: '#6b7280'}} dx={-10} />
                 <Tooltip 
-                  formatter={(value) => [new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(value), "Total Omzet"]}
+                  formatter={(value) => [new Intl.NumberFormat('id-ID', { minimumFractionDigits: 0 }).format(value), "Total Omzet"]}
                   contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                 />
                 <Line type="monotone" dataKey="Omzet" stroke="#1e3a8a" strokeWidth={3} dot={{ r: 4, fill: '#1e3a8a', strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 6 }} />
@@ -45,7 +45,7 @@ export default React.memo(function SalesVisualization() {
                 <tbody>
                   <tr className="border-b border-gray-100 hover:bg-gray-50">
                     <td className="px-4 py-3 font-medium text-gray-800">Total Omzet Penjualan</td>
-                    <td className="px-4 py-3 text-right font-bold text-gray-900">{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(dynamicSalesChartData.reduce((sum, item) => sum + (item.Omzet || 0), 0))}</td>
+                    <td className="px-4 py-3 text-right font-bold text-gray-900">{new Intl.NumberFormat('id-ID', { minimumFractionDigits: 0 }).format(dynamicSalesChartData.reduce((sum, item) => sum + (item.Omzet || 0), 0))}</td>
                   </tr>
                 </tbody>
               </table>

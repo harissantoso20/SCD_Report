@@ -5,10 +5,11 @@ import {
 } from 'recharts';
 import { usePembibitanData } from '../../hooks/programs/usePembibitanData';
 import { TrendingUp, AlertTriangle } from '../Icons';
-import { Sparkles, DollarSign, ShoppingBag, Sprout } from 'lucide-react';
+import { Sparkles, ShoppingBag, Sprout } from 'lucide-react';
+import GeminiInsight from './GeminiInsight';
 
-const formatRupiah = (val) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(val);
-const formatJuta = (val) => `${(val / 1000000).toFixed(1)} Jt`;
+const formatRupiah = (val) => new Intl.NumberFormat('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(val);
+const formatJuta = (val) => new Intl.NumberFormat('id-ID').format(val);
 const formatNumber = (val) => new Intl.NumberFormat('id-ID').format(val);
 
 const FilterButtons = ({ currentRange, setRange }) => (
@@ -111,7 +112,7 @@ const AdvancedPembibitanAnalytics = React.memo(function AdvancedPembibitanAnalyt
     });
 
     const formatPeak = (val) => {
-      if (val >= 1000000) return (val / 1000000).toFixed(1) + ' Jt';
+      if (val >= 1000000) return new Intl.NumberFormat('id-ID').format(val);
       if (val >= 1000) return (val / 1000).toFixed(1) + ' Rb';
       return formatRupiah(val);
     };
@@ -162,10 +163,10 @@ const AdvancedPembibitanAnalytics = React.memo(function AdvancedPembibitanAnalyt
       {/* ROW 1: TOP 3 KPIs */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-white p-4 md:p-5 rounded-lg shadow-sm border border-slate-200 border-t-4 border-t-blue-600 hover:-translate-y-1 hover:shadow-md transition-all duration-300 flex items-start gap-4 relative overflow-hidden group">
-          <div className="bg-blue-50/50 p-3 rounded-lg text-blue-600 border border-blue-100 relative z-10"><DollarSign size={24} className="animate-[pulse_2s_ease-in-out_infinite]" /></div>
+          <div className="bg-blue-50/50 p-3 rounded-lg text-blue-600 border border-blue-100 relative z-10"><span className="text-xl font-bold animate-[pulse_2s_ease-in-out_infinite]">Rp</span></div>
           <div className="flex-1 relative z-10">
             <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1">Total Revenue YTD</p>
-            <h2 className="text-xl lg:text-2xl font-extrabold text-[#1e3a8a]">
+            <h2 className="text-lg xl:text-xl tracking-tight font-extrabold text-[#1e3a8a]">
               {formatRupiah(pembibitanYTD?.currRevenue || 0)}
             </h2>
           </div>
@@ -180,7 +181,7 @@ const AdvancedPembibitanAnalytics = React.memo(function AdvancedPembibitanAnalyt
           <div className="bg-sky-50/50 p-3 rounded-lg text-sky-600 border border-sky-100 relative z-10"><ShoppingBag size={24} className="animate-[bounce_3s_ease-in-out_infinite]" /></div>
           <div className="flex-1 relative z-10">
             <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1">Total Penjualan Bibit YTD</p>
-            <h2 className="text-xl lg:text-2xl font-extrabold text-[#1e3a8a]">
+            <h2 className="text-lg xl:text-xl tracking-tight font-extrabold text-[#1e3a8a]">
               {formatNumber(pembibitanYTD?.currPenjualan || 0)} <span className="text-lg text-slate-400 font-semibold">Batang</span>
             </h2>
           </div>
@@ -196,7 +197,7 @@ const AdvancedPembibitanAnalytics = React.memo(function AdvancedPembibitanAnalyt
           <div className="bg-indigo-50/50 p-3 rounded-lg text-indigo-600 border border-indigo-100 relative z-10"><Sprout size={24} className="animate-[pulse_3s_ease-in-out_infinite]" /></div>
           <div className="flex-1 relative z-10">
             <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1">Stok Pembesaran Aktif</p>
-            <h2 className="text-xl lg:text-2xl font-extrabold text-[#1e3a8a]">
+            <h2 className="text-lg xl:text-xl tracking-tight font-extrabold text-[#1e3a8a]">
               {formatNumber(pembibitanYTD?.currPembesaran || 0)} <span className="text-lg text-slate-400 font-semibold">Batang</span>
             </h2>
           </div>
@@ -342,8 +343,7 @@ const AdvancedPembibitanAnalytics = React.memo(function AdvancedPembibitanAnalyt
         </div>
 
         {/* RIGHT COLUMN (xl:col-span-2) */}
-        <div className="xl:col-span-2 flex flex-col gap-4">
-
+        <div className="xl:col-span-2 flex flex-col gap-4 min-w-0">
           {/* Rasio: Bibit vs Media Tanam & Stok to Sale */}
           <div className="grid grid-cols-2 gap-4">
 
@@ -382,18 +382,19 @@ const AdvancedPembibitanAnalytics = React.memo(function AdvancedPembibitanAnalyt
           </div>
 
           {/* Insight Analitik */}
-          <section className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 md:p-5 flex-1 flex flex-col">
-            <div className="flex justify-between items-center mb-4 relative z-10">
-              <h3 className="text-[13px] font-bold text-[#1e3a8a] uppercase tracking-widest flex items-center gap-2">
-                <Sparkles size={16} className="text-blue-500" />
-                Insight Analitik
-              </h3>
-              <FilterButtons currentRange={timeFilter} setRange={setTimeFilter} />
+          <div className="flex flex-col flex-1 relative min-h-[300px] xl:min-h-0">
+            <div className="xl:absolute xl:inset-0 flex flex-col h-full">
+              <GeminiInsight 
+                programName="Pembibitan Tanaman"
+              period={`${timeFilter} Bulan Terakhir (${currentYear})`}
+              quantitativeData={{
+                overview: filteredOverviewData,
+                ytdSummary: pembibitanYTD
+              }}
+              headerAction={<FilterButtons currentRange={timeFilter} setRange={setTimeFilter} />}
+              />
             </div>
-            <div className="flex-1 overflow-y-auto pr-1 custom-scrollbar">
-              {renderAIInsight()}
-            </div>
-          </section>
+          </div>
 
         </div>
 

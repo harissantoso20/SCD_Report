@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabaseClient';
 import { safeNumber, safeString } from '../utils/sanitize';
 
 export const salesService = {
-  fetchSalesData: async (fuzzyKeyword, globalProgram, targetYear) => {
+  fetchSalesData: async (fuzzyKeyword, globalProgram, targetYear, targetMonth) => {
     const targetYearNum = Number(targetYear);
     const prevYearStr = (targetYearNum - 1).toString();
 
@@ -20,20 +20,33 @@ export const salesService = {
     let salesData = data || [];
 
     if (salesData.length > 0) {
+      // Deduplicate salesData to mitigate Supabase RLS DELETE failure
+      const dedupMap = {};
       salesData.forEach(row => {
-        if (row.Operasional && row.Operasional !== '-') {
-          extraFields[row.Operasional] = row['Value Operasional'];
+        const key = `${row.Program}_${row.Tahun}_${row.Bulan}_${row['Kategori Produk']}_${row.Produk}_${row.Operasional}`;
+        if (!dedupMap[key] || dedupMap[key].id < row.id) {
+          dedupMap[key] = row;
         }
-        if (row['Kategori Produk'] && row['Kategori Produk'] !== '-') {
-          const cat = row['Kategori Produk'];
-          if (!tablesData[cat]) tablesData[cat] = [];
-          tablesData[cat].push({
-            product_name: row.Produk,
-            qty: row.Jumlah,
-            unit: row.Satuan_1,
-            unit_price: row['Harga Satuan'],
-            revenue: row.Omzet
-          });
+      });
+      salesData = Object.values(dedupMap);
+
+      salesData.forEach(row => {
+        if (!targetMonth || row.Bulan === targetMonth) {
+          if (row.Operasional && row.Operasional !== '-') {
+            extraFields[row.Operasional] = row['Value Operasional'];
+          }
+          if (row['Kategori Produk'] && row['Kategori Produk'] !== '-') {
+            const cat = row['Kategori Produk'];
+            if (!tablesData[cat]) tablesData[cat] = [];
+            tablesData[cat].push({
+              id: row.id || (Date.now() + Math.random()),
+              product_name: row.Produk,
+              qty: row.Jumlah,
+              unit: row.Satuan_1,
+              unit_price: row['Harga Satuan'],
+              revenue: row.Omzet
+            });
+          }
         }
       });
     }
@@ -43,11 +56,11 @@ export const salesService = {
     return { extraFields, tablesData, salesData };
   },
 
-  upsertSalesData: async (globalProgram, monthNames, targetMonth, targetYear, payload) => {
+  upsertSalesData: async (globalProgram, monthNames, targetMonth, targetYear, payload, fuzzyKeyword) => {
     // 1. Delete old sales data
     const { error: delErr } = await supabase.from('SCD_Report_Sales_Data')
       .delete()
-      .eq('Program', globalProgram)
+      .ilike('Program', fuzzyKeyword || `%${globalProgram.trim()}%`)
       .in('Bulan', monthNames)
       .eq('Tahun', targetYear);
       
@@ -101,7 +114,7 @@ export const salesService = {
               "Operasional": "-",
               "Value Operasional": 0,
               "Satuan": "-",
-              "Kategori Produk": safeString(category),
+              "Kategori Produk": safeString(item.jenis_produk || category),
               "Produk": safeString(item.product_name),
               "Jumlah": safeNumber(item.qty),
               "Satuan_1": safeString(item.unit || "Kg"),

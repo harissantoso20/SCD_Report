@@ -27,7 +27,7 @@ export function useMaggotData() {
 
       const monthIdx = MAGGOT_MONTH_NAMES.indexOf(monthStr);
       if (monthIdx !== -1 && monthIdx <= selectedMonthIdx) {
-        if (row.Operasional === "Sampah Organik Terurai") {
+        if (row.Operasional === "Sampah Organik Terurai" || row.Operasional === "sampah_organik") {
           dataMap[monthIdx].sampah += (Number(row['Value Operasional']) || 0);
         }
         if (row.Produk === "Fresh Maggot") {
@@ -150,7 +150,7 @@ export function useMaggotData() {
 
       const monthIdx = MAGGOT_MONTH_NAMES.indexOf(monthStr);
       if (monthIdx !== -1 && monthIdx <= selectedMonthIdx) {
-        if (row.Operasional === "Sampah Organik Terurai") {
+        if (row.Operasional === "Sampah Organik Terurai" || row.Operasional === "sampah_organik") {
           if (isPrev) prevWaste += (Number(row['Value Operasional']) || 0);
           else currWaste += (Number(row['Value Operasional']) || 0);
         }

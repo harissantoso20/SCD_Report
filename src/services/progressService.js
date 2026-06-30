@@ -9,6 +9,7 @@ export const progressService = {
       .ilike('Program', fuzzyKeyword)
       .eq('Tahun', targetYear)
       .in('Bulan', monthNames)
+      .order('id', { ascending: false })
       .limit(1)
       .single();
       

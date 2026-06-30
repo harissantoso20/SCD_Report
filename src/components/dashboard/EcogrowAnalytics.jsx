@@ -1,14 +1,15 @@
 import React, { useMemo, useState } from 'react';
 import { AreaChart, Area, BarChart, Bar, ComposedChart, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, LabelList } from 'recharts';
 import { useEcogrowData } from '../../hooks/programs/useEcogrowData';
-import { DollarSign, TrendingUp, TrendingDown, PieChart as PieChartIcon, Sparkles } from 'lucide-react';
+import GeminiInsight from './GeminiInsight';
+import { TrendingUp, TrendingDown, PieChart as PieChartIcon, Sparkles } from 'lucide-react';
 
 // Helpers
-const formatRupiah = (val) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(val);
+const formatRupiah = (val) => new Intl.NumberFormat('id-ID', { minimumFractionDigits: 0 }).format(val);
 const formatNumber = (val) => new Intl.NumberFormat('id-ID').format(val);
 const formatJuta = (val) => {
-  if (val >= 1000000) return `Rp ${(val / 1000000).toFixed(1)} Jt`;
-  return `Rp ${(val / 1000).toFixed(0)} Rb`;
+  if (val >= 1000000) return new Intl.NumberFormat('id-ID').format(val);
+  return `${(val / 1000).toFixed(0)} Rb`;
 };
 const getPercentage = (curr, prev) => {
   if (prev === 0) return '-';
@@ -112,49 +113,7 @@ const EcogrowAnalytics = () => {
     };
   }, [filteredData]);
 
-  // AI Logic for Insight Analitik
-  const generateCrossRevenueAI = () => {
-    if (!filteredData || filteredData.length === 0) return "Belum ada data penjualan pada periode ini.";
-    
-    if (filteredStats.total === 0) return "Tidak ada transaksi tercatat di periode yang dipilih. Fokus pada strategi pemasaran dan pengelolaan panen.";
-    
-    const topVeg = filteredStats.topName;
-    const perc = filteredStats.topPercent;
-
-    let maxBulan = filteredData[0].month;
-    let maxOmzet = 0;
-    filteredData.forEach(d => {
-      if (d.total_omzet > maxOmzet) {
-        maxOmzet = d.total_omzet;
-        maxBulan = d.month;
-      }
-    });
-
-    const startMonth = filteredData[0].month;
-    const endMonth = filteredData[filteredData.length - 1].month;
-    
-    return (
-      <div className="text-slate-600 font-medium leading-relaxed text-[13px] space-y-3">
-        <p>
-          Secara bulanan, puncak gairah pasar terjadi pada bulan <span className="font-bold text-[#1e3a8a]">{maxBulan}</span> dengan total omzet tertinggi menembus <span className="font-bold text-blue-600">{formatJuta(maxOmzet)}</span>.
-        </p>
-        <p>
-          Secara keseluruhan dalam periode <span className="font-bold text-[#1e3a8a]">{startMonth} - {endMonth} {currentYear}</span>, total pendapatan mencapai <span className="font-bold text-blue-800">{formatRupiah(filteredStats.total)}</span>. Portofolio bisnis saat ini sangat condong pada penjualan <span className="font-bold text-blue-600">{topVeg}</span>, yang menguasai <span className="font-bold text-slate-800">{perc}%</span> dari kue pendapatan.
-        </p>
-        <p>
-          Jika dikomparasikan secara *Year-on-Year* (YoY), omzet periode ini mencerminkan tren penjualan komoditas yang dinamis bila dibandingkan dengan performa di tahun sebelumnya.
-        </p>
-        <div className="mt-3 bg-blue-50/60 p-3 rounded border border-blue-100 flex gap-3 items-start shadow-sm">
-          <svg className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-          </svg>
-          <p className="text-xs italic text-blue-900">
-            "Ibarat pondasi, lini penjualan {topVeg.toLowerCase()} saat ini bertindak sebagai lokomotif utama. Namun menjaga lini sayuran lainnya tetap tumbuh adalah strategi lindung nilai yang cerdas terhadap fluktuasi permintaan."
-          </p>
-        </div>
-      </div>
-    );
-  };
+  // generateCrossRevenueAI removed - using Gemini AI instead
 
   // LAYER 2: Product Mix (Donut Chart)
   const getPercentageJSX = (curr, prev) => {
@@ -199,48 +158,45 @@ const EcogrowAnalytics = () => {
   return (
     <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-10">
       
-      {/* LAYER 1: Financial KPIs & Insight */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Total Omzet Card (Span 1) */}
-        <div className="md:col-span-1 bg-white p-5 rounded-xl shadow-sm border border-slate-200 border-t-4 border-t-green-600 relative overflow-hidden group">
-          <div className="absolute -right-4 -bottom-4 text-green-50/50 group-hover:scale-110 transition-transform duration-500 pointer-events-none">
-            <DollarSign size={100} />
-          </div>
-          <div className="relative z-10">
-            <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Total Omzet Keseluruhan (YTD)</p>
-            <div className="flex items-end gap-3 mb-2">
-              <h2 className="text-3xl font-extrabold text-slate-800">{formatRupiah(ecogrowYTD.total_omzet)}</h2>
-            </div>
-            <div className="flex items-center gap-2 mt-2">
-              <span className={`px-2.5 py-1 rounded-full text-xs font-bold flex items-center gap-1 ${isPositive ? 'bg-green-100 text-green-700' : isZero ? 'bg-slate-100 text-slate-600' : 'bg-rose-100 text-rose-700'}`}>
-                {isPositive && !isZero ? <TrendingUp size={14} /> : !isZero ? <TrendingDown size={14} /> : null}
-                {yoyPercent} YoY
-              </span>
-              <span className="text-[10px] font-semibold text-slate-400">vs {Number(currentYear) - 1}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* INSIGHT ANALITIK (Span 2) */}
-        <div className="md:col-span-2 bg-white rounded-lg shadow-sm border border-slate-200 p-4 md:p-5 flex flex-col relative overflow-hidden group hover:-translate-y-1 hover:shadow-md transition-all duration-300">
-          <div className="flex justify-between items-center mb-4 relative z-10">
-            <h3 className="text-[13px] font-bold text-[#1e3a8a] uppercase tracking-widest flex items-center gap-2">
-              <Sparkles size={16} className="text-blue-500" />
-              Insight Analitik
-            </h3>
-            <FilterButtons currentRange={timeFilter} setRange={setTimeFilter} />
-          </div>
-          <div className="flex-1 flex flex-col justify-center relative z-10">
-            {generateCrossRevenueAI()}
-          </div>
-          <Sparkles size={140} className="absolute -bottom-10 -right-10 text-blue-50 opacity-40 group-hover:opacity-60 transition-opacity duration-300 pointer-events-none" />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
+      {/* MAIN DASHBOARD LAYOUT */}
+      <div className="grid grid-cols-1 xl:grid-cols-4 gap-6 items-stretch">
         
-        {/* LAYER 2: Product Mix */}
-        <div className="md:col-span-1 bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex flex-col min-h-[300px]">
+        {/* ROW 1: Volume Penjualan (Span 2) */}
+        <div className="xl:col-span-2 bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex flex-col min-h-[300px]">
+          <h3 className="text-[13px] font-bold text-slate-800 uppercase tracking-widest mb-4">Volume Penjualan Bulanan</h3>
+          <div className="flex-1 w-full relative">
+            {volumeData.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <ComposedChart data={volumeData} margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                  <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 600, fill: '#64748b' }} dy={10} />
+                  
+                  {ikatProducts.length > 0 && (
+                    <YAxis yAxisId="left" orientation="left" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 600, fill: '#3b82f6' }} />
+                  )}
+                  {kgProducts.length > 0 && (
+                    <YAxis yAxisId="right" orientation="right" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 600, fill: '#d97706' }} />
+                  )}
+                  
+                  <Tooltip cursor={{ fill: '#f8fafc' }} content={<CustomVolumeTrendTooltip ecogrowYTD={ecogrowYTD} />} />
+                  <Legend verticalAlign="top" height={70} iconType="circle" wrapperStyle={{ fontSize: '10px', fontWeight: 'bold', paddingBottom: '10px' }} />
+                  
+                  {ikatProducts.map((key, idx) => (
+                    <Bar key={key} dataKey={key} yAxisId="left" name={`${key} (Ikat)`} stackId="ikat" fill={COLORS[idx % COLORS.length]} barSize={30} />
+                  ))}
+                  {kgProducts.map((key, idx) => (
+                    <Bar key={key} dataKey={key} yAxisId="right" name={`${key} (Kg)`} stackId="kg" fill={COLORS[(idx + ikatProducts.length) % COLORS.length]} barSize={30} />
+                  ))}
+                </ComposedChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center text-slate-400 text-sm font-medium italic">Belum ada data</div>
+            )}
+          </div>
+        </div>
+
+        {/* ROW 1: Distribusi Omzet (Span 1) */}
+        <div className="xl:col-span-1 bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex flex-col min-h-[300px]">
           <h3 className="text-[13px] font-bold text-slate-800 uppercase tracking-widest mb-2 flex items-center gap-2">
             <PieChartIcon size={16} className="text-green-600" /> Distribusi Omzet (YTD)
           </h3>
@@ -281,68 +237,69 @@ const EcogrowAnalytics = () => {
           </div>
         </div>
 
-        {/* LAYER 3: Volume */}
-        <div className="md:col-span-2 bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex flex-col min-h-[300px]">
-          <h3 className="text-[13px] font-bold text-slate-800 uppercase tracking-widest mb-4">Volume Penjualan Bulanan</h3>
-          <div className="flex-1 w-full relative">
-            {volumeData.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart data={volumeData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                  <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 600, fill: '#64748b' }} dy={10} />
-                  
-                  {ikatProducts.length > 0 && (
-                    <YAxis yAxisId="left" orientation="left" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 600, fill: '#3b82f6' }} />
-                  )}
-                  {kgProducts.length > 0 && (
-                    <YAxis yAxisId="right" orientation="right" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 600, fill: '#d97706' }} />
-                  )}
-                  
-                  <Tooltip cursor={{ fill: '#f8fafc' }} content={<CustomVolumeTrendTooltip ecogrowYTD={ecogrowYTD} />} />
-                  <Legend verticalAlign="top" height={30} iconType="circle" wrapperStyle={{ fontSize: '10px', fontWeight: 'bold', paddingBottom: '10px' }} />
-                  
-                  {ikatProducts.map((key, idx) => (
-                    <Bar key={key} dataKey={key} yAxisId="left" name={`${key} (Ikat)`} stackId="ikat" fill={COLORS[idx % COLORS.length]} barSize={30} />
-                  ))}
-                  {kgProducts.map((key, idx) => (
-                    <Bar key={key} dataKey={key} yAxisId="right" name={`${key} (Kg)`} stackId="kg" fill={COLORS[(idx + ikatProducts.length) % COLORS.length]} barSize={30} />
-                  ))}
-                </ComposedChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="absolute inset-0 flex items-center justify-center text-slate-400 text-sm font-medium italic">Belum ada data</div>
-            )}
+        {/* ROW 1: Total Omzet Card (Span 1) */}
+        <div className="xl:col-span-1 bg-white p-5 rounded-xl shadow-sm border border-slate-200 border-t-4 border-t-green-600 relative overflow-hidden group flex flex-col justify-center min-h-[300px]">
+          <div className="absolute -right-4 -bottom-4 text-green-50/50 group-hover:scale-110 transition-transform duration-500 pointer-events-none">
+            <span style={{ fontSize: 100 }} className="font-bold">Rp</span>
+          </div>
+          <div className="relative z-10">
+            <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Total Omzet Keseluruhan (YTD)</p>
+            <div className="flex items-end gap-3 mb-2">
+              <h2 className="text-xl tracking-tight font-extrabold text-slate-800">{formatRupiah(ecogrowYTD.total_omzet)}</h2>
+            </div>
+            <div className="flex items-center gap-2 mt-2">
+              <span className={`px-2.5 py-1 rounded-full text-xs font-bold flex items-center gap-1 ${isPositive ? 'bg-green-100 text-green-700' : isZero ? 'bg-slate-100 text-slate-600' : 'bg-rose-100 text-rose-700'}`}>
+                {isPositive && !isZero ? <TrendingUp size={14} /> : !isZero ? <TrendingDown size={14} /> : null}
+                {yoyPercent} YoY
+              </span>
+              <span className="text-[10px] font-semibold text-slate-400">vs {Number(currentYear) - 1}</span>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* LAYER 4: Time-Series Aggregate */}
-      <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex flex-col h-[300px]">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-[13px] font-bold text-slate-800 uppercase tracking-widest">Tren Omzet Agregat</h3>
+        {/* ROW 2: Tren Omzet Agregat (Span 2) */}
+        <div className="xl:col-span-2 bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex flex-col h-[300px]">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-[13px] font-bold text-slate-800 uppercase tracking-widest">Tren Omzet Agregat</h3>
+          </div>
+          <div className="flex-1 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={areaData} margin={{ top: 20, right: 30, left: 30, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#16a34a" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="#16a34a" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 11, fontWeight: 600, fill: '#64748b' }} dy={10} />
+                <YAxis hide />
+                <Tooltip 
+                  formatter={(value) => [formatRupiah(value), "Total Omzet"]}
+                  contentStyle={{ borderRadius: '8px', fontSize: '12px', fontWeight: 'bold' }}
+                />
+                <Area type="monotone" dataKey="Total" stroke="#16a34a" strokeWidth={3} fillOpacity={1} fill="url(#colorTotal)">
+                  <LabelList dataKey="Total" position="top" formatter={(val) => formatJuta(val)} style={{ fontSize: '10px', fontWeight: 'bold', fill: '#16a34a' }} />
+                </Area>
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
         </div>
-        <div className="flex-1 w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={areaData} margin={{ top: 20, right: 30, left: 30, bottom: 0 }}>
-              <defs>
-                <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#16a34a" stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor="#16a34a" stopOpacity={0}/>
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-              <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 11, fontWeight: 600, fill: '#64748b' }} dy={10} />
-              <YAxis hide />
-              <Tooltip 
-                formatter={(value) => [formatRupiah(value), "Total Omzet"]}
-                contentStyle={{ borderRadius: '8px', fontSize: '12px', fontWeight: 'bold' }}
-              />
-              <Area type="monotone" dataKey="Total" stroke="#16a34a" strokeWidth={3} fillOpacity={1} fill="url(#colorTotal)">
-                <LabelList dataKey="Total" position="top" formatter={(val) => formatJuta(val)} style={{ fontSize: '10px', fontWeight: 'bold', fill: '#16a34a' }} />
-              </Area>
-            </AreaChart>
-          </ResponsiveContainer>
+
+        {/* ROW 2: INSIGHT ANALITIK (Span 2) */}
+        <div className="xl:col-span-2 flex flex-col h-[300px]">
+          <GeminiInsight 
+            programName="Ecogrow"
+            period={`${timeFilter} Bulan Terakhir (${currentYear})`}
+            quantitativeData={{
+              sales: filteredData,
+              ytdSummary: ecogrowYTD,
+              stats: filteredStats
+            }}
+            headerAction={<FilterButtons currentRange={timeFilter} setRange={setTimeFilter} />}
+          />
         </div>
+
       </div>
 
       {/* Row: Rekapitulasi YTD Table */}

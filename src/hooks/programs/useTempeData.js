@@ -39,13 +39,17 @@ export function useTempeData() {
       const monthIdx = MAGGOT_MONTH_NAMES.indexOf(monthStr);
       if (monthIdx !== -1 && monthIdx <= selectedMonthIdx) {
         const prod = (row.Produk || '').toLowerCase();
+        const cat = (row['Kategori Produk'] || '').toLowerCase();
         const omzet = Number(row.Omzet) || 0;
         const qty = Number(row.Jumlah) || 0;
 
-        if (prod.includes('tempe mentah')) {
+        const isMentah = prod.includes('tempe mentah') || prod.includes('tempe papan') || cat.includes('setengah jadi') || cat.includes('mentah');
+        const isOlahan = prod.includes('olahan') || prod.includes('keripik') || cat.includes('olahan');
+
+        if (isMentah) {
           dataMap[monthIdx].qty_mentah += qty;
           dataMap[monthIdx].omzet_mentah += omzet;
-        } else if (prod.includes('olahan')) {
+        } else if (isOlahan) {
           dataMap[monthIdx].qty_olahan += qty;
           dataMap[monthIdx].omzet_olahan += omzet;
         } else {

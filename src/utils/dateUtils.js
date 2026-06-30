@@ -22,3 +22,10 @@ export const getMonthStrings = (dateStr) => {
 export const getYear = (dateStr) => {
   return new Date(dateStr).getFullYear();
 };
+
+export const INDO_MONTHS = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+
+export const getIndoMonthString = (dateStr) => {
+  const d = new Date(dateStr);
+  return INDO_MONTHS[d.getMonth()];
+};

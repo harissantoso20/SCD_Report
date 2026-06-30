@@ -3,25 +3,53 @@ import { TableIcon } from '../Icons';
 
 export const GenericDynamicTable = ({ title, headers, initialLabels, value = [], onChange, unitOptionsMap = {} }) => {
   useEffect(() => {
-    if (value.length === 0 && initialLabels.length > 0) {
-      const initialRows = initialLabels.map((label, i) => ({ 
-        id: i + 1, 
-        product_name: label === "Lainnya" ? "" : label, 
-        isOthers: label === "Lainnya", 
-        qty: "", 
-        unit_price: "", 
-        revenue: "",
-        unit: unitOptionsMap[label] ? unitOptionsMap[label][0] : ""
-      }));
-      onChange(initialRows);
+    if (initialLabels.length > 0) {
+      if (value.length === 0) {
+        const initialRows = initialLabels.map((label, i) => ({ 
+          id: i + 1, 
+          product_name: label === "Lainnya" ? "" : label, 
+          isOthers: label === "Lainnya", 
+          qty: "", 
+          unit_price: "", 
+          revenue: "",
+          unit: unitOptionsMap[label] ? unitOptionsMap[label][0] : ""
+        }));
+        onChange(initialRows);
+      } else if (initialLabels.includes("Lainnya")) {
+        const lastRow = value[value.length - 1];
+        if (!lastRow.isOthers || lastRow.product_name !== "") {
+          onChange([...value, { 
+            id: Date.now(), 
+            product_name: "", 
+            isOthers: true, 
+            qty: "", 
+            unit_price: "", 
+            revenue: "",
+            unit: unitOptionsMap["Lainnya"] ? unitOptionsMap["Lainnya"][0] : ""
+          }]);
+        }
+      }
     }
-  }, [initialLabels, value.length, onChange]); 
+  }, [value.length, onChange]); 
 
   const handleFieldChange = (id, field, val) => {
     const newRows = [...value]; 
     const rowIndex = newRows.findIndex(r => r.id === id);
     if (rowIndex === -1) return; 
-    newRows[rowIndex] = { ...newRows[rowIndex], [field]: val };
+    
+    let updatedRow = { ...newRows[rowIndex], [field]: val };
+
+    if (field === 'qty' || field === 'unit_price') {
+      const q = parseFloat(field === 'qty' ? val : updatedRow.qty);
+      const p = parseFloat(field === 'unit_price' ? val : updatedRow.unit_price);
+      if (!isNaN(q) && !isNaN(p)) {
+        updatedRow.revenue = (q * p).toString();
+      } else {
+        updatedRow.revenue = "";
+      }
+    }
+
+    newRows[rowIndex] = updatedRow;
     
     if (field === 'product_name' && newRows[rowIndex].isOthers && rowIndex === newRows.length - 1 && val.trim() !== "") {
       newRows.push({ 
@@ -49,7 +77,7 @@ export const GenericDynamicTable = ({ title, headers, initialLabels, value = [],
           </thead>
           <tbody>
             {value.map((row) => {
-              const uOptions = unitOptionsMap[row.product_name] || (row.isOthers ? unitOptionsMap["Lainnya"] : null);
+              const uOptions = unitOptionsMap[row.product_name] || unitOptionsMap["Lainnya"];
               
               return (
                 <tr key={row.id} className="border-b border-gray-100 hover:bg-blue-50/60">
@@ -71,7 +99,7 @@ export const GenericDynamicTable = ({ title, headers, initialLabels, value = [],
                     )}
                   </td>
                   <td className="px-3 py-2.5"><input type="number" className="w-full border border-gray-300 p-1.5 rounded focus:border-[#25326a]" value={row.unit_price} onChange={(e) => handleFieldChange(row.id, 'unit_price', e.target.value)} /></td>
-                  <td className="px-3 py-2.5"><input type="number" className="w-full border border-gray-300 p-1.5 rounded focus:border-[#25326a]" value={row.revenue} onChange={(e) => handleFieldChange(row.id, 'revenue', e.target.value)} /></td>
+                  <td className="px-3 py-2.5"><input type="number" className="w-full border border-gray-300 p-1.5 rounded bg-gray-100 text-gray-600 cursor-not-allowed" readOnly value={row.revenue} /></td>
                 </tr>
               );
             })}
@@ -84,16 +112,28 @@ export const GenericDynamicTable = ({ title, headers, initialLabels, value = [],
 
 export const SimpleQtyTable = ({ title, headers, initialLabels, value = [], onChange }) => {
   useEffect(() => {
-    if (value.length === 0 && initialLabels.length > 0) {
-      const initialRows = initialLabels.map((label, i) => ({ 
-        id: i + 1, 
-        product_name: label === "Lainnya" ? "" : label, 
-        isOthers: label === "Lainnya", 
-        qty: ""
-      }));
-      onChange(initialRows);
+    if (initialLabels.length > 0) {
+      if (value.length === 0) {
+        const initialRows = initialLabels.map((label, i) => ({ 
+          id: i + 1, 
+          product_name: label === "Lainnya" ? "" : label, 
+          isOthers: label === "Lainnya", 
+          qty: ""
+        }));
+        onChange(initialRows);
+      } else if (initialLabels.includes("Lainnya")) {
+        const lastRow = value[value.length - 1];
+        if (!lastRow.isOthers || lastRow.product_name !== "") {
+          onChange([...value, { 
+            id: Date.now(), 
+            product_name: "", 
+            isOthers: true, 
+            qty: ""
+          }]);
+        }
+      }
     }
-  }, [initialLabels, value.length, onChange]); 
+  }, [value.length, onChange]); 
 
   const handleFieldChange = (id, field, val) => {
     const newRows = [...value]; 
@@ -156,6 +196,18 @@ export const PrabumenangDynamicTable = ({ title, value = [], onChange }) => {
         unit_price: "", 
         revenue: ""
       }]);
+    } else {
+      const lastRow = value[value.length - 1];
+      if (lastRow.product_name !== "") {
+        onChange([...value, { 
+          id: Date.now(), 
+          jenis_produk: jenisProdukOptions[0],
+          product_name: "", 
+          qty: "", 
+          unit_price: "", 
+          revenue: ""
+        }]);
+      }
     }
   }, [value.length, onChange]); 
 
@@ -163,7 +215,20 @@ export const PrabumenangDynamicTable = ({ title, value = [], onChange }) => {
     const newRows = [...value]; 
     const rowIndex = newRows.findIndex(r => r.id === id);
     if (rowIndex === -1) return; 
-    newRows[rowIndex] = { ...newRows[rowIndex], [field]: val };
+    
+    let updatedRow = { ...newRows[rowIndex], [field]: val };
+
+    if (field === 'qty' || field === 'unit_price') {
+      const q = parseFloat(field === 'qty' ? val : updatedRow.qty);
+      const p = parseFloat(field === 'unit_price' ? val : updatedRow.unit_price);
+      if (!isNaN(q) && !isNaN(p)) {
+        updatedRow.revenue = (q * p).toString();
+      } else {
+        updatedRow.revenue = "";
+      }
+    }
+
+    newRows[rowIndex] = updatedRow;
     
     if (field === 'product_name' && rowIndex === newRows.length - 1 && val.trim() !== "") {
       newRows.push({ 
@@ -210,7 +275,7 @@ export const PrabumenangDynamicTable = ({ title, value = [], onChange }) => {
                   <input type="number" className="w-full border border-gray-300 p-1.5 rounded focus:border-[#25326a]" value={row.unit_price} onChange={(e) => handleFieldChange(row.id, 'unit_price', e.target.value)} />
                 </td>
                 <td className="px-3 py-2.5">
-                  <input type="number" className="w-full border border-gray-300 p-1.5 rounded focus:border-[#25326a]" value={row.revenue} onChange={(e) => handleFieldChange(row.id, 'revenue', e.target.value)} />
+                  <input type="number" className="w-full border border-gray-300 p-1.5 rounded bg-gray-100 text-gray-600 cursor-not-allowed" readOnly value={row.revenue} />
                 </td>
               </tr>
             ))}
@@ -244,7 +309,7 @@ export default function DynamicTablesManager({ selectedProgram, tablesData, hand
         <GenericDynamicTable 
           title="Penjualan" 
           headers={["Produk", "Qty (Kg)", "Harga Satuan (Rp)", "Omzet"]} 
-          initialLabels={["Fresh Maggot", "Maggot Kering", "Kasgot"]} 
+          initialLabels={["Fresh Maggot", "Maggot Kering", "Kasgot", "Lainnya"]} 
           value={tablesData['maggot']}
           onChange={(rows) => handleTableChange('maggot', rows)}
         />
@@ -259,15 +324,15 @@ export default function DynamicTablesManager({ selectedProgram, tablesData, hand
           title="Penjualan Ikan Konsumsi" 
           headers={["Produk", "Qty (Kg)", "Harga Satuan (Rp)", "Omzet"]} 
           initialLabels={["Lele", "Nila", "Patin", "Gurame", "Lainnya"]} 
-          value={tablesData['konsumsi']}
-          onChange={(rows) => handleTableChange('konsumsi', rows)}
+          value={tablesData['Ikan Konsumsi']}
+          onChange={(rows) => handleTableChange('Ikan Konsumsi', rows)}
         />
         <GenericDynamicTable 
           title="Penjualan Bibit Ikan" 
           headers={["Produk", "Qty (Ekor)", "Harga Satuan (Rp)", "Omzet"]} 
           initialLabels={["Lele", "Nila", "Patin", "Gurame", "Lainnya"]} 
-          value={tablesData['bibit']}
-          onChange={(rows) => handleTableChange('bibit', rows)}
+          value={tablesData['Bibit Ikan']}
+          onChange={(rows) => handleTableChange('Bibit Ikan', rows)}
         />
       </div>
     );

@@ -4,10 +4,11 @@ import {
   CartesianGrid, XAxis, YAxis, LabelList
 } from 'recharts';
 import { useItikData } from '../../hooks/programs/useItikData';
-import { Sparkles, DollarSign, Package, Activity, Info } from 'lucide-react';
+import { Sparkles, Package, Activity, Info } from 'lucide-react';
+import GeminiInsight from './GeminiInsight';
 
-const formatRupiah = (val) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(val);
-const formatJuta = (val) => `${(val / 1000000).toFixed(1)} Jt`;
+const formatRupiah = (val) => new Intl.NumberFormat('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(val);
+const formatJuta = (val) => new Intl.NumberFormat('id-ID').format(val);
 const formatNumber = (val) => new Intl.NumberFormat('id-ID').format(val);
 
 const FilterButtons = ({ currentRange, setRange }) => (
@@ -178,14 +179,14 @@ const ItikAnalytics = React.memo(function ItikAnalytics() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-200 border-t-4 border-t-emerald-500 relative overflow-hidden group hover:-translate-y-1 hover:shadow-md transition-all duration-300">
           <div className="absolute -right-4 -bottom-4 text-emerald-50/50 group-hover:scale-110 transition-transform duration-500 pointer-events-none">
-            <DollarSign size={100} />
+            <span style={{ fontSize: 100 }} className="font-bold">Rp</span>
           </div>
           <div className="relative z-10 flex items-start gap-4">
-            <div className="bg-emerald-50/50 p-3 rounded-lg text-emerald-600 border border-emerald-100"><DollarSign size={24} /></div>
+            <div className="bg-emerald-50/50 p-3 rounded-lg text-emerald-600 border border-emerald-100"><span className="text-xl font-bold">Rp</span></div>
             <div className="flex-1">
               <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1">Total Omzet Penjualan YTD</p>
               <div className="flex items-end gap-2">
-                <h2 className="text-xl lg:text-3xl font-extrabold text-[#1e3a8a]">
+                <h2 className="text-lg xl:text-xl tracking-tight font-extrabold text-[#1e3a8a]">
                   {formatRupiah(total_omzet)}
                 </h2>
                 {yoyOmzetPct !== '-' && (
@@ -206,7 +207,7 @@ const ItikAnalytics = React.memo(function ItikAnalytics() {
             <div className="bg-sky-50/50 p-3 rounded-lg text-sky-600 border border-sky-100"><Package size={24} /></div>
             <div className="flex-1">
               <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1">Total Distribusi Telur YTD</p>
-              <h2 className="text-xl lg:text-3xl font-extrabold text-[#1e3a8a]">
+              <h2 className="text-lg xl:text-xl tracking-tight font-extrabold text-[#1e3a8a]">
                 {formatNumber(total_vol)} <span className="text-lg text-slate-400 font-semibold">Butir</span>
               </h2>
             </div>
@@ -242,29 +243,18 @@ const ItikAnalytics = React.memo(function ItikAnalytics() {
           </div>
         </div>
 
-        <div className="xl:col-span-2 bg-white rounded-lg shadow-sm border border-slate-200 p-4 md:p-5 flex flex-col relative overflow-hidden group hover:-translate-y-1 hover:shadow-md transition-all duration-300">
-          <div className="flex justify-between items-center mb-4 relative z-10 border-b border-slate-100 pb-3">
-            <h3 className="text-[13px] font-bold text-[#1e3a8a] uppercase tracking-widest flex items-center gap-2">
-              <Info size={16} className="text-blue-500" />
-              Insight Analitik & Strategi
-            </h3>
-            <FilterButtons currentRange={timeFilter} setRange={setTimeFilter} />
+        <div className="xl:col-span-2 flex flex-col relative min-h-[300px] xl:min-h-0">
+          <div className="xl:absolute xl:inset-0 flex flex-col h-full">
+            <GeminiInsight 
+              programName="Peternakan Itik Petelur"
+              period={`${timeFilter} Bulan Terakhir (${currentYear})`}
+              quantitativeData={{
+                overview: filteredOverviewData,
+                ytdSummary: itikPetelurYTD
+              }}
+              headerAction={<FilterButtons currentRange={timeFilter} setRange={setTimeFilter} />}
+            />
           </div>
-          <div className="flex-1 flex flex-col relative z-10">
-            <div className="text-[13px] text-slate-600 space-y-4 leading-relaxed font-medium">
-              <p>{generateItikInsight()}</p>
-              <div className="bg-blue-50/60 p-4 rounded-lg border border-blue-100 flex gap-3 items-start shadow-sm mt-auto">
-                <Activity className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
-                <div>
-                  <h4 className="text-xs font-bold text-blue-900 mb-1">Rekomendasi Operasional</h4>
-                  <p className="text-xs italic text-blue-800">
-                    "Pantau terus grafik volume telur mentah pada panel di bawah. Jika rata-rata volume bulanan mulai stagnan atau menurun dalam 3 bulan terakhir, pertimbangkan untuk menyiapkan program peremajaan bebek petelur agar kapasitas produksi tetap terjamin."
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-          <Info size={160} className="absolute -bottom-12 -right-12 text-blue-50 opacity-40 group-hover:opacity-60 transition-opacity duration-300 pointer-events-none" />
         </div>
       </div>
 

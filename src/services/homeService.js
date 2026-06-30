@@ -33,6 +33,13 @@ export const homeService = {
       'Perikanan': 0,
       'Infrastruktur': 0
     };
+    const sektorPrograms = {
+      'Perkebunan': new Set(),
+      'Peternakan': new Set(),
+      'Industri': new Set(),
+      'Perikanan': new Set(),
+      'Infrastruktur': new Set()
+    };
 
     const groupedByLocation = {};
 
@@ -67,21 +74,24 @@ export const homeService = {
       
       // Count Sektor for all rows that have a valid Sektor
       const rawSektor = (item.Sektor || '').trim();
-      if (rawSektor && rawSektor !== '-' && rawSektor.toLowerCase() !== 'null') {
+      if (rawSektor && rawSektor !== '-' && rawSektor.toLowerCase() !== 'null' && program && program !== '-') {
         const s = rawSektor.toLowerCase();
+        let targetSektor = rawSektor;
         if (s.includes('kebun') || s.includes('tani') || s.includes('agric')) {
-          sektorCount['Perkebunan']++;
+          targetSektor = 'Perkebunan';
         } else if (s.includes('ternak') || s.includes('hewan')) {
-          sektorCount['Peternakan']++;
+          targetSektor = 'Peternakan';
         } else if (s.includes('industri') || s.includes('olah') || s.includes('pabrik')) {
-          sektorCount['Industri']++;
+          targetSektor = 'Industri';
         } else if (s.includes('ikan') || s.includes('lele') || s.includes('air')) {
-          sektorCount['Perikanan']++;
+          targetSektor = 'Perikanan';
         } else if (s.includes('infra') || s.includes('insfra') || s.includes('plts') || s.includes('bangun')) {
-          sektorCount['Infrastruktur']++;
-        } else {
-          sektorCount[rawSektor] = (sektorCount[rawSektor] || 0) + 1;
+          targetSektor = 'Infrastruktur';
         }
+        
+        sektorCount[targetSektor] = (sektorCount[targetSektor] || 0) + 1;
+        if (!sektorPrograms[targetSektor]) sektorPrograms[targetSektor] = new Set();
+        sektorPrograms[targetSektor].add(program);
       }
     });
 
@@ -110,7 +120,16 @@ export const homeService = {
         .select('*')
         .eq('Tahun', targetYear)
         .in('Bulan', monthNames);
-      if (!error && data) salesData = data;
+      if (!error && data) {
+        const dedupMap = {};
+        data.forEach(row => {
+          const key = `${row.Program}_${row.Tahun}_${row.Bulan}_${row['Kategori Produk']}_${row.Produk}_${row.Operasional}`;
+          if (!dedupMap[key] || dedupMap[key].id < row.id) {
+            dedupMap[key] = row;
+          }
+        });
+        salesData = Object.values(dedupMap);
+      }
     }
 
     return {
@@ -124,6 +143,9 @@ export const homeService = {
         desa: uniqueProgramDesa.size
       },
       sektorCount,
+      sektorPrograms: Object.fromEntries(
+        Object.entries(sektorPrograms).map(([k, v]) => [k, Array.from(v)])
+      ),
       luarRing1Programs,
       groupedByLocation,
       mapData: ring1,

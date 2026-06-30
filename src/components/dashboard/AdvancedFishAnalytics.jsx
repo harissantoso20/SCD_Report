@@ -4,10 +4,11 @@ import {
   BarChart, Bar, LineChart, Line, CartesianGrid, XAxis, YAxis, LabelList
 } from 'recharts';
 import { useFisheryData } from '../../hooks/programs/useFisheryData';
-import { Sparkles, DollarSign, Package, ShoppingBag } from 'lucide-react'; // icons imported
+import { Sparkles, Package, ShoppingBag } from 'lucide-react'; // icons imported
+import GeminiInsight from './GeminiInsight';
 
-const formatRupiah = (val) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(val);
-const formatJuta = (val) => `${(val / 1000000).toFixed(1)} Jt`;
+const formatRupiah = (val) => new Intl.NumberFormat('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(val);
+const formatJuta = (val) => new Intl.NumberFormat('id-ID').format(val);
 
 const FilterButtons = ({ currentRange, setRange }) => (
   <div className="relative">
@@ -177,7 +178,7 @@ const AdvancedFishAnalytics = React.memo(function AdvancedFishAnalytics() {
       {/* ROW 1: TOP 3 KPIs */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-white p-4 md:p-5 rounded-lg shadow-sm border border-slate-200 border-t-4 border-t-blue-600 hover:-translate-y-1 hover:shadow-md transition-all duration-300 flex items-start gap-4 relative overflow-hidden group">
-          <div className="bg-blue-50/50 p-3 rounded-lg text-blue-600 border border-blue-100 relative z-10"><DollarSign size={24} className="animate-[pulse_2s_ease-in-out_infinite]" /></div>
+          <div className="bg-blue-50/50 p-3 rounded-lg text-blue-600 border border-blue-100 relative z-10"><span className="text-xl font-bold animate-[pulse_2s_ease-in-out_infinite]">Rp</span></div>
           <div className="flex-1 relative z-10">
             <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1">Total Revenue YTD</p>
             <h2 className="text-xl lg:text-2xl font-extrabold text-[#1e3a8a]">
@@ -226,10 +227,10 @@ const AdvancedFishAnalytics = React.memo(function AdvancedFishAnalytics() {
       </div>
 
       {/* MAIN 2-COLUMN GRID (Matching Wireframe) */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 items-stretch">
+      <div className="grid grid-cols-1 xl:grid-cols-5 gap-4 items-stretch">
         
         {/* LEFT COLUMN */}
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 xl:col-span-3">
           
           {/* OVERVIEW PENJUALAN */}
           <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 md:p-5 flex flex-col">
@@ -369,22 +370,22 @@ const AdvancedFishAnalytics = React.memo(function AdvancedFishAnalytics() {
         </div>
 
         {/* RIGHT COLUMN */}
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 min-w-0 h-full min-h-0 xl:col-span-2">
           
           {/* INSIGHT ANALITIK (50% Height) */}
-          <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 md:p-5 flex flex-col flex-1 relative overflow-hidden group hover:-translate-y-1 hover:shadow-md transition-all duration-300">
-            <div className="flex justify-between items-center mb-4 relative z-10">
-              <h3 className="text-[13px] font-bold text-[#1e3a8a] uppercase tracking-widest flex items-center gap-2">
-                <Sparkles size={16} className="text-blue-500" />
-                Insight Analitik
-              </h3>
-              <FilterButtons currentRange={timeFilter} setRange={setTimeFilter} />
+          <div className="flex flex-col flex-1 relative min-h-[300px] xl:min-h-0">
+            <div className="xl:absolute xl:inset-0 flex flex-col h-full">
+              <GeminiInsight 
+                programName="Budidaya Ikan Air Tawar"
+                period={`${timeFilter} Bulan Terakhir (${currentYear})`}
+                quantitativeData={{
+                  overview: filteredOverviewData,
+                  portfolio: fisheryPortfolio,
+                  ytdSummary: fisheryYTD
+                }}
+                headerAction={<FilterButtons currentRange={timeFilter} setRange={setTimeFilter} />}
+              />
             </div>
-            
-            <div className="flex-1 flex flex-col justify-center relative z-10">
-              {generateCrossRevenueAI()}
-            </div>
-            <Sparkles size={140} className="absolute -bottom-10 -right-10 text-blue-50 opacity-40 group-hover:opacity-60 transition-opacity duration-300 pointer-events-none" />
           </div>
 
           {/* SPECIES PORTFOLIO (PieCharts Reverted) (50% Height) */}

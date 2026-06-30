@@ -4,10 +4,11 @@ import {
   BarChart, Bar, LineChart, Line, CartesianGrid, XAxis, YAxis, ComposedChart
 } from 'recharts';
 import { useQuailData } from '../../hooks/programs/useQuailData';
-import { TrendingUp, Bird, Egg, Package, DollarSign, Info, Sparkles, Box } from 'lucide-react';
+import { TrendingUp, Bird, Egg, Package, Info, Sparkles, Box } from 'lucide-react';
+import GeminiInsight from './GeminiInsight';
 
-const formatRupiah = (val) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(val);
-const formatJuta = (val) => `${(val / 1000000).toFixed(1)} Jt`;
+const formatRupiah = (val) => new Intl.NumberFormat('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(val);
+const formatJuta = (val) => new Intl.NumberFormat('id-ID').format(val);
 
 const FilterButtons = ({ currentRange, setRange }) => (
   <div className="relative">
@@ -82,7 +83,7 @@ const QuailAnalytics = React.memo(function QuailAnalytics() {
       <div className="text-slate-600 font-medium leading-relaxed text-[13px] space-y-3">
         {peakStatement && <p><span className="font-bold text-[#1e3a8a]">{peakStatement}</span></p>}
         <p>
-          Secara keseluruhan dalam periode <span className="font-bold text-[#1e3a8a]">{startMonth} - {endMonth} {currentYear}</span>, total produksi telur puyuh mencapai <span className="font-bold text-blue-600">{new Intl.NumberFormat('id-ID').format(totalTelur)} Butir</span> dengan akumulasi pendapatan keseluruhan menyentuh <span className="font-bold text-blue-800">{formatRupiah(quailYTD.total_omzet)}</span>. Rata-rata harga jual telur di pasar berada di kisaran Rp {avgPrice}/butir. 
+          Secara keseluruhan dalam periode <span className="font-bold text-[#1e3a8a]">{startMonth} - {endMonth} {currentYear}</span>, total produksi telur puyuh mencapai <span className="font-bold text-blue-600">{new Intl.NumberFormat('id-ID').format(totalTelur)} Butir</span> dengan akumulasi pendapatan keseluruhan menyentuh <span className="font-bold text-blue-800">{formatRupiah(quailYTD.total_omzet)}</span>. Rata-rata harga jual telur di pasar berada di kisaran {avgPrice}/butir. 
         </p>
         <p>
           Jika dikomparasikan secara *Year-on-Year* (YoY), {quailYTD.prev_total_omzet > 0 ? (quailYTD.total_omzet > quailYTD.prev_total_omzet ? "performa komersial saat ini mencatat tren pertumbuhan positif dibandingkan periode yang sama di tahun sebelumnya." : "terjadinya kontraksi pendapatan") : "belum ada data historis yang memadai untuk menghitung pertumbuhan komersial secara akurat."} Diversifikasi ke produk sekunder seperti pupuk kohe juga {quailYTD.prev_total_qty_kohe > 0 ? (quailYTD.total_qty_kohe > quailYTD.prev_total_qty_kohe ? "berhasil menopang tambahan pendapatan operasional." : "perlu dimaksimalkan kembali serapan penualannya.") : "merupakan strategi potensial untuk menopang tambahan pendapatan operasional."}
@@ -133,10 +134,10 @@ const QuailAnalytics = React.memo(function QuailAnalytics() {
           {/* ROW 1: TOP 3 KPIs */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="bg-white p-4 md:p-5 rounded-lg shadow-sm border border-slate-200 border-t-4 border-t-blue-600 hover:-translate-y-1 hover:shadow-md transition-all duration-300 flex items-start gap-4 relative overflow-hidden group">
-              <div className="bg-blue-50/50 p-3 rounded-lg text-blue-600 border border-blue-100 relative z-10"><DollarSign size={24} className="animate-[pulse_2s_ease-in-out_infinite]" /></div>
+              <div className="bg-blue-50/50 p-3 rounded-lg text-blue-600 border border-blue-100 relative z-10"><span className="text-xl font-bold animate-[pulse_2s_ease-in-out_infinite]">Rp</span></div>
               <div className="flex flex-col mb-1 relative z-10">
                 <span className="text-[9px] font-bold text-slate-500 tracking-wider uppercase mb-1">Total Omzet YTD</span>
-                <span className="text-xl xl:text-2xl font-extrabold text-[#1e3a8a]">{formatRupiah(quailYTD.total_omzet)}</span>
+                <span className="text-lg xl:text-xl tracking-tight font-extrabold text-[#1e3a8a]">{formatRupiah(quailYTD.total_omzet)}</span>
               </div>
               {/* Doodle Art */}
               <div className="absolute -bottom-6 -right-4 text-blue-100/40 group-hover:-translate-y-2 group-hover:rotate-6 transition-transform duration-500 pointer-events-none">
@@ -149,7 +150,7 @@ const QuailAnalytics = React.memo(function QuailAnalytics() {
               <div className="bg-sky-50/50 p-3 rounded-lg text-sky-600 border border-sky-100 relative z-10"><Box size={24} className="animate-[bounce_3s_ease-in-out_infinite]" /></div>
               <div className="flex flex-col mb-1 relative z-10">
                 <span className="text-[9px] font-bold text-slate-500 tracking-wider uppercase mb-1">Vol. Penjualan Telur</span>
-                <span className="text-xl xl:text-2xl font-extrabold text-[#1e3a8a]">{new Intl.NumberFormat('id-ID').format(quailYTD.total_qty_telur)} <span className="text-sm font-semibold text-slate-400">Butir</span></span>
+                <span className="text-lg xl:text-xl tracking-tight font-extrabold text-[#1e3a8a]">{new Intl.NumberFormat('id-ID').format(quailYTD.total_qty_telur)} <span className="text-sm font-semibold text-slate-400">Butir</span></span>
               </div>
               {/* Doodle Art */}
               <div className="absolute -bottom-4 -right-4 text-sky-100/40 group-hover:scale-110 transition-transform duration-500 pointer-events-none">
@@ -162,7 +163,7 @@ const QuailAnalytics = React.memo(function QuailAnalytics() {
               <div className="bg-indigo-50/50 p-3 rounded-lg text-indigo-600 border border-indigo-100 relative z-10"><Box size={24} className="animate-[pulse_3s_ease-in-out_infinite]" /></div>
               <div className="flex flex-col mb-1 relative z-10">
                 <span className="text-[9px] font-bold text-slate-500 tracking-wider uppercase mb-1">Total Penjualan Kohe YTD</span>
-                <span className="text-xl xl:text-2xl font-extrabold text-[#1e3a8a]">{new Intl.NumberFormat('id-ID').format(quailYTD.total_qty_kohe)} <span className="text-sm font-semibold text-slate-400">Kg</span></span>
+                <span className="text-lg xl:text-xl tracking-tight font-extrabold text-[#1e3a8a]">{new Intl.NumberFormat('id-ID').format(quailYTD.total_qty_kohe)} <span className="text-sm font-semibold text-slate-400">Kg</span></span>
               </div>
               {/* Doodle Art */}
               <div className="absolute -bottom-2 -right-4 text-indigo-100/40 group-hover:translate-x-2 transition-transform duration-500 pointer-events-none">
@@ -291,23 +292,20 @@ const QuailAnalytics = React.memo(function QuailAnalytics() {
           
         </div>
 
-        {/* RIGHT COLUMN (Span 1) */}
-        <div className="xl:col-span-1 flex flex-col gap-4 h-full">
+        <div className="xl:col-span-1 flex flex-col relative min-h-[600px] xl:min-h-0">
+          <div className="xl:absolute xl:inset-0 flex flex-col gap-4 h-full w-full">
           
           {/* INSIGHT ANALITIK */}
-          <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 md:p-5 flex flex-col relative overflow-hidden group hover:-translate-y-1 hover:shadow-md transition-all duration-300">
-            <div className="flex justify-between items-center mb-4 relative z-10">
-              <h3 className="text-[13px] font-bold text-[#1e3a8a] uppercase tracking-widest flex items-center gap-2">
-                <Sparkles size={16} className="text-blue-500" />
-                Insight Analitik
-              </h3>
-              <FilterButtons currentRange={timeFilter} setRange={setTimeFilter} />
-            </div>
-            
-            <div className="flex-1 flex flex-col justify-center relative z-10">
-              {renderAIInsight()}
-            </div>
-            <Sparkles size={140} className="absolute -bottom-10 -right-10 text-blue-50 opacity-40 group-hover:opacity-60 transition-opacity duration-300 pointer-events-none" />
+          <div className="flex flex-col flex-1 min-h-0">
+            <GeminiInsight 
+              programName="Budidaya Puyuh Petelur"
+              period={`${timeFilter} Bulan Terakhir (${currentYear})`}
+              quantitativeData={{
+                overview: filteredOverviewData,
+                ytdSummary: quailYTD
+              }}
+              headerAction={<FilterButtons currentRange={timeFilter} setRange={setTimeFilter} />}
+            />
           </div>
 
           {/* RASIO DIVERSIFIKASI */}
@@ -356,7 +354,8 @@ const QuailAnalytics = React.memo(function QuailAnalytics() {
               </div>
             </div>
           </div>
-          
+
+          </div>
         </div>
 
       </div>

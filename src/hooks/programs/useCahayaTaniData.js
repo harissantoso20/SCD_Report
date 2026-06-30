@@ -36,8 +36,11 @@ export function useCahayaTaniData() {
 
       const monthIdx = MAGGOT_MONTH_NAMES.indexOf(monthStr);
       if (monthIdx !== -1 && monthIdx <= selectedMonthIdx) {
-        const op = (row.Operasional || '').toLowerCase();
-        if (op === 'penjualan') {
+        const op = (row.Operasional || '').toLowerCase().trim();
+        const cat = (row['Kategori Produk'] || '').toLowerCase().trim();
+        const isPenjualan = op === 'penjualan' || cat === 'bibit_tanaman' || cat === 'bibit tanaman';
+
+        if (isPenjualan) {
           const omzet = Number(row.Omzet) || 0;
           const qty = Number(row.Jumlah) || 0;
           const harga = Number(row['Harga Satuan']) || 0;
@@ -64,10 +67,15 @@ export function useCahayaTaniData() {
             dataMap[monthIdx].lainnya_omzet += omzet;
             dataMap[monthIdx].lainnya_vol += qty;
           }
-        } else if (op === 'pembesaran bibit') {
-          const val = Number(row['Value Operasional']) || 0;
-          dataMap[monthIdx].pembesaran_vol += val;
         }
+        
+        let pembesaranVal = 0;
+        if (cat === 'pembesaran_batang' || cat === 'pembesaran batang') {
+          pembesaranVal = Number(row.Jumlah) || 0;
+        } else if (op === 'pembesaran bibit' || op.includes('pembesaran')) {
+          pembesaranVal = Number(row['Value Operasional']) || 0;
+        }
+        dataMap[monthIdx].pembesaran_vol += pembesaranVal;
       }
     });
 
@@ -115,8 +123,11 @@ export function useCahayaTaniData() {
 
       const monthIdx = MAGGOT_MONTH_NAMES.indexOf(monthStr);
       if (monthIdx !== -1 && monthIdx <= selectedMonthIdx) {
-        const op = (row.Operasional || '').toLowerCase();
-        if (op === 'penjualan') {
+        const op = (row.Operasional || '').toLowerCase().trim();
+        const cat = (row['Kategori Produk'] || '').toLowerCase().trim();
+        const isPenjualan = op === 'penjualan' || cat === 'bibit_tanaman' || cat === 'bibit tanaman';
+
+        if (isPenjualan) {
           const omzet = Number(row.Omzet) || 0;
           const qty = Number(row.Jumlah) || 0;
           const prod = (row.Produk || '');
@@ -143,12 +154,20 @@ export function useCahayaTaniData() {
               items[prod].vol += qty;
             }
           }
-        } else if (op === 'pembesaran bibit') {
-          const val = Number(row['Value Operasional']) || 0;
+        }
+        
+        let pembesaranVal = 0;
+        if (cat === 'pembesaran_batang' || cat === 'pembesaran batang') {
+          pembesaranVal = Number(row.Jumlah) || 0;
+        } else if (op === 'pembesaran bibit' || op.includes('pembesaran')) {
+          pembesaranVal = Number(row['Value Operasional']) || 0;
+        }
+
+        if (pembesaranVal > 0) {
           if (isPrev) {
-            prev_total_pembesaran += val;
+            prev_total_pembesaran += pembesaranVal;
           } else {
-            total_pembesaran += val;
+            total_pembesaran += pembesaranVal;
           }
         }
       }

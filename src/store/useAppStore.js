@@ -5,7 +5,7 @@ import { progressService } from '../services/progressService';
 import { salesService } from '../services/salesService';
 import { evidenceService } from '../services/evidenceService';
 import { homeService } from '../services/homeService';
-import { getMonthStrings, getYear } from '../utils/dateUtils';
+import { getMonthStrings, getYear, getIndoMonthString } from '../utils/dateUtils';
 import { getFuzzyKeyword } from '../utils/programUtils';
 
 const useAppStore = create((set, get) => ({
@@ -116,7 +116,7 @@ const useAppStore = create((set, get) => ({
 
       // 5. Fetch Sales Data
       const { extraFields, tablesData, salesData } = await salesService.fetchSalesData(
-        fuzzyKeyword, globalProgram, targetYear
+        fuzzyKeyword, globalProgram, targetYear, getIndoMonthString(globalDate)
       );
       set({ extraFields, tablesData, salesData });
 
@@ -137,14 +137,15 @@ const useAppStore = create((set, get) => ({
     const { globalProgram, globalDate } = get();
     const targetYear = getYear(globalDate);
     const monthNames = getMonthStrings(globalDate);
-    const targetMonth = monthNames[0]; 
+    const targetMonth = getIndoMonthString(globalDate); 
 
     try {
       // 1. Upsert Monthly Progress
       await progressService.upsertMonthlyProgress(globalProgram, monthNames, targetMonth, targetYear, payload);
 
       // 2. Insert Sales Data
-      await salesService.upsertSalesData(globalProgram, monthNames, targetMonth, targetYear, payload);
+      const fuzzyKeyword = getFuzzyKeyword(globalProgram);
+      await salesService.upsertSalesData(globalProgram, monthNames, targetMonth, targetYear, payload, fuzzyKeyword);
 
       // 3. Upload Evidence Files and Save to Database
       await evidenceService.uploadAndInsertEvidence(globalProgram, targetMonth, targetYear, payload.evidenceFiles);

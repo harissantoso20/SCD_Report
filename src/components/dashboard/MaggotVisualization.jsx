@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { ResponsiveContainer, BarChart, Bar, CartesianGrid, XAxis, YAxis, Tooltip, LineChart, Line } from 'recharts';
 import useAppStore from '../../store/useAppStore';
 import { PROGRAM_IMAGES, PROGRAM_DETAILS } from '../../data/mockData';
-import { Zap, TrendingUp, Sparkles, Box, DollarSign, Recycle, Bug } from 'lucide-react';
+import { Zap, TrendingUp, Sparkles, Box, Recycle, Bug } from 'lucide-react';
 import { useMaggotData } from '../../hooks/programs/useMaggotData';
+import GeminiInsight from './GeminiInsight';
 
 // Chart Helpers
 const FilterButtons = ({ currentRange, setRange }) => (
@@ -38,7 +39,7 @@ const renderLineLabelRp = (props) => {
   if (!value) return null;
   return (
     <text x={x} y={y - 12} fill="#374151" fontSize={10} fontWeight="bold" textAnchor="middle">
-      {(value / 1000000).toFixed(1).replace('.0', '') + 'Jt'}
+      {new Intl.NumberFormat('id-ID').format(value)}
     </text>
   );
 };
@@ -74,51 +75,7 @@ const MaggotVisualization = React.memo(function MaggotVisualization() {
 
 
 
-  const generateSmartAnalogy = (kg) => {
-    if (!kg) return "Belum ada data konversi sampah organik pada periode ini.";
-    const households = Math.round(kg / 2); 
-    const methane = (kg * 0.05).toFixed(1); 
-    const startMonth = bioData.length > 0 ? bioData[0].bulan : '';
-    const endMonth = bioData.length > 0 ? bioData[bioData.length - 1].bulan : '';
-    
-    // Find peak waste month
-    const peakMonthData = [...bioData].sort((a, b) => (Number(b.sampah) || 0) - (Number(a.sampah) || 0))[0];
-    let peakStatement = '';
-    if (peakMonthData && Number(peakMonthData.sampah) > 0) {
-      peakStatement = `Secara bulanan, performa penguraian sampah tertinggi pada periode ini berhasil dicapai pada bulan ${peakMonthData.bulan} dengan volume ${new Intl.NumberFormat('id-ID').format(peakMonthData.sampah)} Kg.`;
-    }
-
-    // Find peak sales month
-    const peakSalesData = [...filteredFinancialData].sort((a, b) => (b.omzet_kasgot + b.omzet_kering + b.omzet_fresh) - (a.omzet_kasgot + a.omzet_kering + a.omzet_fresh))[0];
-    let peakSalesStatement = '';
-    if (peakSalesData) {
-      const totalOmzetPeak = peakSalesData.omzet_kasgot + peakSalesData.omzet_kering + peakSalesData.omzet_fresh;
-      if (totalOmzetPeak > 0) {
-        peakSalesStatement = ` Sementara itu, rekor omzet penjualan tertinggi diraih pada bulan ${peakSalesData.bulan} menembus Rp ${(totalOmzetPeak / 1000000).toFixed(1)} Jt.`;
-      }
-    }
-
-    // Calculate overall sales
-    const totalSalesOmzet = filteredFinancialData.reduce((sum, d) => sum + d.omzet_kasgot + d.omzet_kering + d.omzet_fresh, 0);
-    const salesOverallStatement = ` Dari sisi komersial, total pendapatan dari penjualan produk turunan maggot (fresh, kering, kasgot) menyentuh angka Rp ${(totalSalesOmzet / 1000000).toFixed(1)} Jt.`;
-
-    return (
-      <div className="text-slate-600 text-[13px] leading-relaxed space-y-3">
-        {(peakStatement || peakSalesStatement) && (
-          <p>
-            {peakStatement && <span className="font-bold text-[#1e3a8a]">{peakStatement}</span>}
-            {peakSalesStatement && <span className="font-bold text-blue-600">{peakSalesStatement}</span>}
-          </p>
-        )}
-        <p>
-          Secara keseluruhan dalam periode <strong className="text-[#1e3a8a]">{startMonth} - {endMonth} {currentYear}</strong>, sebanyak <strong className="text-blue-600">{new Intl.NumberFormat('id-ID').format(kg)} Kg</strong> sampah organik berhasil terurai. Ini setara dengan mencegah timbunan limbah harian dari <strong>±{households} rumah tangga</strong> serta mencegah pelepasan <strong>±{methane} Kg emisi metana (CH4)</strong> ke atmosfer.{salesOverallStatement}
-        </p>
-        <p>
-          Jika dikomparasikan secara *Year-on-Year* (YoY) dengan tahun sebelumnya, tren performa operasional menunjukkan peningkatan berkelanjutan, baik dari sisi kapasitas pengolahan limbah organik maupun optimalisasi monetisasi sirkular ekonominya.
-        </p>
-      </div>
-    );
-  };
+  // generateSmartAnalogy removed - using Gemini AI instead
 
   return (
     <div className="flex flex-col gap-4">
@@ -127,19 +84,18 @@ const MaggotVisualization = React.memo(function MaggotVisualization() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         
         {/* 1. Insight Analitik (Takes up 2 columns) */}
-        <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 md:p-5 flex flex-col relative overflow-hidden group hover:-translate-y-1 hover:shadow-md transition-all duration-300 lg:col-span-2">
-          <div className="flex items-center justify-between mb-4 relative z-10">
-            <h4 className="text-[13px] font-bold text-[#1e3a8a] uppercase tracking-wider flex items-center gap-2">
-              <Sparkles size={16} className="text-blue-500" />
-              Insight Analitik
-            </h4>
-            <FilterButtons currentRange={timeFilter} setRange={setTimeFilter} />
-          </div>
-          <div className="flex-1 relative z-10">
-            {generateSmartAnalogy(selectedWasteManaged)}
-          </div>
-          <div className="absolute -bottom-6 -right-6 text-blue-50/50 group-hover:scale-110 transition-transform duration-500 pointer-events-none">
-             <Sparkles size={140} />
+        <div className="lg:col-span-2 flex flex-col relative min-h-[300px] lg:min-h-0">
+          <div className="lg:absolute lg:inset-0 flex flex-col h-full">
+            <GeminiInsight 
+              programName={selectedProgram}
+              period={`${timeFilter} Bulan Terakhir (${currentYear})`}
+              quantitativeData={{
+                bioconversion: bioData,
+                financial: filteredFinancialData,
+                ytdSummary: maggotYTD
+              }}
+              headerAction={<FilterButtons currentRange={timeFilter} setRange={setTimeFilter} />}
+            />
           </div>
         </div>
 
@@ -172,12 +128,12 @@ const MaggotVisualization = React.memo(function MaggotVisualization() {
           {/* Total Omzet YTD */}
           <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 flex flex-col justify-center relative overflow-hidden group hover:-translate-y-1 hover:shadow-md transition-all duration-300 flex-1">
             <div className="relative z-10 flex items-start gap-3">
-              <div className="bg-blue-50/50 p-2.5 rounded-lg text-blue-600 shadow-sm border border-blue-100 mt-1"><DollarSign size={20} className="animate-[pulse_2s_ease-in-out_infinite]" /></div>
+              <div className="bg-blue-50/50 p-2.5 rounded-lg text-blue-600 shadow-sm border border-blue-100 mt-1"><span className="text-lg font-bold animate-[pulse_2s_ease-in-out_infinite]">Rp</span></div>
               <div className="flex-1">
                 <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Total Omzet YTD</p>
                 <div className="flex items-baseline gap-1.5">
                   <h3 className="text-xl lg:text-2xl font-black text-[#1e3a8a] tracking-tighter">
-                    Rp {((maggotYTD?.currOmzet || 0) / 1000000).toFixed(1)} <span className="text-sm font-bold text-slate-400">Jt</span>
+                    {new Intl.NumberFormat('id-ID').format(maggotYTD?.currOmzet || 0)}
                   </h3>
                 </div>
               </div>
@@ -251,7 +207,7 @@ const MaggotVisualization = React.memo(function MaggotVisualization() {
         <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 md:p-5 flex flex-col">
           <div className="flex items-center justify-between border-b border-slate-100 pb-2 mb-4">
             <h2 className="text-[13px] font-bold text-[#1e3a8a] uppercase tracking-wider flex items-center gap-2">
-              <DollarSign size={16} className="text-[#f43f5e]" />
+              <span className="text-base font-bold text-[#f43f5e]">Rp</span>
               Tren Omzet Produk
             </h2>
           </div>
@@ -261,7 +217,7 @@ const MaggotVisualization = React.memo(function MaggotVisualization() {
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                 <XAxis dataKey="bulan" axisLine={false} tickLine={false} tick={{fontSize: 10, fill: '#64748b', fontWeight: 'bold'}} dy={10} padding={{ left: 20, right: 20 }} />
                 <YAxis hide domain={[0, dataMax => Math.max(10, Math.ceil((dataMax || 0) * 1.2))]} />
-                <Tooltip cursor={{fill: '#f8fafc', strokeWidth: 1, strokeDasharray: '3 3'}} contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '12px' }} formatter={(val) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(val)} />
+                <Tooltip cursor={{fill: '#f8fafc', strokeWidth: 1, strokeDasharray: '3 3'}} contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '12px' }} formatter={(val) => new Intl.NumberFormat('id-ID', { minimumFractionDigits: 0 }).format(val)} />
                 <Line type="monotone" dataKey="omzet_kasgot" name="Omzet Kasgot" stroke="#1e3a8a" strokeWidth={3} dot={{ r: 3 }} activeDot={{ r: 5 }} label={renderLineLabelRp} />
                 <Line type="monotone" dataKey="omzet_kering" name="Omzet Kering" stroke="#f43f5e" strokeWidth={3} dot={{ r: 3 }} activeDot={{ r: 5 }} label={renderLineLabelRp} />
                 <Line type="monotone" dataKey="omzet_fresh" name="Omzet Fresh" stroke="#3b82f6" strokeWidth={3} dot={{ r: 3 }} activeDot={{ r: 5 }} label={renderLineLabelRp} />
@@ -330,12 +286,12 @@ const MaggotVisualization = React.memo(function MaggotVisualization() {
                   <td className="p-3 md:p-4 font-semibold text-slate-600">{row.variabel}</td>
                   <td className="p-3 md:p-4 text-center text-slate-500 font-medium">
                     {row.isCurrency 
-                      ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(row.prevYearData) 
+                      ? new Intl.NumberFormat('id-ID', { minimumFractionDigits: 0 }).format(row.prevYearData) 
                       : new Intl.NumberFormat('id-ID').format(row.prevYearData)}
                   </td>
                   <td className="p-3 md:p-4 text-center font-extrabold text-[#1e3a8a]">
                     {row.isCurrency 
-                      ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(row.currYearData) 
+                      ? new Intl.NumberFormat('id-ID', { minimumFractionDigits: 0 }).format(row.currYearData) 
                       : new Intl.NumberFormat('id-ID').format(row.currYearData)}
                   </td>
                   <td className={`p-3 md:p-4 text-center font-bold ${row.percent.startsWith('+') ? 'text-blue-600' : (row.percent === '-' ? 'text-slate-400' : 'text-rose-500')}`}>
