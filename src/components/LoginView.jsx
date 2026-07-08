@@ -17,7 +17,11 @@ export default function LoginView() {
 
     const { error } = await login(email, password);
     if (error) {
-      setErrorMsg(error.message);
+      if (error.message && error.message.toLowerCase().includes('fetch')) {
+        setErrorMsg('Gagal terhubung ke server Supabase (Failed to fetch). Periksa koneksi internet Anda, atau matikan VPN / Adblocker / Firewall yang memblokir akses ke server.');
+      } else {
+        setErrorMsg(error.message);
+      }
     }
     
     setIsLoading(false);

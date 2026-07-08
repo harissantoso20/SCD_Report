@@ -1,11 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import useAppStore from '../store/useAppStore';
 import * as L from 'leaflet';
-import { MapPin, Lightbulb, TrendingUp, Presentation, AlertCircle, FileText, CheckCircle, ChevronDown } from './Icons';
+import { MapPin, Lightbulb, TrendingUp, AlertCircle, CheckCircle, ChevronDown } from './Icons';
 import { Maximize, Minimize } from 'lucide-react';
 import logoSDGs from '../assets/logo-sdgs.png';
-import { exportDashboardPresentation } from '../services/exportPresentation';
-import { generateGoogleSlide, fetchPresentations } from '../services/googleSlidesService';
 import { generateText } from '../lib/geminiClient';
 import ReactMarkdown from 'react-markdown';
 
@@ -18,12 +16,8 @@ export default function HomeView() {
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [aiReportStatement, setAiReportStatement] = useState('');
   const [isAiLoading, setIsAiLoading] = useState(false);
-  const [isGeneratingSlide, setIsGeneratingSlide] = useState(false);
-  const [presentations, setPresentations] = useState([]);
-
   useEffect(() => {
     fetchHomeData();
-    fetchPresentations().then(setPresentations).catch(console.error);
   }, [fetchHomeData]);
 
   // --- Leaflet Map Cleanup ---
@@ -69,16 +63,48 @@ export default function HomeView() {
         hasValidCoords = true;
         bounds.extend([lat, lng]);
         
-        L.marker([lat, lng]).addTo(map)
-          .bindPopup(`
-            <div class="text-xs p-1">
-              <b class="text-[#1e3a8a] text-sm">${loc['Program PPM'] || loc.Program || '-'}</b><br/>
-              <span class="text-gray-500 font-medium">${loc['Desa/Kelurahan'] || loc.Desa}, ${loc.Kecamatan}, ${loc.Kabupaten}</span><br/>
-              <div class="mt-1 inline-block bg-blue-100 text-blue-800 px-2 py-0.5 rounded text-[10px] font-bold">
-                Sektor: ${loc.Sektor || '-'}
-              </div>
+        const programName = loc['Program PPM'] || loc.Program || '-';
+        const googleMapsUrl = loc.map_link || `https://www.google.com/maps?q=${lat},${lng}`;
+        
+        const marker = L.marker([lat, lng]).addTo(map);
+        
+        marker.bindTooltip(`
+          <a href="${googleMapsUrl}" target="_blank" rel="noopener noreferrer" 
+             class="block bg-white/95 hover:bg-[#1e3a8a] text-[#1e3a8a] hover:text-white p-2 rounded shadow-md border border-blue-600/30 transition-all duration-200 no-underline cursor-pointer min-w-[160px]">
+            <div class="font-extrabold text-xs flex items-center justify-between gap-2 border-b border-gray-100 pb-1 mb-1">
+              <span>📍 ${programName}</span>
+              <span class="text-[10px] opacity-75">↗</span>
             </div>
-          `);
+            <div class="text-[10px] text-gray-600 hover:text-blue-100 font-medium">
+              ${loc['Desa/Kelurahan'] || loc.Desa}, ${loc.Kecamatan} • Sektor: ${loc.Sektor || '-'}
+            </div>
+            <div class="text-[9px] text-blue-600 hover:text-white font-bold mt-1 flex items-center gap-1">
+              <span>Klik untuk buka Google Maps</span> ↗
+            </div>
+          </a>
+        `, {
+          permanent: false,
+          direction: 'top',
+          offset: [0, -25],
+          interactive: true,
+          className: 'custom-infographic-tooltip'
+        });
+
+        marker.bindPopup(`
+          <div class="text-xs p-1.5 min-w-[170px]">
+            <b class="text-[#1e3a8a] text-sm block border-b border-gray-100 pb-1 mb-1">${programName}</b>
+            <span class="text-gray-600 font-medium">${loc['Desa/Kelurahan'] || loc.Desa}, ${loc.Kecamatan}, ${loc.Kabupaten}</span><br/>
+            <div class="mt-1.5 inline-block bg-blue-100 text-blue-800 px-2 py-0.5 rounded text-[10px] font-bold">
+              Sektor: ${loc.Sektor || '-'}
+            </div>
+            <div class="mt-2.5 pt-2 border-t border-gray-200">
+              <a href="${googleMapsUrl}" target="_blank" rel="noopener noreferrer" 
+                 class="flex items-center justify-center gap-1.5 w-full bg-[#1e3a8a] text-white px-3 py-1.5 rounded text-[11px] font-bold hover:bg-blue-800 transition-colors no-underline shadow-sm">
+                📍 Buka di Google Maps ↗
+              </a>
+            </div>
+          </div>
+        `);
       }
     });
 
@@ -176,7 +202,6 @@ Instruksi:
   if (!homeData) return null;
 
   const currentPeriodStr = `${monthName} ${currentYearStr}`;
-  const filteredPresentations = presentations.filter(p => p.period === currentPeriodStr);
 
   const sectorIcons = {
     'Perkebunan': <span className="text-green-600">🌱</span>,
@@ -212,7 +237,7 @@ Instruksi:
             {!isFullScreen && (
               <button 
                 onClick={() => setIsFullScreen(true)}
-                className="bg-white hover:bg-slate-50 text-slate-700 p-2 rounded shadow-md border border-slate-200 transition-colors"
+                className="bg-white hover:bg-slate-50 text-slate-700 p-2 rounded shadow-md border border-slate-200 transition-colors cursor-pointer"
                 title="Lihat Peta Penuh"
               >
                 <Maximize size={18} />
@@ -371,60 +396,6 @@ Instruksi:
               </div>
             </div>
 
-            <button 
-              onClick={async () => {
-                try {
-                  setIsGeneratingSlide(true);
-                  const result = await generateGoogleSlide(globalDate, aiReportStatement);
-                  if (result && result.record) {
-                    setPresentations(prev => [result.record, ...prev]);
-                    window.open(result.url, '_blank');
-                  }
-                } catch (error) {
-                  console.error("Error generating presentation:", error);
-                  alert("Gagal men-generate presentasi: " + error.message);
-                } finally {
-                  setIsGeneratingSlide(false);
-                }
-              }}
-              disabled={isGeneratingSlide}
-              className={`mt-6 flex-shrink-0 w-full py-2.5 text-white text-sm font-bold rounded shadow-sm transition-colors flex justify-center items-center gap-2 ${isGeneratingSlide ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#1e3a8a] hover:bg-[#152a6b]'}`}
-            >
-              {isGeneratingSlide ? (
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-              ) : (
-                <Presentation size={16} />
-              )}
-              {isGeneratingSlide ? "Sedang Membuat Slide..." : "Buat Presentasi"}
-            </button>
-            
-            {/* PANEL PRESENTASI */}
-            {filteredPresentations.length > 0 && (
-              <div className="mt-4 border-t border-gray-200 pt-4">
-                <h4 className="text-[12px] font-bold text-[#25326a] uppercase tracking-wider mb-3 flex items-center gap-2">
-                  <FileText size={14} className="text-[#1e3a8a]" /> Link Presentasi Tersimpan ({currentPeriodStr})
-                </h4>
-                <div className="flex flex-col gap-2 max-h-32 overflow-y-auto minimal-scrollbar pr-2">
-                  {filteredPresentations.map((p) => (
-                    <a 
-                      key={p.id} 
-                      href={p.slide_url} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="text-[12px] flex items-center gap-3 p-2.5 bg-blue-50/50 hover:bg-blue-50 border border-blue-100 rounded text-[#1e3a8a] transition-all hover:shadow-sm"
-                    >
-                      <div className="bg-white p-1.5 rounded shadow-sm">
-                        <Presentation size={14} className="text-blue-600" />
-                      </div>
-                      <span className="font-semibold truncate flex-1">Presentasi SCD - {p.period}</span>
-                      <span className="text-[10px] text-gray-500 font-medium bg-white px-2 py-0.5 rounded border border-gray-100">
-                        {new Date(p.created_at).toLocaleDateString('id-ID')}
-                      </span>
-                    </a>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
         </div>
 
