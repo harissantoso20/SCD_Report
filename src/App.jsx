@@ -1,6 +1,7 @@
 import React, { Suspense, lazy, useEffect } from 'react';
 import useAppStore from './store/useAppStore';
 import logoPTBA from './assets/logo-ptba.png';
+import { version as appVersion } from '../package.json';
 
 class GlobalErrorBoundary extends React.Component {
   constructor(props) {
@@ -117,7 +118,7 @@ export default function App() {
 
         <footer className="w-full text-center py-6 mt-auto">
           <p className="text-gray-500 text-[13px] font-medium">© 2026 Sustainable Community Development</p>
-          <p className="text-[11px] text-gray-400 mt-1.5 font-mono">Version: v1.0.7</p>
+          <p className="text-[11px] text-gray-400 mt-1.5 font-mono">Version: v{appVersion}</p>
         </footer>
       </div>
     </GlobalErrorBoundary>
