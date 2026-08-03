@@ -1,6 +1,6 @@
 import React from 'react';
 import useAppStore from '../../store/useAppStore';
-import { PROGRAMS, PROGRAM_IMAGES } from '../../data/mockData';
+import { PROGRAMS, PROGRAM_IMAGES, PROGRAM_DETAILS } from '../../data/mockData';
 import { ChevronDown } from '../Icons';
 
 const INDO_MONTHS = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
@@ -31,7 +31,19 @@ export default function DataEntryHeader({ isLoading }) {
       <div className="lg:w-1/2 flex flex-col justify-between">
         <div>
           <h2 className="text-3xl font-extrabold text-[#1e3a8a] mb-2 tracking-tight">Data Entry {isLoading && <span className="text-sm font-normal text-gray-400">(Loading...)</span>}</h2>
-          <p className="text-gray-600 font-medium text-[13.5px] pr-4 leading-relaxed">Update ringkasan program dan data kuantitatif program sustainable community development.</p>
+          <p className="text-gray-600 font-medium text-[13.5px] pr-4 leading-relaxed text-justify">
+            {selectedProgram?.toLowerCase().includes("plts") 
+              ? "Pompa Irigasi Berbasis PLTS adalah inisiatif pemanfaatan energi terbarukan untuk mengatasi krisis air di sektor pertanian. Program ini bertujuan untuk meningkatkan produktivitas panen (dari 1x menjadi 2-3x setahun), memperluas lahan produktif, serta mendorong kemandirian ekonomi petani secara berkelanjutan."
+              : selectedProgram?.toLowerCase().includes("maggot")
+              ? "Budidaya Maggot Tanjung Agung adalah inisiatif ekonomi sirkular yang mengubah masalah sampah organik menjadi pakan ternak alternatif bernilai ekonomi tinggi. Program ini bertujuan mengatasi tingginya biaya pakan ternak dan perikanan sekaligus mengurangi limbah lingkungan, dengan kemampuan menyerap 12 ton sampah per tahun, meningkatkan efisiensi biaya pakan hingga 35%, serta berkontribusi pada penurunan emisi karbon."
+              : selectedProgram?.toLowerCase().includes("ikan air tawar")
+              ? "Budidaya Ikan Air Tawar Desa Tanjung Agung adalah inisiatif produktif berbasis kelompok yang bertujuan untuk meningkatkan ketahanan pangan dan pendapatan masyarakat lokal, khususnya bagi kelompok pemuda dan eks-pekerja PETI. Program ini berfokus secara holistik pada operasional budidaya, meliputi pembangunan unit kolam, pelatihan teknis pembesaran jenis ikan seperti lele, nila, patin, gurame, dan gabus, serta pendampingan manajemen pakan, kualitas air, hingga masa panen."
+              : selectedProgram?.toLowerCase().includes("siba")
+              ? "SIBA Pembibitan di Desa Tanjung Karangan adalah inisiatif pengembangan sentra pembibitan tanaman hortikultura dan tanaman produktif untuk menciptakan alternatif mata pencaharian yang berkelanjutan, khususnya bagi eks-pekerja PETI. Program ini berfokus pada penguatan operasional usaha pembibitan secara terpadu, yang meliputi pembangunan fasilitas rumah pembibitan (greenhouse), pelatihan teknis perbanyakan tanaman (seperti stek, cangkok, dan okulasi), serta produksi tambahan berupa media tanam, kompos, dan pupuk organik."
+              : selectedProgram?.toLowerCase().includes("puyuh") && selectedProgram?.toLowerCase().includes("seleman")
+              ? "Budidaya Puyuh Petelur di Desa Seleman adalah inisiatif pengembangan usaha berbasis kelompok yang bertujuan meningkatkan kapasitas ekonomi masyarakat agar lebih produktif, berkelanjutan, dan memiliki akses pasar yang stabil. Rangkaian kegiatan operasional pada program ini mencakup pembangunan dan penguatan unit kandang produksi, pelatihan teknis budidaya, serta pendampingan berkelanjutan untuk manajemen usaha dan pemasaran telur puyuh."
+              : "Update ringkasan program dan data kuantitatif program sustainable community development."}
+          </p>
         </div>
         <div className="flex flex-wrap items-center gap-2 relative z-50 mt-6 lg:mt-0">
           {/* Program Dropdown */}

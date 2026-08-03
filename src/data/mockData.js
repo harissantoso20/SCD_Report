@@ -20,7 +20,7 @@ export const PROGRAM_IMAGES = {
 
 export const PROGRAM_DETAILS = {
   "PLTS Irigasi": {
-    desc: "Meningkatkan produktivitas pertanian melalui pemanfaatan energi terbarukan berupa PLTS untuk sistem pompa irigasi guna menjamin ketersediaan air secara efisien, hemat biaya, dan ramah lingkungan.",
+    desc: "Pompa Irigasi Berbasis PLTS adalah inisiatif pemanfaatan energi terbarukan untuk mengatasi krisis air di sektor pertanian. Program ini bertujuan untuk meningkatkan produktivitas panen (dari 1x menjadi 2-3x setahun), memperluas lahan produktif, serta mendorong kemandirian ekonomi petani secara berkelanjutan.",
     lokasi: "Tanjung Enim Mining Site, Tarahan Port, Ombilin Mining Site",
     penerima: "Kelompok Tani / Petani Sawah Tadah Hujan",
     objektif: "Unit PLTS irigasi beroperasi dengan tingkat utilisasi 285%. Peningkatan IP dari 1x menjadi 2-3x tanam per tahun.",
@@ -29,13 +29,40 @@ export const PROGRAM_DETAILS = {
     realisasi: "Rp 139.286.026"
   },
   "Budidaya Maggot BSF": {
-    desc: "Meningkatkan kemandirian ekonomi masyarakat melalui pengelolaan sampah organik berbasis budidaya maggot (BSF) sebagai sumber pakan alternatif dan produk bernilai.",
+    desc: "Budidaya Maggot Tanjung Agung adalah inisiatif ekonomi sirkular yang mengubah masalah sampah organik menjadi pakan ternak alternatif bernilai ekonomi tinggi. Program ini bertujuan mengatasi tingginya biaya pakan ternak dan perikanan sekaligus mengurangi limbah lingkungan, dengan kemampuan menyerap 12 ton sampah per tahun, meningkatkan efisiensi biaya pakan hingga 35%, serta berkontribusi pada penurunan emisi karbon.",
     lokasi: "Desa Keban Agung, Lawang Kidul",
     penerima: "Kelompok Masyarakat Pengelola Sampah",
     objektif: "Tereduksinya sampah organik minimal 5 ton/bulan dan produksi maggot stabil untuk subtitusi pakan ternak warga lokal.",
     tpb: "TPB 8 & 12 - Pertumbuhan Ekonomi & Konsumsi Bertanggung Jawab",
     anggaran: "Rp 450.000.000",
     realisasi: "Rp 85.500.000"
+  },
+  "Budidaya Ikan Air Tawar": {
+    desc: "Budidaya Ikan Air Tawar Desa Tanjung Agung adalah inisiatif produktif berbasis kelompok yang bertujuan untuk meningkatkan ketahanan pangan dan pendapatan masyarakat lokal, khususnya bagi kelompok pemuda dan eks-pekerja PETI. Program ini berfokus secara holistik pada operasional budidaya, meliputi pembangunan unit kolam, pelatihan teknis pembesaran jenis ikan seperti lele, nila, patin, gurame, dan gabus, serta pendampingan manajemen pakan, kualitas air, hingga masa panen.",
+    lokasi: "Desa Tanjung Agung",
+    penerima: "Kelompok Pemuda & Eks-pekerja PETI",
+    objektif: "Peningkatan ketahanan pangan dan pendapatan masyarakat lokal.",
+    tpb: "TPB 2 & 8 - Tanpa Kelaparan & Pertumbuhan Ekonomi",
+    anggaran: "Rp 500.000.000",
+    realisasi: "Rp 120.000.000"
+  },
+  "SIBA Pembibitan": {
+    desc: "SIBA Pembibitan di Desa Tanjung Karangan adalah inisiatif pengembangan sentra pembibitan tanaman hortikultura dan tanaman produktif untuk menciptakan alternatif mata pencaharian yang berkelanjutan, khususnya bagi eks-pekerja PETI. Program ini berfokus pada penguatan operasional usaha pembibitan secara terpadu, yang meliputi pembangunan fasilitas rumah pembibitan (greenhouse), pelatihan teknis perbanyakan tanaman (seperti stek, cangkok, dan okulasi), serta produksi tambahan berupa media tanam, kompos, dan pupuk organik.",
+    lokasi: "Desa Tanjung Karangan",
+    penerima: "Eks-pekerja PETI & Masyarakat Sekitar",
+    objektif: "Menciptakan alternatif mata pencaharian berkelanjutan.",
+    tpb: "TPB 8 & 15 - Pertumbuhan Ekonomi & Ekosistem Daratan",
+    anggaran: "Rp 350.000.000",
+    realisasi: "Rp 90.000.000"
+  },
+  "Budidaya Puyuh Petelur (Seleman)": {
+    desc: "Budidaya Puyuh Petelur di Desa Seleman adalah inisiatif pengembangan usaha berbasis kelompok yang bertujuan meningkatkan kapasitas ekonomi masyarakat agar lebih produktif, berkelanjutan, dan memiliki akses pasar yang stabil. Rangkaian kegiatan operasional pada program ini mencakup pembangunan dan penguatan unit kandang produksi, pelatihan teknis budidaya, serta pendampingan berkelanjutan untuk manajemen usaha dan pemasaran telur puyuh.",
+    lokasi: "Desa Seleman",
+    penerima: "Masyarakat Desa Seleman",
+    objektif: "Meningkatkan kapasitas ekonomi masyarakat agar lebih produktif.",
+    tpb: "TPB 1 & 8 - Tanpa Kemiskinan & Pertumbuhan Ekonomi",
+    anggaran: "Rp 400.000.000",
+    realisasi: "Rp 150.000.000"
   },
   "default": {
     desc: "Meningkatkan kesejahteraan masyarakat lingkar tambang melalui program pemberdayaan ekonomi dan pelestarian lingkungan yang berkelanjutan.",

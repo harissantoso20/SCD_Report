@@ -151,6 +151,7 @@ const QuailAnalytics = React.memo(function QuailAnalytics() {
               <div className="flex flex-col mb-1 relative z-10">
                 <span className="text-[9px] font-bold text-slate-500 tracking-wider uppercase mb-1">Vol. Penjualan Telur</span>
                 <span className="text-lg xl:text-xl tracking-tight font-extrabold text-[#1e3a8a]">{new Intl.NumberFormat('id-ID').format(quailYTD.total_qty_telur)} <span className="text-sm font-semibold text-slate-400">Butir</span></span>
+                <span className="text-xs font-semibold text-slate-500 mt-0.5">≈ {new Intl.NumberFormat('id-ID', { maximumFractionDigits: 1 }).format(quailYTD.total_qty_telur / 90)} <span className="font-medium text-slate-400">Kg</span></span>
               </div>
               {/* Doodle Art */}
               <div className="absolute -bottom-4 -right-4 text-sky-100/40 group-hover:scale-110 transition-transform duration-500 pointer-events-none">

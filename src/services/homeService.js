@@ -42,6 +42,7 @@ export const homeService = {
     };
 
     const groupedByLocation = {};
+    const allGroupedByLocation = {};
 
     ring1.forEach(item => {
       // Safely access fields since user might have used different names
@@ -53,7 +54,19 @@ export const homeService = {
       
       if (desa && desa !== '-') {
         uniqueDesa.add(desa);
+        
+        const regionKey = `[${kec}], [${kab}]`;
+        if (!allGroupedByLocation[regionKey]) {
+          allGroupedByLocation[regionKey] = {};
+        }
+        if (!allGroupedByLocation[regionKey][desa]) {
+          allGroupedByLocation[regionKey][desa] = [];
+        }
+        if (program && program !== '-') {
+          allGroupedByLocation[regionKey][desa].push(program);
+        }
       }
+
       if (kec && kec !== '-') uniqueKec.add(kec);
       if (kab && kab !== '-') uniqueKab.add(kab);
       
@@ -148,6 +161,7 @@ export const homeService = {
       ),
       luarRing1Programs,
       groupedByLocation,
+      allGroupedByLocation,
       mapData: ring1,
       monthlyProgress,
       salesData

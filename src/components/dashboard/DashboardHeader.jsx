@@ -11,10 +11,36 @@ export default function DashboardHeader() {
   const selectedDate = useAppStore((state) => state.globalDate);
   const setSelectedDate = useAppStore((state) => state.setGlobalDate);
   const programListFromStore = useAppStore((state) => state.programList);
-
+  
   const availablePrograms = programListFromStore?.length > 0 ? programListFromStore : PROGRAMS;
-  const bannerImage = React.useMemo(() => PROGRAM_IMAGES[selectedProgram] || PROGRAM_IMAGES["default"], [selectedProgram]);
-  const details = React.useMemo(() => PROGRAM_DETAILS[selectedProgram] || PROGRAM_DETAILS["default"], [selectedProgram]);
+  
+  const bannerImage = React.useMemo(() => {
+    const sLow = selectedProgram?.toLowerCase() || "";
+    const key = Object.keys(PROGRAM_IMAGES).find(k => {
+      const kLow = k.toLowerCase();
+      return kLow === sLow || 
+             (sLow.includes('maggot') && kLow.includes('maggot')) ||
+             (sLow.includes('plts') && kLow.includes('plts')) ||
+             (sLow.includes('ikan air tawar') && kLow.includes('ikan air tawar')) ||
+             (sLow.includes('siba') && kLow.includes('siba')) ||
+             (sLow.includes('puyuh') && sLow.includes('seleman') && kLow.includes('puyuh') && kLow.includes('seleman'));
+    });
+    return PROGRAM_IMAGES[key] || PROGRAM_IMAGES["default"];
+  }, [selectedProgram]);
+
+  const details = React.useMemo(() => {
+    const sLow = selectedProgram?.toLowerCase() || "";
+    const key = Object.keys(PROGRAM_DETAILS).find(k => {
+      const kLow = k.toLowerCase();
+      return kLow === sLow || 
+             (sLow.includes('maggot') && kLow.includes('maggot')) ||
+             (sLow.includes('plts') && kLow.includes('plts')) ||
+             (sLow.includes('ikan air tawar') && kLow.includes('ikan air tawar')) ||
+             (sLow.includes('siba') && kLow.includes('siba')) ||
+             (sLow.includes('puyuh') && sLow.includes('seleman') && kLow.includes('puyuh') && kLow.includes('seleman'));
+    });
+    return PROGRAM_DETAILS[key] || PROGRAM_DETAILS["default"];
+  }, [selectedProgram]);
 
   const currentMonthStr = selectedDate ? selectedDate.split('-')[1] : "01";
   const currentYearStr = selectedDate ? selectedDate.split('-')[0] : "2026";
@@ -34,7 +60,7 @@ export default function DashboardHeader() {
           <h2 className="text-3xl font-extrabold text-[#1e3a8a] mb-3 tracking-tight leading-tight">
             {selectedProgram}
           </h2>
-          <p className="text-gray-600 font-medium text-[13.5px] pr-4 leading-relaxed border-l-4 border-[#1e3a8a] pl-3">
+          <p className="text-gray-600 font-medium text-[13.5px] pr-4 leading-relaxed border-l-4 border-[#1e3a8a] pl-3 text-justify">
             {details.desc}
           </p>
         </div>

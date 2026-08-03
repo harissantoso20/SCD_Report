@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import useAppStore from '../store/useAppStore';
 import * as L from 'leaflet';
 import { MapPin, Lightbulb, TrendingUp, AlertCircle, CheckCircle, ChevronDown } from './Icons';
-import { Maximize, Minimize } from 'lucide-react';
+import { Maximize, Minimize, X } from 'lucide-react';
 import logoSDGs from '../assets/logo-sdgs.png';
 import { generateText } from '../lib/geminiClient';
 import ReactMarkdown from 'react-markdown';
@@ -16,6 +16,8 @@ export default function HomeView() {
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [aiReportStatement, setAiReportStatement] = useState('');
   const [isAiLoading, setIsAiLoading] = useState(false);
+  const [modalConfig, setModalConfig] = useState(null);
+
   useEffect(() => {
     fetchHomeData();
   }, [fetchHomeData]);
@@ -211,6 +213,124 @@ Instruksi:
     'Infrastruktur': <span className="text-purple-600">🏗️</span>
   };
 
+  const renderModalContent = () => {
+    if (!modalConfig || !homeData) return null;
+
+    if (modalConfig.type === 'GROUPED_BY_LOCATION') {
+      return (
+        <div className="flex flex-col gap-6">
+          {Object.entries(homeData.groupedByLocation).map(([region, desaObj], idx) => (
+            <div key={idx}>
+              <h4 className="font-bold text-gray-700 bg-gray-100 px-3 py-2 rounded-md mb-3">{region}</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {Object.entries(desaObj).map(([desa, programs], vIdx) => (
+                  <div key={vIdx} className="border border-gray-200 rounded p-3 bg-gray-50 hover:bg-blue-50 transition-colors">
+                    <p className="font-bold text-blue-700 mb-2">{desa}</p>
+                    <ul className="flex flex-col gap-1.5 pl-4 list-disc marker:text-gray-400">
+                      {programs.map((prog, pIdx) => (
+                        <li key={pIdx} className="text-sm text-gray-700 leading-tight">{prog}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    if (modalConfig.type === 'ALL_LOCATIONS_RING_1') {
+      return (
+        <div className="flex flex-col gap-6">
+          {Object.entries(homeData.allGroupedByLocation || {}).map(([region, desaObj], idx) => (
+            <div key={idx}>
+              <h4 className="font-bold text-gray-700 bg-gray-100 px-3 py-2 rounded-md mb-3">{region}</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {Object.entries(desaObj).map(([desa, programs], vIdx) => (
+                  <div key={vIdx} className="border border-gray-200 rounded p-3 bg-gray-50 hover:bg-blue-50 transition-colors">
+                    <p className="font-bold text-blue-700 mb-2">{desa}</p>
+                    {programs.length > 0 ? (
+                      <ul className="flex flex-col gap-1.5 pl-4 list-disc marker:text-gray-400">
+                        {programs.map((prog, pIdx) => (
+                          <li key={pIdx} className="text-sm text-gray-700 leading-tight">{prog}</li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-sm text-gray-400 italic flex items-center gap-1.5">
+                        <span className="text-gray-300 text-[10px]">●</span> Belum ada program
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    if (modalConfig.type === 'GROUPED_BY_SECTOR') {
+      const sektorData = {};
+      homeData.mapData.forEach(item => {
+        const sektor = item.Sektor || 'Lainnya';
+        const program = item['Program PPM'] || item.Program || '';
+        const desa = item['Desa/Kelurahan'] || item.Desa || '';
+        
+        if (program && program !== '-') {
+          let targetSektor = sektor;
+          const s = (sektor || '').toLowerCase();
+          if (s.includes('kebun') || s.includes('tani') || s.includes('agric')) targetSektor = 'Perkebunan';
+          else if (s.includes('ternak') || s.includes('hewan')) targetSektor = 'Peternakan';
+          else if (s.includes('industri') || s.includes('olah') || s.includes('pabrik')) targetSektor = 'Industri';
+          else if (s.includes('ikan') || s.includes('lele') || s.includes('air')) targetSektor = 'Perikanan';
+          else if (s.includes('infra') || s.includes('insfra') || s.includes('plts') || s.includes('bangun')) targetSektor = 'Infrastruktur';
+          
+          if (!sektorData[targetSektor]) sektorData[targetSektor] = {};
+          if (!sektorData[targetSektor][program]) sektorData[targetSektor][program] = new Set();
+          if (desa && desa !== '-') sektorData[targetSektor][program].add(desa);
+        }
+      });
+
+      return (
+        <div className="flex flex-col gap-6">
+          {Object.entries(sektorData).map(([sektor, progObj], idx) => (
+            <div key={idx}>
+              <h4 className="font-bold text-white bg-[#1e3a8a] px-3 py-2 rounded-md mb-3 flex items-center gap-2">
+                {sectorIcons[sektor] || '📦'} {sektor}
+              </h4>
+              <div className="flex flex-col gap-3">
+                {Object.entries(progObj).map(([prog, desaSet], pIdx) => (
+                  <div key={pIdx} className="border-l-4 border-[#1e3a8a]/40 pl-3 py-1 hover:border-[#1e3a8a] transition-colors">
+                    <p className="font-bold text-gray-800">{prog}</p>
+                    <p className="text-sm text-gray-500 mt-1">
+                      <span className="font-medium">Lokasi:</span> {Array.from(desaSet).join(', ') || '-'}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    if (modalConfig.type === 'LUAR_RING_1') {
+      return (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {homeData.luarRing1Programs.map((prog, i) => (
+            <div key={i} className="border border-gray-200 rounded p-3 bg-gray-50 flex items-start gap-3 hover:bg-orange-50 transition-colors">
+              <span className="text-orange-500 text-lg leading-none">☀️</span>
+              <span className="text-sm font-medium text-gray-700 leading-snug">{prog}</span>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    return null;
+  };
+
   return (
     <div className="flex flex-col gap-6 -mt-4 md:-mt-6 lg:-mx-auto -mx-4 md:-mx-6 lg:max-w-none">
       
@@ -263,7 +383,10 @@ Instruksi:
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 -mt-16 relative z-10 px-4 md:px-6 lg:max-w-7xl lg:mx-auto w-full">
         
         {/* Card 1 */}
-        <div className="bg-white rounded-md shadow-lg border border-gray-100 p-5 flex items-start gap-4 hover:-translate-y-1 transition-transform">
+        <div 
+          onClick={() => setModalConfig({ title: 'Detail Jumlah Lokasi Ring 1', type: 'ALL_LOCATIONS_RING_1' })}
+          className="bg-white rounded-md shadow-lg border border-gray-100 p-5 flex items-start gap-4 hover:-translate-y-1 hover:shadow-xl transition-all cursor-pointer"
+        >
           <div className="bg-blue-50 p-3 rounded-full text-blue-700 mt-1">
             <MapPin size={28} />
           </div>
@@ -281,7 +404,10 @@ Instruksi:
         </div>
 
         {/* Card 2 */}
-        <div className="bg-white rounded-md shadow-lg border border-gray-100 p-5 flex items-start gap-4 hover:-translate-y-1 transition-transform">
+        <div 
+          onClick={() => setModalConfig({ title: 'Detail Jumlah Program Ring 1', type: 'GROUPED_BY_LOCATION' })}
+          className="bg-white rounded-md shadow-lg border border-gray-100 p-5 flex items-start gap-4 hover:-translate-y-1 hover:shadow-xl transition-all cursor-pointer"
+        >
           <div className="bg-yellow-50 p-3 rounded-full text-yellow-600 mt-1">
             <Lightbulb size={28} />
           </div>
@@ -298,7 +424,10 @@ Instruksi:
         </div>
 
         {/* Card 3 */}
-        <div className="bg-white rounded-md shadow-lg border border-gray-100 p-5 hover:-translate-y-1 transition-transform">
+        <div 
+          onClick={() => setModalConfig({ title: 'Detail Program Per Sektor', type: 'GROUPED_BY_SECTOR' })}
+          className="bg-white rounded-md shadow-lg border border-gray-100 p-5 hover:-translate-y-1 hover:shadow-xl transition-all cursor-pointer"
+        >
           <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wide border-b border-gray-100 pb-2 mb-3">Jumlah Program Per Sektor</p>
           <div className="flex flex-col gap-2">
             {Object.entries(homeData.sektorCount).map(([sektor, count]) => (
@@ -312,7 +441,10 @@ Instruksi:
         </div>
 
         {/* Card 4 */}
-        <div className="bg-white rounded-md shadow-lg border border-gray-100 p-5 hover:-translate-y-1 transition-transform">
+        <div 
+          onClick={() => setModalConfig({ title: 'Detail Program di Luar Ring 1', type: 'LUAR_RING_1' })}
+          className="bg-white rounded-md shadow-lg border border-gray-100 p-5 hover:-translate-y-1 hover:shadow-xl transition-all cursor-pointer"
+        >
           <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wide border-b border-gray-100 pb-2 mb-3">Program di Luar Ring 1</p>
           <div className="flex items-start gap-2 mb-2">
             <span className="text-xl">☀️</span>
@@ -438,6 +570,33 @@ Instruksi:
           <img src={logoSDGs} alt="SDGs Goals" className="w-full h-auto object-contain mix-blend-multiply opacity-90 hover:opacity-100 transition-opacity cursor-pointer" title="Sustainable Development Goals" />
         </div>
       </div>
+
+      {/* INFOGRAPHIC MODAL */}
+      {modalConfig && (
+        <div className="fixed inset-0 z-[10000] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 md:p-6 animate-in fade-in duration-200">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-5 border-b border-gray-100 bg-gray-50/80">
+              <h3 className="font-extrabold text-xl text-[#1e3a8a] flex items-center gap-2">
+                <Lightbulb className="text-yellow-500" size={24} />
+                {modalConfig.title}
+              </h3>
+              <button 
+                onClick={() => setModalConfig(null)} 
+                className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors"
+                title="Tutup"
+              >
+                <X size={24} strokeWidth={2.5} />
+              </button>
+            </div>
+            
+            {/* Modal Body */}
+            <div className="p-6 overflow-y-auto custom-scrollbar flex-1 bg-white">
+              {renderModalContent()}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
