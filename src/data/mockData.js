@@ -4,7 +4,7 @@ export const PROGRAMS = [
   "PLTS Irigasi", "Budidaya Maggot BSF", "Budidaya Ikan Air Tawar", "SIBA Pembibitan", 
   "Budidaya Puyuh Petelur (Seleman)", "Budidaya Puyuh Petelur (Darmo)", "EcoGrow Mom Utun Makmur", 
   "Poktan Cahaya Tani", "Budidaya Itik Petelur", "Suscomdev Lingkar Tambang", "Suscomdev Sirah Pulau", 
-  "Suscomdev Prabumenang", "Budidaya Ikan RAS System", "BA-MAXI", "PROKLIM"
+  "Suscomdev Prabumenang", "Budidaya Ikan RAS System", "BA-MAXI", "PROKLIM", "Revitalisasi Taman Kehati"
 ];
 
 export const PROGRAM_IMAGES = {
@@ -63,6 +63,105 @@ export const PROGRAM_DETAILS = {
     tpb: "TPB 1 & 8 - Tanpa Kemiskinan & Pertumbuhan Ekonomi",
     anggaran: "Rp 400.000.000",
     realisasi: "Rp 150.000.000"
+  },
+  "Budidaya Puyuh Petelur (Darmo)": {
+    desc: "Program Budidaya Puyuh Petelur Darmo adalah inisiatif pemberdayaan masyarakat lingkar tambang (eks-PETI) melalui ekosistem agribisnis puyuh terintegrasi. Dengan menerapkan model ekonomi sirkular—mulai dari produksi telur hingga pengolahan limbah menjadi pupuk dan maggot—program ini bertujuan meningkatkan kemandirian ekonomi sekaligus mendukung pelestarian lingkungan yang berkelanjutan.",
+    lokasi: "Desa Darmo",
+    penerima: "Masyarakat Desa Darmo",
+    objektif: "Meningkatkan kemandirian ekonomi sekaligus mendukung pelestarian lingkungan yang berkelanjutan.",
+    tpb: "TPB 8 & 12 - Pertumbuhan Ekonomi & Konsumsi Bertanggung Jawab",
+    anggaran: "Rp 0",
+    realisasi: "Rp 0"
+  },
+  "EcoGrow Mom Utun Makmur": {
+    desc: "Program EcoGrow Mom KWT Utun Makmur adalah inisiatif pemberdayaan perempuan rentan (eks-PETI) melalui optimalisasi lahan pekarangan untuk budidaya hortikultura dan pengolahan hasil pertanian. Program ini mengintegrasikan ketahanan pangan, peningkatan pendapatan, dan praktik ekonomi sirkular guna mewujudkan kemandirian ekonomi keluarga secara berkelanjutan.",
+    lokasi: "Tanjung Enim",
+    penerima: "KWT Utun Makmur",
+    objektif: "Mewujudkan kemandirian ekonomi keluarga secara berkelanjutan.",
+    tpb: "TPB 2 & 8 - Tanpa Kelaparan & Pertumbuhan Ekonomi",
+    anggaran: "Rp 0",
+    realisasi: "Rp 0"
+  },
+  "Poktan Cahaya Tani": {
+    desc: "Program Poktan Cahaya Tani adalah inisiatif pemberdayaan masyarakat lingkar tambang (eks-PETI) melalui pengembangan sentra pembibitan modern terpadu. Program ini menyediakan bibit untuk kebutuhan reklamasi, penghijauan, dan perkebunan sebagai mata pencaharian alternatif yang mendukung pertumbuhan ekonomi sekaligus pelestarian lingkungan berkelanjutan.",
+    lokasi: "Tanjung Enim",
+    penerima: "Poktan Cahaya Tani",
+    objektif: "Mendukung pertumbuhan ekonomi sekaligus pelestarian lingkungan berkelanjutan.",
+    tpb: "TPB 8 & 15 - Pertumbuhan Ekonomi & Ekosistem Daratan",
+    anggaran: "Rp 0",
+    realisasi: "Rp 0"
+  },
+  "Budidaya Itik Petelur": {
+    desc: "Program Budidaya Itik Petelur di Desa Tegal Rejo adalah inisiatif pemberdayaan masyarakat lingkar tambang yang dirancang sebagai tindakan preventif untuk mencegah keterlibatan warga dalam aktivitas penambangan tanpa izin (PETI). Melalui penerapan standar budidaya (SOP), pendampingan intensif, dan pembukaan akses pasar, program ini menyediakan alternatif mata pencaharian yang layak untuk mewujudkan kelompok peternak yang mandiri dan berkelanjutan.",
+    lokasi: "Desa Tegal Rejo",
+    penerima: "Masyarakat Desa Tegal Rejo",
+    objektif: "Menyediakan alternatif mata pencaharian yang layak untuk mewujudkan kelompok peternak yang mandiri dan berkelanjutan.",
+    tpb: "TPB 8 - Pertumbuhan Ekonomi",
+    anggaran: "Rp 0",
+    realisasi: "Rp 0"
+  },
+  "Suscomdev Lingkar Tambang": {
+    desc: "Program Lingga Smart Grow adalah inisiatif pemberdayaan kelompok pemuda rentan sosial-ekonomi di kawasan lingkar tambang Desa Lingga melalui pengembangan budidaya melon premium bernilai komersial. Dengan menerapkan sistem pertanian modern berbasis smart greenhouse, hidroponik, dan Internet of Things (IoT), program ini bertujuan menciptakan kemandirian ekonomi, mengurangi ketergantungan pada sektor tambang, serta mewujudkan ekosistem agribisnis sirkular yang berkelanjutan.",
+    lokasi: "Desa Lingga",
+    penerima: "Kelompok Pemuda Rentan Sosial-Ekonomi",
+    objektif: "Menciptakan kemandirian ekonomi, mengurangi ketergantungan pada sektor tambang, serta mewujudkan ekosistem agribisnis sirkular yang berkelanjutan.",
+    tpb: "TPB 8 - Pertumbuhan Ekonomi",
+    anggaran: "Rp 0",
+    realisasi: "Rp 0"
+  },
+  "Suscomdev Prabumenang": {
+    desc: "Program Suscomdev Prabumenang adalah inisiatif pemberdayaan ibu rumah tangga pra-sejahtera di lingkar tambang melalui pengembangan UMKM produksi tempe. Program ini berfokus pada peningkatan standar produksi, fasilitasi legalitas usaha, dan diversifikasi produk untuk mewujudkan ekosistem Sentra Industri Kedelai yang mandiri dan berkelanjutan.",
+    lokasi: "Desa Prabumenang",
+    penerima: "Ibu Rumah Tangga Pra-Sejahtera",
+    objektif: "Mewujudkan ekosistem Sentra Industri Kedelai yang mandiri dan berkelanjutan.",
+    tpb: "TPB 8 - Pertumbuhan Ekonomi",
+    anggaran: "Rp 0",
+    realisasi: "Rp 0"
+  },
+  "Budidaya Ikan RAS System": {
+    desc: "Program Budidaya RAS System di Desa Keban Agung merupakan inisiatif pemberdayaan masyarakat lingkar tambang yang bertujuan menciptakan unit usaha perikanan modern berbasis kelompok melalui penerapan teknologi Recirculating Aquaculture System (RAS). Melalui integrasi kolam terpadu dan hidroponik yang sangat hemat air, program ini mendorong efisiensi produktivitas budidaya ikan air tawar guna meningkatkan kesejahteraan ekonomi sekaligus mendukung pelestarian lingkungan yang berkelanjutan.",
+    lokasi: "Desa Keban Agung",
+    penerima: "Masyarakat Desa Keban Agung",
+    objektif: "Menciptakan unit usaha perikanan modern berbasis kelompok melalui penerapan teknologi Recirculating Aquaculture System (RAS).",
+    tpb: "TPB 8 & 12 - Pertumbuhan Ekonomi & Konsumsi Bertanggung Jawab",
+    anggaran: "Rp 0",
+    realisasi: "Rp 0"
+  },
+  "BA-MAXI": {
+    desc: "Program Bukit Asam Mangrove Nexus Initiative (BA-MAXI) adalah inisiatif peningkatan ketahanan ekosistem pesisir di berbagai wilayah operasional melalui rehabilitasi mangrove guna mencegah abrasi dan menjaga keanekaragaman hayati.",
+    lokasi: "Berbagai Wilayah Operasional",
+    penerima: "Masyarakat Pesisir",
+    objektif: "Meningkatkan ketahanan ekosistem pesisir melalui rehabilitasi mangrove guna mencegah abrasi dan menjaga keanekaragaman hayati.",
+    tpb: "TPB 14 - Ekosistem Laut",
+    anggaran: "Rp 0",
+    realisasi: "Rp 0"
+  },
+  "PROKLIM": {
+    desc: "Program Kampung Iklim (ProKlim) di kawasan Tanjung Enim merupakan inisiatif kolaboratif antara pemerintah, perusahaan, dan masyarakat untuk meningkatkan peran aktif warga dalam upaya adaptasi serta mitigasi perubahan iklim di tingkat desa. Melalui serangkaian kegiatan terpadu seperti pengelolaan sampah, penghijauan, edukasi, dan konservasi air, program ini berupaya menciptakan lingkungan yang bersih dan berkelanjutan yang sejalan dengan pencapaian TPB/SDGs 13.",
+    lokasi: "Kawasan Tanjung Enim",
+    penerima: "Masyarakat Desa/Kelurahan",
+    objektif: "Menciptakan lingkungan yang bersih dan berkelanjutan yang sejalan dengan pencapaian TPB/SDGs 13.",
+    tpb: "TPB 13 - Penanganan Perubahan Iklim",
+    anggaran: "Rp 0",
+    realisasi: "Rp 0"
+  },
+  "Revitalisasi Taman Kehati": {
+    desc: "Program Revitalisasi Taman Kehati Bedegung merupakan inisiatif pengembangan ekowisata berbasis masyarakat yang bertujuan meningkatkan fungsi konservasi, edukasi, dan ekonomi kawasan di Desa Bedegung. Melalui revitalisasi infrastruktur dan rehabilitasi tanaman endemik, program ini berupaya melestarikan ekosistem daratan (TPB/SDGs 15) sekaligus meningkatkan kesejahteraan ekonomi masyarakat lingkar tambang secara berkelanjutan.",
+    lokasi: "Desa Bedegung",
+    penerima: "Masyarakat Desa Bedegung",
+    objektif: "Meningkatkan fungsi konservasi, edukasi, dan ekonomi kawasan.",
+    tpb: "TPB 15 - Ekosistem Daratan",
+    anggaran: "Rp 0",
+    realisasi: "Rp 0"
+  },
+  "Suscomdev Sirah Pulau": {
+    desc: "Program Pengembangan Desa Sirah Pulau adalah inisiatif pemberdayaan bagi kelompok rentan berpenghasilan rendah di kawasan lingkar tambang melalui pengembangan usaha budidaya ayam petelur komunal. Terintegrasi dengan Program Kampung Iklim (Proklim), program ini menerapkan praktik ekonomi sirkular dan infrastruktur kandang adaptif untuk meningkatkan ketahanan pangan, menangani stunting desa, serta menciptakan kemandirian ekonomi yang sejalan dengan TPB/SDGs 8.",
+    lokasi: "Desa Sirah Pulau",
+    penerima: "Kelompok Rentan Berpenghasilan Rendah",
+    objektif: "Meningkatkan ketahanan pangan, menangani stunting desa, serta menciptakan kemandirian ekonomi.",
+    tpb: "TPB 8 - Pertumbuhan Ekonomi",
+    anggaran: "Rp 0",
+    realisasi: "Rp 0"
   },
   "default": {
     desc: "Meningkatkan kesejahteraan masyarakat lingkar tambang melalui program pemberdayaan ekonomi dan pelestarian lingkungan yang berkelanjutan.",

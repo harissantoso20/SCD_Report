@@ -23,7 +23,18 @@ export default function DashboardHeader() {
              (sLow.includes('plts') && kLow.includes('plts')) ||
              (sLow.includes('ikan air tawar') && kLow.includes('ikan air tawar')) ||
              (sLow.includes('siba') && kLow.includes('siba')) ||
-             (sLow.includes('puyuh') && sLow.includes('seleman') && kLow.includes('puyuh') && kLow.includes('seleman'));
+             (sLow.includes('puyuh') && sLow.includes('seleman') && kLow.includes('puyuh') && kLow.includes('seleman')) ||
+             (sLow.includes('puyuh') && sLow.includes('darmo') && kLow.includes('puyuh') && kLow.includes('darmo')) ||
+             (sLow.includes('ecogrow') && kLow.includes('ecogrow')) ||
+             (sLow.includes('cahaya tani') && kLow.includes('cahaya tani')) ||
+             (sLow.includes('itik petelur') && kLow.includes('itik petelur')) ||
+             (sLow.includes('suscomdev lingkar tambang') && kLow.includes('suscomdev lingkar tambang')) ||
+             (sLow.includes('suscomdev prabumenang') && kLow.includes('suscomdev prabumenang')) ||
+             (sLow.includes('ras system') && kLow.includes('ras system')) ||
+             (sLow.includes('ba-maxi') && kLow.includes('ba-maxi')) ||
+             (sLow.includes('taman kehati') && kLow.includes('taman kehati')) ||
+             (sLow.includes('sirah pulau') && kLow.includes('sirah pulau')) ||
+             (sLow.includes('proklim') && kLow.includes('proklim'));
     });
     return PROGRAM_IMAGES[key] || PROGRAM_IMAGES["default"];
   }, [selectedProgram]);
@@ -37,7 +48,18 @@ export default function DashboardHeader() {
              (sLow.includes('plts') && kLow.includes('plts')) ||
              (sLow.includes('ikan air tawar') && kLow.includes('ikan air tawar')) ||
              (sLow.includes('siba') && kLow.includes('siba')) ||
-             (sLow.includes('puyuh') && sLow.includes('seleman') && kLow.includes('puyuh') && kLow.includes('seleman'));
+             (sLow.includes('puyuh') && sLow.includes('seleman') && kLow.includes('puyuh') && kLow.includes('seleman')) ||
+             (sLow.includes('puyuh') && sLow.includes('darmo') && kLow.includes('puyuh') && kLow.includes('darmo')) ||
+             (sLow.includes('ecogrow') && kLow.includes('ecogrow')) ||
+             (sLow.includes('cahaya tani') && kLow.includes('cahaya tani')) ||
+             (sLow.includes('itik petelur') && kLow.includes('itik petelur')) ||
+             (sLow.includes('suscomdev lingkar tambang') && kLow.includes('suscomdev lingkar tambang')) ||
+             (sLow.includes('suscomdev prabumenang') && kLow.includes('suscomdev prabumenang')) ||
+             (sLow.includes('ras system') && kLow.includes('ras system')) ||
+             (sLow.includes('ba-maxi') && kLow.includes('ba-maxi')) ||
+             (sLow.includes('taman kehati') && kLow.includes('taman kehati')) ||
+             (sLow.includes('sirah pulau') && kLow.includes('sirah pulau')) ||
+             (sLow.includes('proklim') && kLow.includes('proklim'));
     });
     return PROGRAM_DETAILS[key] || PROGRAM_DETAILS["default"];
   }, [selectedProgram]);
