@@ -1,6 +1,6 @@
 import React, { Suspense, lazy, useEffect } from 'react';
 import useAppStore from './store/useAppStore';
-import logoPTBA from './assets/logo-ptba.png';
+import logoPTBA from './assets/logo/logo-ptba.png';
 import { version as appVersion } from '../package.json';
 
 class GlobalErrorBoundary extends React.Component {

@@ -13,7 +13,30 @@ export default function DataEntryHeader({ isLoading }) {
   const programListFromStore = useAppStore((state) => state.programList);
 
   const availablePrograms = programListFromStore?.length > 0 ? programListFromStore : PROGRAMS;
-  const bannerImage = React.useMemo(() => PROGRAM_IMAGES[selectedProgram] || PROGRAM_IMAGES["default"], [selectedProgram]);
+  const bannerImage = React.useMemo(() => {
+    const sLow = selectedProgram?.toLowerCase() || "";
+    const key = Object.keys(PROGRAM_IMAGES).find(k => {
+      const kLow = k.toLowerCase();
+      return kLow === sLow || 
+             (sLow.includes('maggot') && kLow.includes('maggot')) ||
+             (sLow.includes('plts') && kLow.includes('plts')) ||
+             (sLow.includes('ikan air tawar') && kLow.includes('ikan air tawar')) ||
+             (sLow.includes('siba') && kLow.includes('siba')) ||
+             (sLow.includes('puyuh') && sLow.includes('seleman') && kLow.includes('puyuh') && kLow.includes('seleman')) ||
+             (sLow.includes('puyuh') && sLow.includes('darmo') && kLow.includes('puyuh') && kLow.includes('darmo')) ||
+             (sLow.includes('ecogrow') && kLow.includes('ecogrow')) ||
+             (sLow.includes('cahaya tani') && kLow.includes('cahaya tani')) ||
+             (sLow.includes('itik petelur') && kLow.includes('itik petelur')) ||
+             (sLow.includes('suscomdev lingkar tambang') && kLow.includes('suscomdev lingkar tambang')) ||
+             (sLow.includes('suscomdev prabumenang') && kLow.includes('suscomdev prabumenang')) ||
+             (sLow.includes('ras system') && kLow.includes('ras system')) ||
+             (sLow.includes('ba-maxi') && kLow.includes('ba-maxi')) ||
+             (sLow.includes('taman kehati') && kLow.includes('taman kehati')) ||
+             (sLow.includes('sirah pulau') && kLow.includes('sirah pulau')) ||
+             (sLow.includes('proklim') && kLow.includes('proklim'));
+    });
+    return PROGRAM_IMAGES[key] || PROGRAM_IMAGES["default"];
+  }, [selectedProgram]);
 
   const currentMonthStr = selectedDate ? selectedDate.split('-')[1] : "01";
   const currentYearStr = selectedDate ? selectedDate.split('-')[0] : "2026";

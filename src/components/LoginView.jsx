@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import useAppStore from '../store/useAppStore';
-import logoPTBA from '../assets/logo-ptba.png';
+import logoPTBA from '../assets/logo/logo-ptba.png';
 import { AlertTriangle } from './Icons';
 
 export default function LoginView() {

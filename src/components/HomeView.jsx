@@ -3,7 +3,7 @@ import useAppStore from '../store/useAppStore';
 import * as L from 'leaflet';
 import { MapPin, Lightbulb, TrendingUp, AlertCircle, CheckCircle, ChevronDown } from './Icons';
 import { Maximize, Minimize, X } from 'lucide-react';
-import logoSDGs from '../assets/logo-sdgs.png';
+import logoSDGs from '../assets/logo/logo-sdgs.png';
 import { generateText } from '../lib/geminiClient';
 import ReactMarkdown from 'react-markdown';
 
