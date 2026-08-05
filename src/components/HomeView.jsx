@@ -319,9 +319,21 @@ Instruksi:
       return (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {homeData.luarRing1Programs.map((prog, i) => (
-            <div key={i} className="border border-gray-200 rounded p-3 bg-gray-50 flex items-start gap-3 hover:bg-orange-50 transition-colors">
-              <span className="text-orange-500 text-lg leading-none">☀️</span>
-              <span className="text-sm font-medium text-gray-700 leading-snug">{prog}</span>
+            <div key={i} className="border border-gray-200 rounded p-3 bg-gray-50 flex flex-col gap-2 hover:bg-orange-50 transition-colors">
+              <div className="flex items-start gap-3">
+                <span className="text-orange-500 text-lg leading-none">☀️</span>
+                <span className="text-sm font-bold text-[#1e3a8a] leading-snug">{prog.title}</span>
+              </div>
+              <div className="pl-8 text-xs text-gray-600 font-medium">
+                Desa {prog.desa}, Kec. {prog.kecamatan}, Kab. {prog.kabupaten}, {prog.provinsi}
+              </div>
+              {prog.map_link && (
+                <div className="pl-8 mt-1">
+                  <a href={prog.map_link} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 bg-[#1e3a8a] text-white hover:bg-blue-800 px-3 py-1.5 rounded text-[11px] font-bold transition-colors no-underline shadow-sm">
+                    📍 Buka di Google Maps ↗
+                  </a>
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -456,7 +468,7 @@ Instruksi:
             {homeData.luarRing1Programs.slice(0,3).map((prog, i) => (
               <div key={i} className="text-xs text-gray-500 relative">
                 <div className="absolute -left-5.5 top-1.5 w-4 h-px bg-gray-200"></div>
-                {prog}
+                {prog.title}
               </div>
             ))}
             {homeData.luarRing1Programs.length > 3 && (

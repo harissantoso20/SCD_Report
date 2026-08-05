@@ -112,7 +112,14 @@ export const homeService = {
     const plts = pltsData || [];
     const luarRing1Programs = plts
       .filter(item => item.Keterangan && item.Keterangan.toLowerCase().includes('luar ring 1'))
-      .map(item => `PLTS Irigasi Desa ${item.Desa}`);
+      .map(item => ({
+        title: `PLTS Irigasi Desa ${item.Desa}`,
+        desa: item.Desa || '-',
+        kecamatan: item.Kecamatan || '-',
+        kabupaten: item.Kabupaten || '-',
+        provinsi: item.Provinsi || '-',
+        map_link: item.map_link || (item.Latitude && item.Longitude ? `https://www.google.com/maps?q=${item.Latitude},${item.Longitude}` : null)
+      }));
 
     // 5. Fetch Monthly Progress for selected period
     let monthlyProgress = [];

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import useAppStore from '../store/useAppStore';
 import logoPTBA from '../assets/logo/logo ptba putih.png';
+import logoSDGs from '../assets/logo/Logo-SDGs-bundar.png';
 import { AlertTriangle } from './Icons';
 import bgLogin from '../assets/banner/background log in.png';
 
@@ -41,18 +42,30 @@ export default function LoginView() {
         <div className="absolute inset-0 bg-black/25"></div>
       </div>
 
-      {/* Centered Glass Card */}
-      <div className="relative z-10 w-full max-w-[420px] bg-black/40 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.6)] border border-white/20 rounded-3xl flex flex-col p-8 sm:p-10">
+      {/* Centered Large Glass Panel */}
+      <div className="relative z-10 w-full max-w-4xl backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.6)] border border-white/20 rounded-3xl overflow-hidden flex flex-col md:flex-row m-4 animate-in fade-in zoom-in-95 duration-500">
         
-        <div className="flex flex-col items-center mb-8">
-          <img src={logoPTBA} alt="Logo PTBA" className="h-14 w-auto object-contain mb-6 drop-shadow-lg" />
-          <h2 className="text-3xl font-normal text-white mb-2 text-center tracking-wide">
-            Welcome <span className="font-bold">back!</span>
-          </h2>
-          <p className="text-sm text-blue-100/80 font-medium text-center">
-            Sign in to access report
-          </p>
+        {/* Left Side: SDGs Logo (White Glass) */}
+        <div className="hidden md:flex flex-1 items-center justify-center p-10 bg-white/60 border-r border-white/20">
+          <img 
+            src={logoSDGs} 
+            alt="Sustainable Development Goals" 
+            className="w-full max-w-[320px] h-auto object-contain hover:scale-105 transition-transform duration-500" 
+          />
         </div>
+
+        {/* Right Side: Login Form (Dark Glass) */}
+        <div className="w-full md:w-[420px] flex-shrink-0 flex flex-col p-8 sm:p-12 bg-black/50">
+        
+          <div className="flex flex-col items-center mb-8">
+            <img src={logoPTBA} alt="Logo PTBA" className="h-14 w-auto object-contain mb-6 drop-shadow-lg" />
+            <h2 className="text-3xl font-normal text-white mb-2 text-center tracking-wide">
+              Welcome <span className="font-bold">back!</span>
+            </h2>
+            <p className="text-sm text-blue-100/80 font-medium text-center">
+              Sign in to access report
+            </p>
+          </div>
 
         <form className="space-y-5" onSubmit={handleSubmit}>
           {errorMsg && (
@@ -106,6 +119,7 @@ export default function LoginView() {
             &copy; {new Date().getFullYear()} SUSTAINABLE COMMUNITY DEVELOPMENT
           </p>
         </div>
+      </div>
       </div>
     </div>
   );
