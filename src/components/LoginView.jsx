@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import useAppStore from '../store/useAppStore';
 import logoPTBA from '../assets/logo/logo-ptba.png';
 import { AlertTriangle } from './Icons';
+import bgLogin from '../assets/banner/background log in.png';
 
 export default function LoginView() {
   const login = useAppStore((state) => state.login);
@@ -28,69 +29,84 @@ export default function LoginView() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f8f9fa] flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md flex flex-col items-center">
-        <img src={logoPTBA} alt="Logo PTBA" className="h-20 w-auto object-contain mb-6" />
-        <h2 className="mt-2 text-center text-3xl font-extrabold text-[#1e3a8a]">
-          SCD Report Login
-        </h2>
-        <p className="mt-2 text-center text-sm text-gray-600">
-          Sign in to access Dashboard and Data Entry
-        </p>
+    <div className="min-h-screen flex relative overflow-hidden bg-[#0d1b42] font-sans items-center justify-center p-4">
+      {/* Background Image */}
+      <div className="absolute inset-0 z-0">
+        <img 
+          src={bgLogin} 
+          alt="Background" 
+          className="w-full h-full object-cover"
+        />
+        {/* Subtle dark overlay to make the glass card stand out more */}
+        <div className="absolute inset-0 bg-[#0d1b42]/30"></div>
       </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10 border border-gray-200">
-          <form className="space-y-6" onSubmit={handleSubmit}>
-            {errorMsg && (
-              <div className="bg-red-50 p-4 rounded-md flex items-center gap-3 border border-red-200">
-                <AlertTriangle size={20} className="text-red-500" />
-                <p className="text-sm text-red-700">{errorMsg}</p>
-              </div>
-            )}
+      {/* Centered Glass Card */}
+      <div className="relative z-10 w-full max-w-[420px] bg-[#0d1b42]/40 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.5)] border border-white/20 rounded-3xl flex flex-col p-8 sm:p-10">
+        
+        <div className="flex flex-col items-center mb-8">
+          <div className="bg-white p-3 rounded-2xl shadow-lg mb-6">
+            <img src={logoPTBA} alt="Logo PTBA" className="h-10 w-auto object-contain" />
+          </div>
+          <h2 className="text-3xl font-normal text-white mb-2 text-center tracking-wide">
+            Welcome <span className="font-bold">back!</span>
+          </h2>
+          <p className="text-sm text-blue-100/80 font-medium text-center">
+            Sign in to access report
+          </p>
+        </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Email address
-              </label>
-              <div className="mt-1">
-                <input
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-[#1e3a8a] focus:border-[#1e3a8a] sm:text-sm"
-                  placeholder="admin@ptba.co.id"
-                />
-              </div>
+        <form className="space-y-5" onSubmit={handleSubmit}>
+          {errorMsg && (
+            <div className="bg-red-500/20 p-3 rounded-xl flex items-start gap-3 border border-red-500/30 backdrop-blur-sm">
+              <AlertTriangle size={20} className="text-red-400 mt-0.5 flex-shrink-0" />
+              <p className="text-xs text-red-100 font-medium leading-relaxed">{errorMsg}</p>
             </div>
+          )}
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Password
-              </label>
-              <div className="mt-1">
-                <input
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-[#1e3a8a] focus:border-[#1e3a8a] sm:text-sm"
-                  placeholder="••••••••"
-                />
-              </div>
-            </div>
+          <div>
+            <label className="block text-xs font-medium text-blue-100/80 mb-1.5 ml-1">
+              Email
+            </label>
+            <input
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="appearance-none block w-full px-4 py-3.5 bg-transparent border border-white/30 rounded-xl text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent focus:bg-white/5 sm:text-sm transition-all"
+              placeholder="Enter your email"
+            />
+          </div>
 
-            <div>
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-md shadow-sm text-sm font-bold text-white bg-[#1e3a8a] hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#1e3a8a] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                {isLoading ? "Signing in..." : "Sign in"}
-              </button>
-            </div>
-          </form>
+          <div>
+            <label className="block text-xs font-medium text-blue-100/80 mb-1.5 ml-1">
+              Password
+            </label>
+            <input
+              type="password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="appearance-none block w-full px-4 py-3.5 bg-transparent border border-white/30 rounded-xl text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent focus:bg-white/5 sm:text-sm transition-all"
+              placeholder="••••••••"
+            />
+          </div>
+
+          <div className="pt-6">
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full flex justify-center py-3.5 px-4 rounded-full shadow-lg text-sm font-bold text-[#1e3a8a] bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[#0d1b42]/40 focus:ring-white disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            >
+              {isLoading ? "Signing in..." : "Log In"}
+            </button>
+          </div>
+        </form>
+        
+        <div className="mt-8 text-center">
+          <p className="text-[10px] text-white/50 font-medium uppercase tracking-widest">
+            &copy; {new Date().getFullYear()} SUSTAINABLE COMMUNITY DEVELOPMENT
+          </p>
         </div>
       </div>
     </div>

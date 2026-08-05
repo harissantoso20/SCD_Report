@@ -18,16 +18,26 @@ class GlobalErrorBoundary extends React.Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div style={{ padding: 20, background: '#fee2e2', color: '#991b1b', minHeight: '100vh' }}>
-          <h1 style={{ fontSize: 24, fontWeight: 'bold' }}>Something went wrong.</h1>
-          <pre style={{ marginTop: 20, background: '#fef2f2', padding: 15, borderRadius: 8, overflowX: 'auto' }}>
-            {this.state.error && this.state.error.stack}
-            <br />
-            <br />
-            COMPONENT STACK:
-            <br />
-            {this.state.errorInfo && this.state.errorInfo.componentStack}
-          </pre>
+        <div style={{ padding: 20, background: '#fee2e2', color: '#991b1b', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
+          <h1 style={{ fontSize: 28, fontWeight: 'bold', marginBottom: 10 }}>Oops! Terjadi Kesalahan.</h1>
+          <p style={{ fontSize: 16, marginBottom: 20, maxWidth: 600 }}>Sistem mengalami kendala teknis. Kami mohon maaf atas ketidaknyamanan ini. Silakan muat ulang halaman.</p>
+          <button 
+            onClick={() => window.location.reload()}
+            style={{ padding: '10px 20px', background: '#991b1b', color: 'white', border: 'none', borderRadius: 6, cursor: 'pointer', fontWeight: 'bold' }}
+          >
+            Muat Ulang Halaman
+          </button>
+          
+          {import.meta.env.DEV && (
+            <pre style={{ marginTop: 40, background: '#fef2f2', padding: 15, borderRadius: 8, overflowX: 'auto', maxWidth: '90%', fontSize: 12, textAlign: 'left', border: '1px solid #fca5a5' }}>
+              <strong style={{ color: '#dc2626' }}>[DEVELOPMENT MODE ONLY] Stack Trace:</strong>
+              <br/><br/>
+              {this.state.error && this.state.error.stack}
+              <br /><br />
+              <strong>COMPONENT STACK:</strong><br />
+              {this.state.errorInfo && this.state.errorInfo.componentStack}
+            </pre>
+          )}
         </div>
       );
     }
@@ -51,6 +61,14 @@ export default function App() {
   useEffect(() => {
     initializeAuth();
   }, [initializeAuth]);
+
+  // View-only users
+  const viewOnlyEmails = [
+    'apurnomo@bukitasam.co.id',
+    'santoso.official03@gmail.com'
+  ];
+  
+  const isViewOnly = user && viewOnlyEmails.includes(user.email);
 
   if (isAuthLoading) {
     return (
@@ -88,12 +106,14 @@ export default function App() {
             >
               Dashboard
             </button>
-            <button 
-              onClick={() => setActiveTab("Data Entry")}
-              className={`transition-colors ${activeTab === "Data Entry" ? "text-[#1e3a8a] border-b-2 border-[#1e3a8a] pb-1" : "text-gray-400 hover:text-[#1e3a8a]"}`}
-            >
-              Data Entry
-            </button>
+            {!isViewOnly && (
+              <button 
+                onClick={() => setActiveTab("Data Entry")}
+                className={`transition-colors ${activeTab === "Data Entry" ? "text-[#1e3a8a] border-b-2 border-[#1e3a8a] pb-1" : "text-gray-400 hover:text-[#1e3a8a]"}`}
+              >
+                Data Entry
+              </button>
+            )}
             <div className="w-[1px] h-6 bg-gray-300 mx-1 hidden md:block"></div>
             <button 
               onClick={logout}
@@ -112,7 +132,13 @@ export default function App() {
           }>
             {activeTab === "Home" && <HomeView />}
             {activeTab === "Dashboard" && <DashboardView />}
-            {activeTab === "Data Entry" && <DataEntryView />}
+            {activeTab === "Data Entry" && !isViewOnly && <DataEntryView />}
+            {activeTab === "Data Entry" && isViewOnly && (
+              <div className="flex flex-col items-center justify-center h-64 text-center">
+                <h2 className="text-xl font-bold text-gray-700">Akses Ditolak</h2>
+                <p className="text-gray-500 mt-2">Akun Anda hanya memiliki izin untuk melihat data (View Only).</p>
+              </div>
+            )}
           </Suspense>
         </main>
 

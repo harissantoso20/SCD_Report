@@ -90,41 +90,44 @@ const useAppStore = create((set, get) => ({
     set({ isLoading: true });
     
     try {
-      // 1. Fetch Program List
-      const programList = await programService.fetchProgramList();
-      if (programList.length > 0) set({ programList });
-
-      // 2. Fetch Program Context
-      const programContext = await programService.fetchProgramContext(globalProgram);
-      if (programContext) set({ programContext });
-
-      // 3. Fetch PLTS Locations
-      const pltsLocations = await programService.fetchPLTSLocations(globalProgram);
-      set({ pltsLocations });
-
-      // Prepare date params
       const targetYear = getYear(globalDate);
       const targetMonthIdx = new Date(globalDate).getMonth();
       const monthNames = getMonthStrings(globalDate);
       const fuzzyKeyword = getFuzzyKeyword(globalProgram);
+      const targetIndoMonth = getIndoMonthString(globalDate);
 
-      // 4. Fetch Monthly Progress
-      const monthlyProgress = await progressService.fetchMonthlyProgress(
-        fuzzyKeyword, targetYear, monthNames, targetMonthIdx
-      );
-      set({ monthlyProgress });
+      const [
+        programListResult,
+        programContextResult,
+        pltsLocationsResult,
+        monthlyProgressResult,
+        salesDataResult,
+        evidenceDataResult
+      ] = await Promise.allSettled([
+        programService.fetchProgramList(),
+        programService.fetchProgramContext(globalProgram),
+        programService.fetchPLTSLocations(globalProgram),
+        progressService.fetchMonthlyProgress(fuzzyKeyword, targetYear, monthNames, targetMonthIdx),
+        salesService.fetchSalesData(fuzzyKeyword, globalProgram, targetYear, targetIndoMonth),
+        evidenceService.fetchEvidenceData(fuzzyKeyword, targetYear, monthNames)
+      ]);
 
-      // 5. Fetch Sales Data
-      const { extraFields, tablesData, salesData } = await salesService.fetchSalesData(
-        fuzzyKeyword, globalProgram, targetYear, getIndoMonthString(globalDate)
-      );
-      set({ extraFields, tablesData, salesData });
+      if (programListResult.status === 'fulfilled' && programListResult.value.length > 0) set({ programList: programListResult.value });
+      if (programContextResult.status === 'fulfilled' && programContextResult.value) set({ programContext: programContextResult.value });
+      if (pltsLocationsResult.status === 'fulfilled') set({ pltsLocations: pltsLocationsResult.value });
+      if (monthlyProgressResult.status === 'fulfilled') set({ monthlyProgress: monthlyProgressResult.value });
+      
+      if (salesDataResult.status === 'fulfilled') {
+        const { extraFields, tablesData, salesData } = salesDataResult.value;
+        set({ extraFields, tablesData, salesData });
+      }
+      
+      if (evidenceDataResult.status === 'fulfilled') set({ evidenceData: evidenceDataResult.value });
 
-      // 6. Fetch Evidence Data
-      const evidenceData = await evidenceService.fetchEvidenceData(
-        fuzzyKeyword, targetYear, monthNames
-      );
-      set({ evidenceData });
+      // Optionally log rejected promises
+      [programListResult, programContextResult, pltsLocationsResult, monthlyProgressResult, salesDataResult, evidenceDataResult].forEach((res, i) => {
+        if (res.status === 'rejected') console.error(`Fetch Data Promise [${i}] failed:`, res.reason);
+      });
 
     } catch (error) {
       console.error("Fetch Data Error:", error);

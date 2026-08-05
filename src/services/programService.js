@@ -33,6 +33,7 @@ export const programService = {
         location: data.Lokasi,
         beneficiaries: data['Penerima Manfaat'],
         objective: data.Objective,
+        description: data.Description || data.Objective,
         kpi: data.KPI,
         tpb: data["TPB/SDG's"],
         budget_text: data.Anggaran

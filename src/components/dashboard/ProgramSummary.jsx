@@ -1,6 +1,6 @@
 import React from 'react';
 import useAppStore from '../../store/useAppStore';
-import { PROGRAM_DETAILS } from '../../data/mockData';
+
 import { MapPin, Users, CheckCircle, TrendingUp, TableIcon, Paperclip, Plus } from '../Icons';
 import EvidenceGallery from './EvidenceGallery';
 
@@ -9,7 +9,6 @@ export default function ProgramSummary() {
   const programContext = useAppStore((state) => state.programContext);
   const monthlyProgress = useAppStore((state) => state.monthlyProgress);
 
-  const details = React.useMemo(() => PROGRAM_DETAILS[selectedProgram] || PROGRAM_DETAILS["default"], [selectedProgram]);
 
   return (
     <section className="bg-white rounded-md shadow-sm border border-gray-200 p-5 md:p-6">
@@ -22,18 +21,18 @@ export default function ProgramSummary() {
         <div className="flex flex-col gap-5 border-r border-gray-100 pr-4">
           <div>
             <p className="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-1.5 flex items-center gap-1.5"><MapPin size={14}/> LOKASI</p>
-            <p className="text-[13px] font-semibold text-gray-800 leading-relaxed">{programContext?.location || details.lokasi}</p>
+            <p className="text-[13px] font-semibold text-gray-800 leading-relaxed">{programContext?.location || "-"}</p>
           </div>
           <div>
             <p className="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-1.5 flex items-center gap-1.5"><Users size={14}/> PENERIMA MANFAAT</p>
-            <p className="text-[13px] font-semibold text-gray-800 leading-relaxed">{programContext?.beneficiaries || details.penerima}</p>
+            <p className="text-[13px] font-semibold text-gray-800 leading-relaxed">{programContext?.beneficiaries || "-"}</p>
           </div>
         </div>
 
         <div className="flex flex-col gap-5 border-r border-gray-100 pr-4">
           <div>
             <p className="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-1.5 flex items-center gap-1.5"><CheckCircle size={14}/> OBJEKTIF</p>
-            <p className="text-[13px] font-medium text-gray-700 leading-relaxed text-justify">{programContext?.objective || details.objektif}</p>
+            <p className="text-[13px] font-medium text-gray-700 leading-relaxed text-justify">{programContext?.objective || "-"}</p>
           </div>
         </div>
 
@@ -44,7 +43,7 @@ export default function ProgramSummary() {
           </div>
           <div>
             <p className="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-1.5 flex items-center gap-1.5"><TrendingUp size={14}/> TPB/SDGS</p>
-            <p className="text-[13px] font-semibold text-[#1e3a8a]">{programContext?.tpb || details.tpb}</p>
+            <p className="text-[13px] font-semibold text-[#1e3a8a]">{programContext?.tpb || "-"}</p>
           </div>
         </div>
 
@@ -52,7 +51,7 @@ export default function ProgramSummary() {
           <div className="bg-[#f8f9fa] p-4 rounded-md border border-gray-200 shadow-sm relative overflow-hidden">
             <div className="absolute top-0 left-0 w-1 h-full bg-[#1e3a8a]"></div>
             <p className="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-1">ANGGARAN</p>
-            <p className="text-[18px] font-extrabold text-[#1e3a8a] tracking-tight">{programContext?.budget_text || details.anggaran}</p>
+            <p className="text-[18px] font-extrabold text-[#1e3a8a] tracking-tight">{programContext?.budget_text || "-"}</p>
           </div>
           <div className="bg-[#f8f9fa] p-4 rounded-md border border-gray-200 shadow-sm relative overflow-hidden">
             <div className="absolute top-0 left-0 w-1 h-full bg-green-500"></div>

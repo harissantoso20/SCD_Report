@@ -78,7 +78,7 @@ export const salesService = {
         else if (field === "Bibit") opSatuan = "Batang";
         else if (field === "Pupuk") opSatuan = "Kg";
         else if (field === "Pakan") opSatuan = "Kg";
-        else if (field === "Total Siklus" || field === "Total DOC/DOD" || field === "Total Panen (Ekor)") opSatuan = "Ekor";
+        else if (field === "Total Siklus" || field === "Total DOC/DOD" || field === "Total Panen (Ekor)" || field === "Populasi Hewan Ternak") opSatuan = "Ekor";
         else if (field === "FCR" || field === "Tingkat Kematian (%)" || field === "Keseragaman (%)" || field === "Index Performa") opSatuan = "%";
         else if (field === "Bahan Baku" || field === "Total Panen (Kg)") opSatuan = "Kg";
         else if (field === "Energi Dihasilkan" || field === "Energi Dimanfaatkan" || field === "Potensi Pengurangan Emisi") opSatuan = "kWh";

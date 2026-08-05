@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ResponsiveContainer, BarChart, Bar, CartesianGrid, XAxis, YAxis, Tooltip, LineChart, Line } from 'recharts';
 import useAppStore from '../../store/useAppStore';
-import { PROGRAM_IMAGES, PROGRAM_DETAILS } from '../../data/mockData';
+
 import { Zap, TrendingUp, Sparkles, Box, Recycle, Bug } from 'lucide-react';
 import { useMaggotData } from '../../hooks/programs/useMaggotData';
 import GeminiInsight from './GeminiInsight';
@@ -61,8 +61,7 @@ const MaggotVisualization = React.memo(function MaggotVisualization() {
     currentYear
   } = useMaggotData();
 
-  const bannerImage = React.useMemo(() => PROGRAM_IMAGES[selectedProgram] || PROGRAM_IMAGES["default"], [selectedProgram]);
-  const details = React.useMemo(() => PROGRAM_DETAILS[selectedProgram] || PROGRAM_DETAILS["default"], [selectedProgram]);
+
 
   // Local state for chart time ranges (in months)
   const [timeFilter, setTimeFilter] = useState(12);

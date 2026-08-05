@@ -1,6 +1,6 @@
 import React from 'react';
 import useAppStore from '../../store/useAppStore';
-import { PROGRAMS, PROGRAM_DETAILS, PROGRAM_IMAGES } from '../../data/mockData';
+import { PROGRAMS, PROGRAM_IMAGES } from '../../utils/programAssets';
 import { ChevronDown } from '../Icons';
 
 const INDO_MONTHS = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
@@ -11,6 +11,7 @@ export default function DashboardHeader() {
   const selectedDate = useAppStore((state) => state.globalDate);
   const setSelectedDate = useAppStore((state) => state.setGlobalDate);
   const programListFromStore = useAppStore((state) => state.programList);
+  const programContext = useAppStore((state) => state.programContext);
   
   const availablePrograms = programListFromStore?.length > 0 ? programListFromStore : PROGRAMS;
   
@@ -39,30 +40,7 @@ export default function DashboardHeader() {
     return PROGRAM_IMAGES[key] || PROGRAM_IMAGES["default"];
   }, [selectedProgram]);
 
-  const details = React.useMemo(() => {
-    const sLow = selectedProgram?.toLowerCase() || "";
-    const key = Object.keys(PROGRAM_DETAILS).find(k => {
-      const kLow = k.toLowerCase();
-      return kLow === sLow || 
-             (sLow.includes('maggot') && kLow.includes('maggot')) ||
-             (sLow.includes('plts') && kLow.includes('plts')) ||
-             (sLow.includes('ikan air tawar') && kLow.includes('ikan air tawar')) ||
-             (sLow.includes('siba') && kLow.includes('siba')) ||
-             (sLow.includes('puyuh') && sLow.includes('seleman') && kLow.includes('puyuh') && kLow.includes('seleman')) ||
-             (sLow.includes('puyuh') && sLow.includes('darmo') && kLow.includes('puyuh') && kLow.includes('darmo')) ||
-             (sLow.includes('ecogrow') && kLow.includes('ecogrow')) ||
-             (sLow.includes('cahaya tani') && kLow.includes('cahaya tani')) ||
-             (sLow.includes('itik petelur') && kLow.includes('itik petelur')) ||
-             (sLow.includes('suscomdev lingkar tambang') && kLow.includes('suscomdev lingkar tambang')) ||
-             (sLow.includes('suscomdev prabumenang') && kLow.includes('suscomdev prabumenang')) ||
-             (sLow.includes('ras system') && kLow.includes('ras system')) ||
-             (sLow.includes('ba-maxi') && kLow.includes('ba-maxi')) ||
-             (sLow.includes('taman kehati') && kLow.includes('taman kehati')) ||
-             (sLow.includes('sirah pulau') && kLow.includes('sirah pulau')) ||
-             (sLow.includes('proklim') && kLow.includes('proklim'));
-    });
-    return PROGRAM_DETAILS[key] || PROGRAM_DETAILS["default"];
-  }, [selectedProgram]);
+  const desc = programContext?.description || "Meningkatkan kesejahteraan masyarakat lingkar tambang melalui program pemberdayaan ekonomi dan pelestarian lingkungan yang berkelanjutan.";
 
   const currentMonthStr = selectedDate ? selectedDate.split('-')[1] : "01";
   const currentYearStr = selectedDate ? selectedDate.split('-')[0] : "2026";
@@ -83,7 +61,7 @@ export default function DashboardHeader() {
             {selectedProgram}
           </h2>
           <p className="text-gray-600 font-medium text-[13.5px] pr-4 leading-relaxed border-l-4 border-[#1e3a8a] pl-3 text-justify">
-            {details.desc}
+            {desc}
           </p>
         </div>
 

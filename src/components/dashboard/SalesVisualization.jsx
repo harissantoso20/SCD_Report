@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import { ResponsiveContainer, LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip } from 'recharts';
-import { CHART_DATA_SALES } from '../../data/mockData';
+
 import { TrendingUp, FileImage } from '../Icons';
 import { useSharedDashboard } from '../../hooks/useSharedDashboard';
 
@@ -19,7 +19,7 @@ export default React.memo(function SalesVisualization() {
         <div className="lg:w-2/3 flex flex-col">
           <div className="h-[300px] w-full pr-4">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={dynamicSalesChartData.length > 0 ? dynamicSalesChartData : CHART_DATA_SALES} margin={{ top: 20, right: 10, left: 10, bottom: 5 }}>
+              <LineChart data={dynamicSalesChartData} margin={{ top: 20, right: 10, left: 10, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
                 <XAxis dataKey="bulan" axisLine={false} tickLine={false} tick={{fontSize: 12, fill: '#6b7280'}} dy={10} />
                 <YAxis tickFormatter={formatRupiahChart} axisLine={false} tickLine={false} tick={{fontSize: 12, fill: '#6b7280'}} dx={-10} />
