@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import useAppStore from '../store/useAppStore';
-import logoPTBA from '../assets/logo/logo-ptba.png';
+import logoPTBA from '../assets/logo/logo ptba putih.png';
 import { AlertTriangle } from './Icons';
 import bgLogin from '../assets/banner/background log in.png';
 
@@ -29,25 +29,23 @@ export default function LoginView() {
   };
 
   return (
-    <div className="min-h-screen flex relative overflow-hidden bg-[#0d1b42] font-sans items-center justify-center p-4">
+    <div className="min-h-screen flex relative overflow-hidden bg-slate-900 font-sans items-center justify-center p-4">
       {/* Background Image */}
       <div className="absolute inset-0 z-0">
         <img 
           src={bgLogin} 
           alt="Background" 
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover object-bottom"
         />
-        {/* Subtle dark overlay to make the glass card stand out more */}
-        <div className="absolute inset-0 bg-[#0d1b42]/30"></div>
+        {/* Neutral dark overlay to make the glass card stand out without changing image colors */}
+        <div className="absolute inset-0 bg-black/25"></div>
       </div>
 
       {/* Centered Glass Card */}
-      <div className="relative z-10 w-full max-w-[420px] bg-[#0d1b42]/40 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.5)] border border-white/20 rounded-3xl flex flex-col p-8 sm:p-10">
+      <div className="relative z-10 w-full max-w-[420px] bg-black/40 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.6)] border border-white/20 rounded-3xl flex flex-col p-8 sm:p-10">
         
         <div className="flex flex-col items-center mb-8">
-          <div className="bg-white p-3 rounded-2xl shadow-lg mb-6">
-            <img src={logoPTBA} alt="Logo PTBA" className="h-10 w-auto object-contain" />
-          </div>
+          <img src={logoPTBA} alt="Logo PTBA" className="h-14 w-auto object-contain mb-6 drop-shadow-lg" />
           <h2 className="text-3xl font-normal text-white mb-2 text-center tracking-wide">
             Welcome <span className="font-bold">back!</span>
           </h2>
