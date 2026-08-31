@@ -29,7 +29,7 @@ export function useItikData() {
       if (monthStr.includes('MAY') || monthStr.includes('MEI')) monthStr = 'MEI';
       if (monthStr.includes('JUN')) monthStr = 'JUN';
       if (monthStr.includes('JUL')) monthStr = 'JUL';
-      if (monthStr.includes('AUG') || monthStr.includes('AGS')) monthStr = 'AUG';
+      if (monthStr.includes('AUG') || monthStr.includes('AGS') || monthStr.includes('AGU')) monthStr = 'AUG';
       if (monthStr.includes('SEP')) monthStr = 'SEP';
       if (monthStr.includes('OCT') || monthStr.includes('OKT')) monthStr = 'OKT';
       if (monthStr.includes('NOV')) monthStr = 'NOV';
@@ -112,7 +112,7 @@ export function useItikData() {
       if (monthStr.includes('MAY') || monthStr.includes('MEI')) monthStr = 'MEI';
       if (monthStr.includes('JUN')) monthStr = 'JUN';
       if (monthStr.includes('JUL')) monthStr = 'JUL';
-      if (monthStr.includes('AUG') || monthStr.includes('AGS')) monthStr = 'AUG';
+      if (monthStr.includes('AUG') || monthStr.includes('AGS') || monthStr.includes('AGU')) monthStr = 'AUG';
       if (monthStr.includes('SEP')) monthStr = 'SEP';
       if (monthStr.includes('OCT') || monthStr.includes('OKT')) monthStr = 'OKT';
       if (monthStr.includes('NOV')) monthStr = 'NOV';
