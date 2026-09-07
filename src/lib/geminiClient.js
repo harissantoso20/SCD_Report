@@ -14,8 +14,10 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
+const vertexLocation = import.meta.env.VITE_VERTEX_LOCATION || "global";
+
 // Initialize Firebase Vertex AI
-const vertexAI = getVertexAI(app);
+const vertexAI = getVertexAI(app, { location: vertexLocation });
 
 /**
  * Simple memory cache to save API quota.
@@ -23,14 +25,16 @@ const vertexAI = getVertexAI(app);
  */
 const responseCache = new Map();
 
+export const DEFAULT_GEMINI_MODEL = import.meta.env.VITE_GEMINI_MODEL || "gemini-3.7-flash";
+
 /**
  * Helper function to generate text using the Firebase Vertex AI model
  * @param {string} prompt - The prompt to send to Gemini
- * @param {string} modelName - The model to use (default: gemini-2.5-flash)
+ * @param {string} modelName - The model to use (default: gemini-3.7-flash)
  * @param {boolean} bypassCache - If true, bypasses the memory cache
  * @returns {Promise<string>} - The generated text response
  */
-export const generateText = async (prompt, modelName = "gemini-2.5-flash", bypassCache = false) => {
+export const generateText = async (prompt, modelName = DEFAULT_GEMINI_MODEL, bypassCache = false) => {
   try {
     const cacheKey = `${modelName}:${prompt}`;
     if (!bypassCache && responseCache.has(cacheKey)) {
