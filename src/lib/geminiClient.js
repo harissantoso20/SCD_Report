@@ -1,5 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getVertexAI, getGenerativeModel } from "@firebase/vertexai";
+import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "firebase/app-check";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_GEMINI_API_KEY,
@@ -13,6 +14,22 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
+
+// Initialize Firebase App Check (reCAPTCHA Enterprise)
+const recaptchaSiteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY || "6LeUbq8tAAAAANu5Ou53tpxyO6iFxCCLZhj4yzkJ";
+if (typeof window !== "undefined" && recaptchaSiteKey) {
+  if (import.meta.env.DEV) {
+    self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+  }
+  try {
+    initializeAppCheck(app, {
+      provider: new ReCaptchaEnterpriseProvider(recaptchaSiteKey),
+      isTokenAutoRefreshEnabled: true
+    });
+  } catch (err) {
+    console.warn("App Check initialization warning:", err);
+  }
+}
 
 const vertexLocation = import.meta.env.VITE_VERTEX_LOCATION || "global";
 
