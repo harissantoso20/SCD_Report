@@ -16,7 +16,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 // Initialize Firebase App Check (reCAPTCHA Enterprise)
-const recaptchaSiteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY || "6LeUbq8tAAAAANu5Ou53tpxyO6iFxCCLZhj4yzkJ";
+const recaptchaSiteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY || "6LeUbq8tAAAAANiAP06R_QB_r0JL9meZY1qISRky";
 if (typeof window !== "undefined" && recaptchaSiteKey) {
   if (import.meta.env.DEV) {
     self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
