@@ -2,9 +2,9 @@ import React, { useEffect, useRef, useState } from 'react';
 import useAppStore from '../store/useAppStore';
 import * as L from 'leaflet';
 import { MapPin, Lightbulb, TrendingUp, AlertCircle, CheckCircle, ChevronDown } from './Icons';
-import { Maximize, Minimize, X } from 'lucide-react';
+import { Maximize, Minimize, X, RefreshCw, Key, Sparkles, Info, Check } from 'lucide-react';
 import logoSDGs from '../assets/logo/logo-sdgs.png';
-import { generateText } from '../lib/geminiClient';
+import { generateText, getActiveApiKey } from '../lib/geminiClient';
 import ReactMarkdown from 'react-markdown';
 
 const INDO_MONTHS = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
@@ -16,7 +16,11 @@ export default function HomeView() {
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [aiReportStatement, setAiReportStatement] = useState('');
   const [isAiLoading, setIsAiLoading] = useState(false);
+  const [aiError, setAiError] = useState(null);
   const [modalConfig, setModalConfig] = useState(null);
+  const [showApiKeyModal, setShowApiKeyModal] = useState(false);
+  const [apiKeyInput, setApiKeyInput] = useState('');
+  const [apiKeySavedNotice, setApiKeySavedNotice] = useState(false);
 
   useEffect(() => {
     fetchHomeData();
@@ -137,13 +141,46 @@ export default function HomeView() {
     setGlobalDate(`${e.target.value}-${currentMonthStr}-01`);
   };
 
-  useEffect(() => {
-    let isMounted = true;
-    const fetchAiReport = async () => {
-      if (!homeData) return;
-      
-      setIsAiLoading(true);
-      const prompt = `
+  // Helper to generate rule-based standard summary when AI is rate-limited or offline
+  const generateLocalSummary = (data, month, year) => {
+    if (!data) return "Data tidak tersedia.";
+    const totalOmzet = (data.salesData || []).reduce((acc, curr) => acc + (Number(curr.Omzet) || 0), 0);
+    const formattedOmzet = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(totalOmzet);
+
+    const progCount = data.totalProgram?.program ?? (typeof data.totalProgram === 'number' ? data.totalProgram : (data.totalProgram?.count ?? 0));
+    const desaLokasiCount = data.totalLokasi?.desa ?? (typeof data.totalLokasi === 'number' ? data.totalLokasi : 0);
+    const kecCount = data.totalLokasi?.kec ? ` (${data.totalLokasi.kec} Kecamatan, ${data.totalLokasi.kab || 0} Kabupaten)` : '';
+
+    const sortedSales = [...(data.salesData || [])]
+      .filter(s => (Number(s.Omzet) || 0) > 0)
+      .sort((a, b) => (Number(b.Omzet) || 0) - (Number(a.Omzet) || 0));
+
+    const topProgram = sortedSales[0] 
+      ? `${sortedSales[0].Program} (${new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(sortedSales[0].Omzet)})`
+      : 'Belum tercatat omzet pada periode ini';
+
+    const lowestProgram = sortedSales.length > 1 
+      ? `${sortedSales[sortedSales.length - 1].Program} (${new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(sortedSales[sortedSales.length - 1].Omzet)})`
+      : sortedSales[0] ? topProgram : '-';
+
+    return `### Executive Summary Program Pemberdayaan (SCD) — Periode ${month} ${year}
+
+**1. Distribusi Sektor & Jangkauan Program**
+Pada periode **${month} ${year}**, tercatat total **${progCount} Program** yang aktif membina kelompok masyarakat di **${desaLokasiCount} Desa/Kelurahan**${kecCount} di wilayah Ring 1 TEMS dan sekitarnya. Program terdistribusi ke berbagai sektor pemberdayaan strategis meliputi Perkebunan, Peternakan, Industri, Perikanan, dan Infrastruktur.
+
+**2. Pencapaian Finansial**
+Total akumulasi omzet penjualan seluruh kelompok binaan pada periode ini mencapai **${formattedOmzet}**. Kontribusi omzet tertinggi dicatatkan oleh **${topProgram}**, sedangkan omzet terendah adalah **${lowestProgram}**.
+
+**3. Progres & Realisasi Program**
+Secara umum, realisasi program berjalan sesuai target kerja bulanan dengan fokus pada stabilitas sarana produksi, penguatan kelembagaan kelompok, dan kesinambungan kemitraan pasar lokal.`;
+  };
+
+  const fetchAiReport = async (forceRefresh = false) => {
+    if (!homeData) return;
+    
+    setIsAiLoading(true);
+    setAiError(null);
+    const prompt = `
 Kamu adalah Senior Data Analyst korporat. Tugasmu adalah membuat "Executive Summary" untuk seluruh ekosistem program pemberdayaan (SCD) pada periode ${monthName} ${currentYearStr}.
 
 Berikut adalah data agregat seluruh program (format JSON):
@@ -165,19 +202,21 @@ Instruksi:
 6. Gunakan bahasa Indonesia profesional dan baku layaknya penyajian data statistik. Format menggunakan Markdown (gunakan bold untuk angka penting).
 `;
 
-      try {
-        const response = await generateText(prompt);
-        if (isMounted) setAiReportStatement(response);
-      } catch (err) {
-        console.error("Gemini Error:", err);
-        if (isMounted) setAiReportStatement(`Gagal menghasilkan laporan AI. Error: ${err.message}`);
-      } finally {
-        if (isMounted) setIsAiLoading(false);
-      }
-    };
+    try {
+      const response = await generateText(prompt, undefined, forceRefresh);
+      setAiReportStatement(response);
+      setAiError(null);
+    } catch (err) {
+      console.error("Gemini Error:", err);
+      setAiError(err.message);
+      setAiReportStatement(prev => prev || generateLocalSummary(homeData, monthName, currentYearStr));
+    } finally {
+      setIsAiLoading(false);
+    }
+  };
 
-    fetchAiReport();
-    return () => { isMounted = false; };
+  useEffect(() => {
+    fetchAiReport(false);
   }, [homeData, monthName, currentYearStr]);
 
   if (isHomeLoading) {
@@ -489,7 +528,33 @@ Instruksi:
         <div className="lg:col-span-7 relative min-h-[500px] lg:min-h-0">
           <div className="absolute inset-0 bg-white p-6 rounded-md shadow-sm border border-gray-200 flex flex-col overflow-hidden">
             <div className="flex items-center justify-between border-b border-gray-200 pb-4 mb-4 flex-shrink-0">
-              <h3 className="text-[15px] font-bold text-[#25326a]">Report Statement</h3>
+              <div className="flex items-center gap-2">
+                <h3 className="text-[15px] font-bold text-[#25326a]">Report Statement</h3>
+                <span className="text-[10px] font-semibold bg-blue-50 text-blue-700 px-2 py-0.5 rounded border border-blue-200 flex items-center gap-1">
+                  <Sparkles size={11} className="text-blue-600" />
+                  Gemini Free Tier
+                </span>
+                <button
+                  type="button"
+                  onClick={() => fetchAiReport(true)}
+                  disabled={isAiLoading}
+                  title="Analisis Ulang dengan AI"
+                  className="p-1 text-gray-400 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors"
+                >
+                  <RefreshCw size={13} className={isAiLoading ? "animate-spin" : ""} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setApiKeyInput(getActiveApiKey());
+                    setShowApiKeyModal(true);
+                  }}
+                  title="Pengaturan Kunci API Gemini (Free Tier)"
+                  className="p-1 text-gray-400 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors"
+                >
+                  <Key size={13} />
+                </button>
+              </div>
               <div className="flex items-center gap-2">
                 {/* Month Dropdown */}
                 <div className="relative">
@@ -530,6 +595,36 @@ Instruksi:
                   <p className="mt-3 text-[#1e3a8a] font-bold text-xs animate-pulse">
                     {isAiLoading ? "AI sedang menyusun laporan analitik..." : "Memuat Ulang Laporan..."}
                   </p>
+                </div>
+              )}
+
+              {/* AI Warning Banner (if error occurred but fallback summary displayed) */}
+              {aiError && (
+                <div className="bg-amber-50 border border-amber-200 rounded-md p-3 mb-3 text-xs text-amber-900 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 flex-shrink-0">
+                  <div className="flex items-start gap-2">
+                    <Info size={15} className="text-amber-600 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-semibold text-amber-800">Menampilkan Ringkasan Standar:</p>
+                      <p className="text-amber-700 mt-0.5">{aiError}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1.5 flex-shrink-0 self-end sm:self-auto">
+                    <button 
+                      type="button"
+                      onClick={() => { setApiKeyInput(getActiveApiKey()); setShowApiKeyModal(true); }}
+                      className="px-2.5 py-1 bg-amber-600 text-white rounded font-medium hover:bg-amber-700 transition-colors text-[11px]"
+                    >
+                      Atur API Key
+                    </button>
+                    <button 
+                      type="button"
+                      onClick={() => fetchAiReport(true)}
+                      disabled={isAiLoading}
+                      className="px-2.5 py-1 bg-white border border-amber-300 text-amber-800 rounded font-medium hover:bg-amber-100 transition-colors text-[11px]"
+                    >
+                      Coba Lagi
+                    </button>
+                  </div>
                 </div>
               )}
               
@@ -605,6 +700,116 @@ Instruksi:
             {/* Modal Body */}
             <div className="p-6 overflow-y-auto custom-scrollbar flex-1 bg-white">
               {renderModalContent()}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* GEMINI API KEY MODAL */}
+      {showApiKeyModal && (
+        <div className="fixed inset-0 z-[10001] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between p-5 border-b border-gray-100 bg-gray-50/80">
+              <h3 className="font-extrabold text-base text-[#1e3a8a] flex items-center gap-2">
+                <Key className="text-blue-600" size={18} />
+                Pengaturan Gemini API (Free Tier)
+              </h3>
+              <button 
+                onClick={() => setShowApiKeyModal(false)} 
+                className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors"
+                title="Tutup"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="p-5 flex flex-col gap-4">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3.5 text-xs text-blue-900 flex flex-col gap-2">
+                <p className="font-semibold flex items-center gap-1.5 text-blue-800">
+                  <Sparkles size={14} className="text-blue-600" />
+                  Gunakan Free Tier Google AI Studio (Rp 0 / Tanpa Kartu Kredit)
+                </p>
+                <p className="leading-relaxed">
+                  Karena akun penagihan Google Cloud project lama sedang ditangguhkan, silakan buat API Key baru yang tidak terikat billing:
+                </p>
+                <ol className="list-decimal pl-4 space-y-1.5 text-blue-800">
+                  <li>Buka tautan <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="underline font-bold text-blue-700 hover:text-blue-900">Google AI Studio (Get API key) ↗</a></li>
+                  <li>Klik tombol <strong>"Create API key"</strong></li>
+                  <li>Pilih opsi <strong>"Create API key in new project"</strong> (agar memakai kuota Free Tier mandiri)</li>
+                  <li>Salin kuncinya (berawalan <code>AIzaSy...</code>) dan tempel di bawah.</li>
+                </ol>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1.5">
+                  Gemini API Key
+                </label>
+                <input 
+                  type="password"
+                  placeholder="AIzaSy..."
+                  value={apiKeyInput}
+                  onChange={(e) => setApiKeyInput(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono"
+                />
+                <p className="text-[11px] text-gray-400 mt-1">
+                  Kunci ini disimpan langsung di browser Anda (localStorage) dan aktif seketika.
+                </p>
+              </div>
+
+              {apiKeySavedNotice && (
+                <div className="bg-green-50 border border-green-200 text-green-800 text-xs px-3 py-2 rounded flex items-center gap-1.5">
+                  <Check size={14} className="text-green-600" />
+                  Kunci API berhasil disimpan dan diterapkan!
+                </div>
+              )}
+
+              <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                <button
+                  type="button"
+                  onClick={() => {
+                    localStorage.removeItem('mora_custom_gemini_api_key');
+                    setApiKeyInput(import.meta.env.VITE_GEMINI_API_KEY || '');
+                    setApiKeySavedNotice(true);
+                    setTimeout(() => {
+                      setApiKeySavedNotice(false);
+                      setShowApiKeyModal(false);
+                      fetchAiReport(true);
+                    }, 600);
+                  }}
+                  className="text-xs text-gray-500 hover:text-red-600 underline font-medium"
+                >
+                  Reset ke Default (.env)
+                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowApiKeyModal(false)}
+                    className="px-3 py-1.5 text-xs font-semibold text-gray-600 hover:bg-gray-100 rounded-md transition-colors"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (apiKeyInput.trim()) {
+                        localStorage.setItem('mora_custom_gemini_api_key', apiKeyInput.trim());
+                      } else {
+                        localStorage.removeItem('mora_custom_gemini_api_key');
+                      }
+                      setApiKeySavedNotice(true);
+                      setTimeout(() => {
+                        setApiKeySavedNotice(false);
+                        setShowApiKeyModal(false);
+                        fetchAiReport(true);
+                      }, 500);
+                    }}
+                    className="px-4 py-1.5 text-xs font-bold text-white bg-[#1e3a8a] hover:bg-blue-800 rounded-md transition-colors shadow-sm flex items-center gap-1.5"
+                  >
+                    <Check size={14} />
+                    Simpan & Terapkan
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>

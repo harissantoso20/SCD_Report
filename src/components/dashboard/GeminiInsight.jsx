@@ -1,10 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { Sparkles, AlertCircle } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Sparkles, AlertCircle, RefreshCw } from 'lucide-react';
 import { generateText } from '../../lib/geminiClient';
 import ReactMarkdown from 'react-markdown';
-
-// In-memory cache for insights
-const insightCache = new Map();
 
 export default function GeminiInsight({ 
   programName, 
@@ -17,23 +14,14 @@ export default function GeminiInsight({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    let isMounted = true;
+  const fetchInsight = useCallback(async (forceRefresh = false) => {
+    // Return early if no data
+    if (!quantitativeData && !qualitativeData) return;
 
-    const fetchInsight = async () => {
-      // Return early if no data
-      if (!quantitativeData && !qualitativeData) return;
+    setIsLoading(true);
+    setError(null);
 
-      const cacheKey = `${programName}-${period}`;
-      if (insightCache.has(cacheKey)) {
-        setInsight(insightCache.get(cacheKey));
-        return;
-      }
-
-      setIsLoading(true);
-      setError(null);
-
-      const prompt = `
+    const prompt = `
 Kamu adalah seorang Senior Data Analyst profesional. Tugasmu adalah memberikan "Insight Analitik" berupa catatan overview naratif yang komprehensif, tajam, dan tidak monoton untuk program "${programName}" pada periode ${period}.
 
 Berikut adalah data kuantitatif yang tersedia (format JSON):
@@ -57,36 +45,40 @@ Instruksi:
 12. PENTING: Istilah "Konsumsi" merujuk pada "Produk Konsumsi" (misalnya Penjualan Ikan Konsumsi), BUKAN "Konsumsi Pakan" atau pemakaian bahan.
 `;
 
-      try {
-        const response = await generateText(prompt);
-        insightCache.set(cacheKey, response);
-        if (isMounted) {
-          setInsight(response);
-        }
-      } catch (err) {
-        console.error("Gemini Error:", err);
-        if (isMounted) setInsight(`Gagal menghasilkan insight AI. Error: ${err.message}`);
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    fetchInsight();
-
-    return () => {
-      isMounted = false;
-    };
+    try {
+      const response = await generateText(prompt, undefined, forceRefresh);
+      setInsight(response);
+      setError(null);
+    } catch (err) {
+      console.error("Gemini Error:", err);
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
   }, [programName, period, quantitativeData, qualitativeData]);
+
+  useEffect(() => {
+    fetchInsight(false);
+  }, [fetchInsight]);
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 md:p-5 flex flex-col flex-1 relative overflow-hidden group hover:-translate-y-1 hover:shadow-md transition-all duration-300 h-full min-h-0">
       <div className="flex items-center justify-between mb-4 relative z-10 flex-shrink-0">
-        <h4 className="text-[13px] font-bold text-[#1e3a8a] uppercase tracking-wider flex items-center gap-2">
-          <Sparkles size={16} className="text-blue-500" />
-          Insight Analitik
-        </h4>
+        <div className="flex items-center gap-2">
+          <h4 className="text-[13px] font-bold text-[#1e3a8a] uppercase tracking-wider flex items-center gap-1.5">
+            <Sparkles size={16} className="text-blue-500" />
+            Insight Analitik
+          </h4>
+          <button
+            type="button"
+            onClick={() => fetchInsight(true)}
+            disabled={isLoading}
+            title="Analisis Ulang dengan AI"
+            className="p-1 text-slate-400 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors"
+          >
+            <RefreshCw size={13} className={isLoading ? "animate-spin" : ""} />
+          </button>
+        </div>
         {headerAction && <div>{headerAction}</div>}
       </div>
       
@@ -97,9 +89,24 @@ Instruksi:
             <p className="text-blue-600 font-medium text-xs animate-pulse">Menyusun catatan analitik...</p>
           </div>
         ) : error ? (
-          <div className="flex items-start gap-2 text-red-600 bg-red-50 p-3 rounded-md border border-red-100">
-            <AlertCircle size={16} className="mt-0.5 flex-shrink-0" />
-            <span>{error}</span>
+          <div className="flex flex-col gap-2 text-amber-900 bg-amber-50 p-3.5 rounded-md border border-amber-200 text-xs">
+            <div className="flex items-start gap-2">
+              <AlertCircle size={15} className="mt-0.5 text-amber-600 flex-shrink-0" />
+              <div>
+                <p className="font-semibold text-amber-800">Koneksi AI Terkendala:</p>
+                <p className="text-amber-700 mt-0.5">{error}</p>
+              </div>
+            </div>
+            <div className="flex justify-end pt-1">
+              <button
+                type="button"
+                onClick={() => fetchInsight(true)}
+                disabled={isLoading}
+                className="px-2.5 py-1 bg-amber-600 text-white font-medium rounded hover:bg-amber-700 transition-colors text-[11px]"
+              >
+                Coba Lagi
+              </button>
+            </div>
           </div>
         ) : (
           <div className="markdown-content space-y-3 text-justify">
