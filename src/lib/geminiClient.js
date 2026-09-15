@@ -5,14 +5,15 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
  * gemini-1.5-flash and gemini-2.0-flash offer generous free tier limits
  * (15 RPM, 1,000,000 TPM, 1,500 RPD) with zero billing requirements.
  */
-export const DEFAULT_GEMINI_MODEL = import.meta.env.VITE_GEMINI_MODEL || "gemini-1.5-flash";
+export const DEFAULT_GEMINI_MODEL = import.meta.env.VITE_GEMINI_MODEL || "gemini-3.6-flash";
 
 // Fallback models if primary model hits rate-limits or temporary service issues
 const FALLBACK_MODELS = [
   DEFAULT_GEMINI_MODEL,
-  "gemini-1.5-flash",
+  "gemini-3.6-flash",
+  "gemini-2.5-flash",
   "gemini-2.0-flash",
-  "gemini-2.5-flash"
+  "gemini-1.5-flash"
 ].filter((m, i, self) => self.indexOf(m) === i);
 
 // In-memory cache fallback

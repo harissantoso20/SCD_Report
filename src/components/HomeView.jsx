@@ -2,9 +2,9 @@ import React, { useEffect, useRef, useState } from 'react';
 import useAppStore from '../store/useAppStore';
 import * as L from 'leaflet';
 import { MapPin, Lightbulb, TrendingUp, AlertCircle, CheckCircle, ChevronDown } from './Icons';
-import { Maximize, Minimize, X, RefreshCw, Key, Sparkles, Info, Check } from 'lucide-react';
+import { Maximize, Minimize, X, Info } from 'lucide-react';
 import logoSDGs from '../assets/logo/logo-sdgs.png';
-import { generateText, getActiveApiKey } from '../lib/geminiClient';
+import { generateText } from '../lib/geminiClient';
 import ReactMarkdown from 'react-markdown';
 
 const INDO_MONTHS = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
@@ -18,9 +18,6 @@ export default function HomeView() {
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [aiError, setAiError] = useState(null);
   const [modalConfig, setModalConfig] = useState(null);
-  const [showApiKeyModal, setShowApiKeyModal] = useState(false);
-  const [apiKeyInput, setApiKeyInput] = useState('');
-  const [apiKeySavedNotice, setApiKeySavedNotice] = useState(false);
 
   useEffect(() => {
     fetchHomeData();
@@ -530,30 +527,6 @@ Instruksi:
             <div className="flex items-center justify-between border-b border-gray-200 pb-4 mb-4 flex-shrink-0">
               <div className="flex items-center gap-2">
                 <h3 className="text-[15px] font-bold text-[#25326a]">Report Statement</h3>
-                <span className="text-[10px] font-semibold bg-blue-50 text-blue-700 px-2 py-0.5 rounded border border-blue-200 flex items-center gap-1">
-                  <Sparkles size={11} className="text-blue-600" />
-                  Gemini Free Tier
-                </span>
-                <button
-                  type="button"
-                  onClick={() => fetchAiReport(true)}
-                  disabled={isAiLoading}
-                  title="Analisis Ulang dengan AI"
-                  className="p-1 text-gray-400 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors"
-                >
-                  <RefreshCw size={13} className={isAiLoading ? "animate-spin" : ""} />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setApiKeyInput(getActiveApiKey());
-                    setShowApiKeyModal(true);
-                  }}
-                  title="Pengaturan Kunci API Gemini (Free Tier)"
-                  className="p-1 text-gray-400 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors"
-                >
-                  <Key size={13} />
-                </button>
               </div>
               <div className="flex items-center gap-2">
                 {/* Month Dropdown */}
@@ -611,16 +584,9 @@ Instruksi:
                   <div className="flex items-center gap-1.5 flex-shrink-0 self-end sm:self-auto">
                     <button 
                       type="button"
-                      onClick={() => { setApiKeyInput(getActiveApiKey()); setShowApiKeyModal(true); }}
-                      className="px-2.5 py-1 bg-amber-600 text-white rounded font-medium hover:bg-amber-700 transition-colors text-[11px]"
-                    >
-                      Atur API Key
-                    </button>
-                    <button 
-                      type="button"
                       onClick={() => fetchAiReport(true)}
                       disabled={isAiLoading}
-                      className="px-2.5 py-1 bg-white border border-amber-300 text-amber-800 rounded font-medium hover:bg-amber-100 transition-colors text-[11px]"
+                      className="px-2.5 py-1 bg-amber-600 text-white rounded font-medium hover:bg-amber-700 transition-colors text-[11px]"
                     >
                       Coba Lagi
                     </button>
@@ -705,115 +671,7 @@ Instruksi:
         </div>
       )}
 
-      {/* GEMINI API KEY MODAL */}
-      {showApiKeyModal && (
-        <div className="fixed inset-0 z-[10001] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200">
-            <div className="flex items-center justify-between p-5 border-b border-gray-100 bg-gray-50/80">
-              <h3 className="font-extrabold text-base text-[#1e3a8a] flex items-center gap-2">
-                <Key className="text-blue-600" size={18} />
-                Pengaturan Gemini API (Free Tier)
-              </h3>
-              <button 
-                onClick={() => setShowApiKeyModal(false)} 
-                className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors"
-                title="Tutup"
-              >
-                <X size={18} />
-              </button>
-            </div>
 
-            <div className="p-5 flex flex-col gap-4">
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3.5 text-xs text-blue-900 flex flex-col gap-2">
-                <p className="font-semibold flex items-center gap-1.5 text-blue-800">
-                  <Sparkles size={14} className="text-blue-600" />
-                  Gunakan Free Tier Google AI Studio (Rp 0 / Tanpa Kartu Kredit)
-                </p>
-                <p className="leading-relaxed">
-                  Karena akun penagihan Google Cloud project lama sedang ditangguhkan, silakan buat API Key baru yang tidak terikat billing:
-                </p>
-                <ol className="list-decimal pl-4 space-y-1.5 text-blue-800">
-                  <li>Buka tautan <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="underline font-bold text-blue-700 hover:text-blue-900">Google AI Studio (Get API key) ↗</a></li>
-                  <li>Klik tombol <strong>"Create API key"</strong></li>
-                  <li>Pilih opsi <strong>"Create API key in new project"</strong> (agar memakai kuota Free Tier mandiri)</li>
-                  <li>Salin kuncinya (berawalan <code>AIzaSy...</code>) dan tempel di bawah.</li>
-                </ol>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1.5">
-                  Gemini API Key
-                </label>
-                <input 
-                  type="password"
-                  placeholder="AIzaSy..."
-                  value={apiKeyInput}
-                  onChange={(e) => setApiKeyInput(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono"
-                />
-                <p className="text-[11px] text-gray-400 mt-1">
-                  Kunci ini disimpan langsung di browser Anda (localStorage) dan aktif seketika.
-                </p>
-              </div>
-
-              {apiKeySavedNotice && (
-                <div className="bg-green-50 border border-green-200 text-green-800 text-xs px-3 py-2 rounded flex items-center gap-1.5">
-                  <Check size={14} className="text-green-600" />
-                  Kunci API berhasil disimpan dan diterapkan!
-                </div>
-              )}
-
-              <div className="flex items-center justify-between pt-2 border-t border-gray-100">
-                <button
-                  type="button"
-                  onClick={() => {
-                    localStorage.removeItem('mora_custom_gemini_api_key');
-                    setApiKeyInput(import.meta.env.VITE_GEMINI_API_KEY || '');
-                    setApiKeySavedNotice(true);
-                    setTimeout(() => {
-                      setApiKeySavedNotice(false);
-                      setShowApiKeyModal(false);
-                      fetchAiReport(true);
-                    }, 600);
-                  }}
-                  className="text-xs text-gray-500 hover:text-red-600 underline font-medium"
-                >
-                  Reset ke Default (.env)
-                </button>
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setShowApiKeyModal(false)}
-                    className="px-3 py-1.5 text-xs font-semibold text-gray-600 hover:bg-gray-100 rounded-md transition-colors"
-                  >
-                    Batal
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (apiKeyInput.trim()) {
-                        localStorage.setItem('mora_custom_gemini_api_key', apiKeyInput.trim());
-                      } else {
-                        localStorage.removeItem('mora_custom_gemini_api_key');
-                      }
-                      setApiKeySavedNotice(true);
-                      setTimeout(() => {
-                        setApiKeySavedNotice(false);
-                        setShowApiKeyModal(false);
-                        fetchAiReport(true);
-                      }, 500);
-                    }}
-                    className="px-4 py-1.5 text-xs font-bold text-white bg-[#1e3a8a] hover:bg-blue-800 rounded-md transition-colors shadow-sm flex items-center gap-1.5"
-                  >
-                    <Check size={14} />
-                    Simpan & Terapkan
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

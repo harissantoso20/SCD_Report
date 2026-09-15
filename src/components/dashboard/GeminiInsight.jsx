@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Sparkles, AlertCircle, RefreshCw } from 'lucide-react';
+import { Sparkles, AlertCircle } from 'lucide-react';
 import { generateText } from '../../lib/geminiClient';
 import ReactMarkdown from 'react-markdown';
 
@@ -69,15 +69,6 @@ Instruksi:
             <Sparkles size={16} className="text-blue-500" />
             Insight Analitik
           </h4>
-          <button
-            type="button"
-            onClick={() => fetchInsight(true)}
-            disabled={isLoading}
-            title="Analisis Ulang dengan AI"
-            className="p-1 text-slate-400 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors"
-          >
-            <RefreshCw size={13} className={isLoading ? "animate-spin" : ""} />
-          </button>
         </div>
         {headerAction && <div>{headerAction}</div>}
       </div>
