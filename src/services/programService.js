@@ -62,5 +62,24 @@ export const programService = {
       }
     }
     return [];
+  },
+
+  updateProgramContext: async (globalProgram, contextData) => {
+    if (!globalProgram || !contextData) return;
+    const { error } = await supabase
+      .from('SCD_Report_Programs')
+      .update({
+        Lokasi: contextData.location || '',
+        'Penerima Manfaat': contextData.beneficiaries || '',
+        Objective: contextData.objective || '',
+        KPI: contextData.kpi || '',
+        "TPB/SDG's": contextData.tpb || '',
+        Anggaran: contextData.budget_text || ''
+      })
+      .eq('Program', globalProgram);
+
+    if (error) {
+      console.error('Error updating program context in Supabase:', error);
+    }
   }
 };

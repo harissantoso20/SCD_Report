@@ -7,6 +7,7 @@ import ProgramContextForm from './data-entry/ProgramContextForm';
 import MonthlyProgressForm from './data-entry/MonthlyProgressForm';
 import DynamicTablesManager from './data-entry/DynamicTablesManager';
 import EvidenceUpload from './data-entry/EvidenceUpload';
+import BeneficiariesTable from './data-entry/BeneficiariesTable';
 
 export default function DataEntryView() {
   const selectedProgram = useAppStore((state) => state.globalProgram);
@@ -50,11 +51,14 @@ export default function DataEntryView() {
   
   const tablesDataFromStore = useAppStore((state) => state.tablesData);
   const extraFieldsFromStore = useAppStore((state) => state.extraFields);
+  const evidenceDataFromStore = useAppStore((state) => state.evidenceData);
+  const beneficiariesFromStore = useAppStore((state) => state.beneficiariesList);
   
   const [tablesData, setTablesData] = useState({});
   const [extraFields, setExtraFields] = useState({});
   const [isPltsEditing, setIsPltsEditing] = useState(false);
-  const [evidenceFiles, setEvidenceFiles] = useState([]);
+  const [evidenceItems, setEvidenceItems] = useState([]);
+  const [beneficiariesList, setBeneficiariesList] = useState([]);
 
   useEffect(() => {
     if (programContext) {
@@ -97,7 +101,27 @@ export default function DataEntryView() {
     } else {
       setExtraFields({});
     }
-  }, [programContext, storePltsLocations, monthlyProgress, selectedProgram, tablesDataFromStore, extraFieldsFromStore]);
+
+    if (evidenceDataFromStore && evidenceDataFromStore.length > 0) {
+      setEvidenceItems(
+        evidenceDataFromStore
+          .filter(ev => ev.File_Url)
+          .map(ev => ({
+            id: ev.id || ev.File_Url,
+            type: 'url',
+            url: ev.File_Url
+          }))
+      );
+    } else {
+      setEvidenceItems([]);
+    }
+
+    if (beneficiariesFromStore && beneficiariesFromStore.length > 0) {
+      setBeneficiariesList(beneficiariesFromStore);
+    } else {
+      setBeneficiariesList([]);
+    }
+  }, [programContext, storePltsLocations, monthlyProgress, selectedProgram, tablesDataFromStore, extraFieldsFromStore, evidenceDataFromStore, beneficiariesFromStore]);
 
   const handlePltsChange = (id, field, value) => setPltsLocations(prev => prev.map(loc => loc.id === id ? { ...loc, [field]: value } : loc));
   const handleAddPltsRow = () => { 
@@ -118,7 +142,8 @@ export default function DataEntryView() {
       monthlyProgress: monthlyState,
       tablesData: tablesData,
       extraFields: extraFields,
-      evidenceFiles: evidenceFiles
+      evidenceItems: evidenceItems,
+      beneficiariesList: beneficiariesList
     });
     
     setIsSaving(false);
@@ -148,6 +173,11 @@ export default function DataEntryView() {
         setIsPltsEditing={setIsPltsEditing}
       />
 
+      <BeneficiariesTable 
+        value={beneficiariesList} 
+        onChange={setBeneficiariesList} 
+      />
+
       <MonthlyProgressForm 
         monthLabels={monthLabels}
         monthlyState={monthlyState}
@@ -166,7 +196,7 @@ export default function DataEntryView() {
         </section>
       )}
 
-      <EvidenceUpload files={evidenceFiles} setFiles={setEvidenceFiles} />
+      <EvidenceUpload items={evidenceItems} setItems={setEvidenceItems} />
 
       <div className="flex justify-end pt-5 border-t border-gray-200">
         <div className="flex items-center gap-3">

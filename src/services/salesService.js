@@ -38,14 +38,25 @@ export const salesService = {
           if (row['Kategori Produk'] && row['Kategori Produk'] !== '-') {
             const cat = row['Kategori Produk'];
             if (!tablesData[cat]) tablesData[cat] = [];
-            tablesData[cat].push({
-              id: row.id || (Date.now() + Math.random()),
-              product_name: row.Produk,
-              qty: row.Jumlah,
-              unit: row.Satuan_1,
-              unit_price: row['Harga Satuan'],
-              revenue: row.Omzet
-            });
+            if (cat === 'operasional') {
+              tablesData[cat].push({
+                id: row.id || (Date.now() + Math.random()),
+                item_pengeluaran: row.Produk,
+                qty: row.Jumlah,
+                satuan: row.Satuan_1,
+                harga_satuan: row['Harga Satuan'],
+                total_harga: row.Omzet
+              });
+            } else {
+              tablesData[cat].push({
+                id: row.id || (Date.now() + Math.random()),
+                product_name: row.Produk,
+                qty: row.Jumlah,
+                unit: row.Satuan_1,
+                unit_price: row['Harga Satuan'],
+                revenue: row.Omzet
+              });
+            }
           }
         }
       });
@@ -106,7 +117,25 @@ export const salesService = {
     if (tablesData) {
       Object.entries(tablesData).forEach(([category, items]) => {
         items.forEach(item => {
-          if (item.product_name) {
+          if (category === 'operasional') {
+            // Pengeluaran operasional: item_pengeluaran, qty, satuan, harga_satuan, total_harga
+            if (item.item_pengeluaran) {
+              salesPayloads.push({
+                "Program": globalProgram,
+                "Bulan": targetMonth,
+                "Tahun": targetYear,
+                "Operasional": "-",
+                "Value Operasional": 0,
+                "Satuan": "-",
+                "Kategori Produk": "operasional",
+                "Produk": safeString(item.item_pengeluaran),
+                "Jumlah": safeNumber(item.qty),
+                "Satuan_1": safeString(item.satuan),
+                "Harga Satuan": safeNumber(item.harga_satuan),
+                "Omzet": safeNumber(item.total_harga)
+              });
+            }
+          } else if (item.product_name) {
             salesPayloads.push({
               "Program": globalProgram,
               "Bulan": targetMonth,

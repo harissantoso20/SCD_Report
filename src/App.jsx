@@ -115,9 +115,17 @@ export default function App() {
               </button>
             )}
             <div className="w-[1px] h-6 bg-gray-300 mx-1 hidden md:block"></div>
+            <div className="hidden lg:flex items-center gap-1.5 text-xs text-gray-500 font-normal normal-case">
+              <span className="truncate max-w-[180px] text-gray-600 font-medium">{user.email}</span>
+              {user.user_metadata?.program && (
+                <span className="text-[10px] bg-blue-50 text-[#1e3a8a] border border-blue-200 px-2 py-0.5 rounded font-bold uppercase">
+                  {user.user_metadata.program}
+                </span>
+              )}
+            </div>
             <button 
               onClick={logout}
-              className="text-red-600 hover:text-red-800 transition-colors"
+              className="text-red-600 hover:text-red-800 transition-colors font-bold"
             >
               Logout
             </button>

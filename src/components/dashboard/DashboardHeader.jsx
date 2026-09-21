@@ -12,6 +12,7 @@ export default function DashboardHeader() {
   const setSelectedDate = useAppStore((state) => state.setGlobalDate);
   const programListFromStore = useAppStore((state) => state.programList);
   const programContext = useAppStore((state) => state.programContext);
+  const assignedProgram = useAppStore((state) => state.assignedProgram);
   
   const availablePrograms = programListFromStore?.length > 0 ? programListFromStore : PROGRAMS;
   
@@ -68,16 +69,26 @@ export default function DashboardHeader() {
         <div className="flex flex-wrap items-center gap-2 relative z-50">
           {/* Program Dropdown */}
           <div className="relative">
-            <select 
-              className="appearance-none bg-[#f8f9fa] border border-gray-200 text-[#25326a] font-bold text-[13px] rounded-lg pl-4 pr-10 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a] cursor-pointer shadow-sm uppercase tracking-wide"
-              value={selectedProgram} 
-              onChange={(e) => setSelectedProgram(e.target.value)}
-            >
-              {availablePrograms.map(prog => (
-                <option key={prog} value={prog}>{prog.toUpperCase()}</option>
-              ))}
-            </select>
-            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-[#25326a] pointer-events-none" size={18} strokeWidth={2.5} />
+            {assignedProgram ? (
+              <div className="bg-white border-2 border-[#1e3a8a] text-[#1e3a8a] font-bold text-[13px] rounded-lg px-4 py-2.5 shadow-sm flex items-center gap-2 uppercase tracking-wide">
+                <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                <span>{selectedProgram.toUpperCase()}</span>
+                <span className="text-[10px] bg-blue-100 text-[#1e3a8a] px-2 py-0.5 rounded font-semibold ml-1">Akun Binaan</span>
+              </div>
+            ) : (
+              <>
+                <select 
+                  className="appearance-none bg-[#f8f9fa] border border-gray-200 text-[#25326a] font-bold text-[13px] rounded-lg pl-4 pr-10 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a] cursor-pointer shadow-sm uppercase tracking-wide"
+                  value={selectedProgram} 
+                  onChange={(e) => setSelectedProgram(e.target.value)}
+                >
+                  {availablePrograms.map(prog => (
+                    <option key={prog} value={prog}>{prog.toUpperCase()}</option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-[#25326a] pointer-events-none" size={18} strokeWidth={2.5} />
+              </>
+            )}
           </div>
 
           {/* Month Dropdown */}

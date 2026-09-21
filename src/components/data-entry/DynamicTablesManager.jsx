@@ -470,10 +470,121 @@ export const LingkarTambangPenjualanTable = ({ title, value = [], onChange }) =>
   );
 };
 
+export const OperasionalTable = ({ value = [], onChange }) => {
+  const SATUAN_OPTIONS = [
+    'Kg', 'Gram', 'Ton',
+    'Liter', 'mL',
+    'Pcs', 'Unit', 'Set', 'Buah', 'Lembar', 'Botol', 'Karung', 'Sak',
+    'Ekor', 'Batang', 'Ikat',
+    'Meter', 'm²', 'm³',
+    'kWh', 'Jam', 'Hari', 'Bulan',
+    'Orang', 'Kegiatan', 'Paket',
+  ];
+
+  useEffect(() => {
+    if (value.length === 0) {
+      onChange([{ id: 1, item_pengeluaran: '', qty: '', satuan: 'Kg', harga_satuan: '', total_harga: '' }]);
+    } else {
+      const lastRow = value[value.length - 1];
+      if (lastRow.item_pengeluaran !== '') {
+        onChange([...value, { id: Date.now(), item_pengeluaran: '', qty: '', satuan: 'Kg', harga_satuan: '', total_harga: '' }]);
+      }
+    }
+  }, [value.length, onChange]);
+
+  const handleFieldChange = (id, field, val) => {
+    const newRows = [...value];
+    const rowIndex = newRows.findIndex(r => r.id === id);
+    if (rowIndex === -1) return;
+
+    let updatedRow = { ...newRows[rowIndex], [field]: val };
+
+    if (field === 'qty' || field === 'harga_satuan') {
+      const q = parseFloat(field === 'qty' ? val : updatedRow.qty);
+      const h = parseFloat(field === 'harga_satuan' ? val : updatedRow.harga_satuan);
+      updatedRow.total_harga = (!isNaN(q) && !isNaN(h)) ? (q * h).toString() : '';
+    }
+
+    newRows[rowIndex] = updatedRow;
+
+    if (field === 'item_pengeluaran' && rowIndex === newRows.length - 1 && val.trim() !== '') {
+      newRows.push({ id: Date.now(), item_pengeluaran: '', qty: '', satuan: 'Kg', harga_satuan: '', total_harga: '' });
+    }
+    onChange(newRows);
+  };
+
+  const headers = ['Item Pengeluaran', 'Qty', 'Satuan', 'Harga Satuan (Rp)', 'Total Harga (Rp)'];
+
+  return (
+    <div className="mb-8 flex flex-col last:mb-0">
+      <h3 className="text-[14px] font-bold text-[#25326a] uppercase tracking-wider border-b border-gray-200 pb-2 mb-4 flex-none flex items-center gap-2">
+        <TableIcon size={18} className="text-[#1e3a8a]" />Pengeluaran Operasional
+      </h3>
+      <div className="overflow-x-auto border-y border-gray-300 shadow-sm bg-white rounded-sm minimal-scrollbar">
+        <table className="w-full text-[13px] text-left border-collapse">
+          <thead className="bg-[#f8f9fa] text-[#25326a] uppercase font-bold">
+            <tr>{headers.map((h, i) => <th key={i} className={`px-4 py-3.5 border-b border-gray-200 ${i === 0 ? 'w-1/3' : ''}`}>{h}</th>)}</tr>
+          </thead>
+          <tbody>
+            {value.map((row) => (
+              <tr key={row.id} className="border-b border-gray-100 hover:bg-orange-50/50">
+                <td className="px-4 py-2.5">
+                  <input
+                    type="text"
+                    className="w-full border border-gray-300 p-1.5 rounded focus:border-[#25326a] focus:outline-none"
+                    placeholder="Nama item pengeluaran..."
+                    value={row.item_pengeluaran}
+                    onChange={(e) => handleFieldChange(row.id, 'item_pengeluaran', e.target.value)}
+                  />
+                </td>
+                <td className="px-3 py-2.5">
+                  <input
+                    type="number"
+                    className="w-full border border-gray-300 p-1.5 rounded focus:border-[#25326a] focus:outline-none"
+                    value={row.qty}
+                    onChange={(e) => handleFieldChange(row.id, 'qty', e.target.value)}
+                  />
+                </td>
+                <td className="px-3 py-2.5">
+                  <select
+                    className="w-full border border-gray-300 p-1.5 rounded focus:border-[#25326a] focus:outline-none bg-white cursor-pointer"
+                    value={row.satuan || 'Kg'}
+                    onChange={(e) => handleFieldChange(row.id, 'satuan', e.target.value)}
+                  >
+                    {SATUAN_OPTIONS.map(opt => (
+                      <option key={opt} value={opt}>{opt}</option>
+                    ))}
+                  </select>
+                </td>
+                <td className="px-3 py-2.5">
+                  <input
+                    type="number"
+                    className="w-full border border-gray-300 p-1.5 rounded focus:border-[#25326a] focus:outline-none"
+                    value={row.harga_satuan}
+                    onChange={(e) => handleFieldChange(row.id, 'harga_satuan', e.target.value)}
+                  />
+                </td>
+                <td className="px-3 py-2.5">
+                  <input
+                    type="number"
+                    className="w-full border border-gray-300 p-1.5 rounded bg-gray-100 text-gray-600 cursor-not-allowed"
+                    readOnly
+                    value={row.total_harga}
+                  />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
+
 export default function DynamicTablesManager({ selectedProgram, tablesData, handleTableChange, extraFields, handleExtraFieldChange }) {
   const p = selectedProgram?.toLowerCase() || '';
   
-  if (p === "plts irigasi" || p.includes("proklim") || p.includes("ras system") || p.includes("ba-maxi") || p.includes("bedegung")) {
+  if (p === "plts irigasi" || p.includes("proklim") || p.includes("ba-maxi") || p.includes("bedegung")) {
     return null;
   }
 
@@ -497,6 +608,10 @@ export default function DynamicTablesManager({ selectedProgram, tablesData, hand
           value={tablesData['maggot']}
           onChange={(rows) => handleTableChange('maggot', rows)}
         />
+        <OperasionalTable
+          value={tablesData['operasional']}
+          onChange={(rows) => handleTableChange('operasional', rows)}
+        />
       </div>
     );
   }
@@ -517,6 +632,10 @@ export default function DynamicTablesManager({ selectedProgram, tablesData, hand
           initialLabels={["Lele", "Nila", "Patin", "Gurame", "Lainnya"]} 
           value={tablesData['Bibit Ikan']}
           onChange={(rows) => handleTableChange('Bibit Ikan', rows)}
+        />
+        <OperasionalTable
+          value={tablesData['operasional']}
+          onChange={(rows) => handleTableChange('operasional', rows)}
         />
       </div>
     );
@@ -546,6 +665,10 @@ export default function DynamicTablesManager({ selectedProgram, tablesData, hand
           value={tablesData['produk_lainnya']}
           onChange={(rows) => handleTableChange('produk_lainnya', rows)}
         />
+        <OperasionalTable
+          value={tablesData['operasional']}
+          onChange={(rows) => handleTableChange('operasional', rows)}
+        />
       </div>
     );
   }
@@ -573,6 +696,10 @@ export default function DynamicTablesManager({ selectedProgram, tablesData, hand
           value={tablesData['produk_lainnya']}
           onChange={(rows) => handleTableChange('produk_lainnya', rows)}
         />
+        <OperasionalTable
+          value={tablesData['operasional']}
+          onChange={(rows) => handleTableChange('operasional', rows)}
+        />
       </div>
     );
   }
@@ -594,6 +721,10 @@ export default function DynamicTablesManager({ selectedProgram, tablesData, hand
           value={tablesData['bibit_tanaman']}
           onChange={(rows) => handleTableChange('bibit_tanaman', rows)}
         />
+        <OperasionalTable
+          value={tablesData['operasional']}
+          onChange={(rows) => handleTableChange('operasional', rows)}
+        />
       </div>
     );
   }
@@ -613,6 +744,10 @@ export default function DynamicTablesManager({ selectedProgram, tablesData, hand
           initialLabels={["Telur Mentah", "Telur Asin Mentah", "Telur Asin Matang", "Lainnya"]} 
           value={tablesData['telur']}
           onChange={(rows) => handleTableChange('telur', rows)}
+        />
+        <OperasionalTable
+          value={tablesData['operasional']}
+          onChange={(rows) => handleTableChange('operasional', rows)}
         />
       </div>
     );
@@ -653,6 +788,10 @@ export default function DynamicTablesManager({ selectedProgram, tablesData, hand
           value={tablesData['produk_olahan']}
           onChange={(rows) => handleTableChange('produk_olahan', rows)}
         />
+        <OperasionalTable
+          value={tablesData['operasional']}
+          onChange={(rows) => handleTableChange('operasional', rows)}
+        />
       </div>
     );
   }
@@ -672,6 +811,10 @@ export default function DynamicTablesManager({ selectedProgram, tablesData, hand
             "Lainnya": ["Kg", "Ikat", "Pcs"]
           }}
         />
+        <OperasionalTable
+          value={tablesData['operasional']}
+          onChange={(rows) => handleTableChange('operasional', rows)}
+        />
       </div>
     );
   }
@@ -689,17 +832,38 @@ export default function DynamicTablesManager({ selectedProgram, tablesData, hand
           value={tablesData['penjualan']}
           onChange={(rows) => handleTableChange('penjualan', rows)}
         />
+        <OperasionalTable
+          value={tablesData['operasional']}
+          onChange={(rows) => handleTableChange('operasional', rows)}
+        />
+      </div>
+    );
+  }
+
+  if (p.includes("ras system")) {
+    return (
+      <div className="flex flex-col gap-4 w-full">
+        <OperasionalTable
+          value={tablesData['operasional']}
+          onChange={(rows) => handleTableChange('operasional', rows)}
+        />
       </div>
     );
   }
 
   return (
-    <GenericDynamicTable 
-      title="Data Kuantitatif / Penjualan" 
-      headers={["ITEM / PRODUK", "QTY", "HARGA SATUAN (RP)", "NILAI / OMZET"]} 
-      initialLabels={["Item Utama", "Lainnya"]} 
-      value={tablesData['default']}
-      onChange={(rows) => handleTableChange('default', rows)}
-    />
+    <div className="flex flex-col gap-4 w-full">
+      <GenericDynamicTable 
+        title="Data Kuantitatif / Penjualan" 
+        headers={["ITEM / PRODUK", "QTY", "HARGA SATUAN (RP)", "NILAI / OMZET"]} 
+        initialLabels={["Item Utama", "Lainnya"]} 
+        value={tablesData['default']}
+        onChange={(rows) => handleTableChange('default', rows)}
+      />
+      <OperasionalTable
+        value={tablesData['operasional']}
+        onChange={(rows) => handleTableChange('operasional', rows)}
+      />
+    </div>
   );
 }
