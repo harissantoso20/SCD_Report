@@ -2,17 +2,16 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 
 /**
  * Default Gemini model for Google AI Studio Free Tier.
- * gemini-2.0-flash offers generous free tier limits
- * (15 RPM, 1,000,000 TPM, 1,500 RPD) with zero billing requirements.
+ * gemini-2.5-flash offers generous free tier limits with zero billing requirements.
  */
-export const DEFAULT_GEMINI_MODEL = import.meta.env.VITE_GEMINI_MODEL || "gemini-2.0-flash";
+export const DEFAULT_GEMINI_MODEL = import.meta.env.VITE_GEMINI_MODEL || "gemini-2.5-flash";
 
 // Fallback models if primary model hits rate-limits or temporary service issues
 const FALLBACK_MODELS = [
   DEFAULT_GEMINI_MODEL,
   "gemini-2.5-flash",
   "gemini-2.0-flash",
-  "gemini-2.0-flash-lite"
+  "gemini-3.5-flash-lite"
 ].filter((m, i, self) => self.indexOf(m) === i);
 
 // In-memory cache fallback
