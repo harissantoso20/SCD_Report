@@ -11,6 +11,8 @@ import TempeAnalytics from './dashboard/TempeAnalytics';
 import EcogrowAnalytics from './dashboard/EcogrowAnalytics';
 import CahayaTaniAnalytics from './dashboard/CahayaTaniAnalytics';
 import ItikAnalytics from './dashboard/ItikAnalytics';
+import LingkarTambangAnalytics from './dashboard/LingkarTambangAnalytics';
+import RasSystemAnalytics from './dashboard/RasSystemAnalytics';
 import ProgramSummary from './dashboard/ProgramSummary';
 import { useSharedDashboard } from '../hooks/useSharedDashboard';
 import { FileText, FileImage } from './Icons';
@@ -50,6 +52,10 @@ export default function DashboardView() {
         <CahayaTaniAnalytics />
       ) : p.includes("itik") ? (
         <ItikAnalytics />
+      ) : p.includes("lingkar tambang") ? (
+        <LingkarTambangAnalytics />
+      ) : p.includes("ras system") ? (
+        <RasSystemAnalytics />
       ) : isSalesProgram ? (
         <SalesVisualization />
       ) : (

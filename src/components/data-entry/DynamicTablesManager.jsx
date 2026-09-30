@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { TableIcon } from '../Icons';
 
-export const GenericDynamicTable = ({ title, headers, initialLabels, value = [], onChange, unitOptionsMap = {} }) => {
+export const GenericDynamicTable = ({ title, headers, initialLabels, value = [], onChange, unitOptionsMap = {}, defaultUnit = "Kg" }) => {
   useEffect(() => {
     if (initialLabels.length > 0) {
       if (value.length === 0) {
@@ -12,7 +12,7 @@ export const GenericDynamicTable = ({ title, headers, initialLabels, value = [],
           qty: "", 
           unit_price: "", 
           revenue: "",
-          unit: unitOptionsMap[label] ? unitOptionsMap[label][0] : ""
+          unit: unitOptionsMap[label] ? unitOptionsMap[label][0] : defaultUnit
         }));
         onChange(initialRows);
       } else if (initialLabels.includes("Lainnya")) {
@@ -25,12 +25,12 @@ export const GenericDynamicTable = ({ title, headers, initialLabels, value = [],
             qty: "", 
             unit_price: "", 
             revenue: "",
-            unit: unitOptionsMap["Lainnya"] ? unitOptionsMap["Lainnya"][0] : ""
+            unit: unitOptionsMap["Lainnya"] ? unitOptionsMap["Lainnya"][0] : defaultUnit
           }]);
         }
       }
     }
-  }, [value.length, onChange]); 
+  }, [value.length, onChange, defaultUnit]); 
 
   const handleFieldChange = (id, field, val) => {
     const newRows = [...value]; 
@@ -110,7 +110,7 @@ export const GenericDynamicTable = ({ title, headers, initialLabels, value = [],
   );
 };
 
-export const SimpleQtyTable = ({ title, headers, initialLabels, value = [], onChange }) => {
+export const SimpleQtyTable = ({ title, headers, initialLabels, value = [], onChange, defaultUnit = "Ekor" }) => {
   useEffect(() => {
     if (initialLabels.length > 0) {
       if (value.length === 0) {
@@ -118,7 +118,8 @@ export const SimpleQtyTable = ({ title, headers, initialLabels, value = [], onCh
           id: i + 1, 
           product_name: label === "Lainnya" ? "" : label, 
           isOthers: label === "Lainnya", 
-          qty: ""
+          qty: "",
+          unit: defaultUnit
         }));
         onChange(initialRows);
       } else if (initialLabels.includes("Lainnya")) {
@@ -128,12 +129,13 @@ export const SimpleQtyTable = ({ title, headers, initialLabels, value = [], onCh
             id: Date.now(), 
             product_name: "", 
             isOthers: true, 
-            qty: ""
+            qty: "",
+            unit: defaultUnit
           }]);
         }
       }
     }
-  }, [value.length, onChange]); 
+  }, [value.length, onChange, defaultUnit]); 
 
   const handleFieldChange = (id, field, val) => {
     const newRows = [...value]; 
@@ -320,6 +322,10 @@ export const LingkarTambangPanenTable = ({ title, value = [], onChange }) => {
     if (rowIndex === -1) return; 
     
     newRows[rowIndex] = { ...newRows[rowIndex], [field]: val };
+    if (field === 'qty_kg') {
+      newRows[rowIndex].qty = val;
+      newRows[rowIndex].unit = 'Kg';
+    }
     
     if (field === 'product_name' && newRows[rowIndex].isOthers && rowIndex === newRows.length - 1 && val.trim() !== "") {
       newRows.push({ 
@@ -327,7 +333,9 @@ export const LingkarTambangPanenTable = ({ title, value = [], onChange }) => {
         product_name: "", 
         isOthers: true, 
         qty_buah: "",
-        qty_kg: ""
+        qty_kg: "",
+        qty: "",
+        unit: "Kg"
       });
     }
     onChange(newRows);
@@ -378,6 +386,8 @@ export const LingkarTambangPenjualanTable = ({ title, value = [], onChange }) =>
         isOthers: label === "Lainnya", 
         qty_buah: "",
         qty_kg: "",
+        qty: "",
+        unit: "Kg",
         unit_price: "",
         revenue: ""
       }));
@@ -391,6 +401,8 @@ export const LingkarTambangPenjualanTable = ({ title, value = [], onChange }) =>
           isOthers: true, 
           qty_buah: "",
           qty_kg: "",
+          qty: "",
+          unit: "Kg",
           unit_price: "",
           revenue: ""
         }]);
@@ -404,6 +416,11 @@ export const LingkarTambangPenjualanTable = ({ title, value = [], onChange }) =>
     if (rowIndex === -1) return; 
     
     let updatedRow = { ...newRows[rowIndex], [field]: val };
+
+    if (field === 'qty_kg') {
+      updatedRow.qty = val;
+      updatedRow.unit = 'Kg';
+    }
 
     if (field === 'qty_kg' || field === 'unit_price') {
       const q = parseFloat(field === 'qty_kg' ? val : updatedRow.qty_kg);
@@ -424,6 +441,8 @@ export const LingkarTambangPenjualanTable = ({ title, value = [], onChange }) =>
         isOthers: true, 
         qty_buah: "",
         qty_kg: "",
+        qty: "",
+        unit: "Kg",
         unit_price: "",
         revenue: ""
       });
@@ -843,6 +862,30 @@ export default function DynamicTablesManager({ selectedProgram, tablesData, hand
   if (p.includes("ras system")) {
     return (
       <div className="flex flex-col gap-4 w-full">
+        <SimpleQtyTable 
+          title="Jumlah Pembesaran Ikan (Ekor)" 
+          headers={["Jenis Ikan", "Qty (Ekor)"]} 
+          initialLabels={["Nila", "Lele", "Lainnya"]} 
+          value={tablesData['pembesaran_ikan']}
+          onChange={(rows) => handleTableChange('pembesaran_ikan', rows)}
+          defaultUnit="Ekor"
+        />
+        <GenericDynamicTable 
+          title="Penjualan Ikan Konsumsi (Kg)" 
+          headers={["Jenis Ikan", "Qty (Kg)", "Harga Satuan (Rp/Kg)", "Omzet"]} 
+          initialLabels={["Nila", "Lele", "Lainnya"]} 
+          value={tablesData['ikan_konsumsi']}
+          onChange={(rows) => handleTableChange('ikan_konsumsi', rows)}
+          defaultUnit="Kg"
+        />
+        <GenericDynamicTable 
+          title="Penjualan Sayur Hidroponik (Kg)" 
+          headers={["Jenis Sayuran", "Qty (Kg)", "Harga Satuan (Rp/Kg)", "Omzet"]} 
+          initialLabels={["Pakcoy", "Selada", "Lainnya"]} 
+          value={tablesData['sayur_hidroponik']}
+          onChange={(rows) => handleTableChange('sayur_hidroponik', rows)}
+          defaultUnit="Kg"
+        />
         <OperasionalTable
           value={tablesData['operasional']}
           onChange={(rows) => handleTableChange('operasional', rows)}

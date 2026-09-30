@@ -47,6 +47,17 @@ export const salesService = {
                 harga_satuan: row['Harga Satuan'],
                 total_harga: row.Omzet
               });
+            } else if (cat === 'panen' || cat === 'penjualan') {
+              tablesData[cat].push({
+                id: row.id || (Date.now() + Math.random()),
+                product_name: row.Produk,
+                qty_buah: row['Value Operasional'] !== null && row['Value Operasional'] !== undefined && row['Value Operasional'] !== 0 ? row['Value Operasional'] : '',
+                qty_kg: row.Jumlah !== null && row.Jumlah !== undefined && row.Jumlah !== 0 ? row.Jumlah : '',
+                qty: row.Jumlah,
+                unit: row.Satuan_1 || 'Kg',
+                unit_price: row['Harga Satuan'] || '',
+                revenue: row.Omzet || ''
+              });
             } else {
               tablesData[cat].push({
                 id: row.id || (Date.now() + Math.random()),
@@ -136,17 +147,24 @@ export const salesService = {
               });
             }
           } else if (item.product_name) {
+            const hasQtyBuah = item.qty_buah !== undefined && item.qty_buah !== null && item.qty_buah !== '';
+            const finalQty = item.qty_kg !== undefined && item.qty_kg !== '' ? safeNumber(item.qty_kg) : safeNumber(item.qty);
+
+            const defaultUnit = category.includes('pembesaran') 
+              ? (category.includes('batang') ? 'Batang' : 'Ekor') 
+              : 'Kg';
+
             salesPayloads.push({
               "Program": globalProgram,
               "Bulan": targetMonth,
               "Tahun": targetYear,
-              "Operasional": "-",
-              "Value Operasional": 0,
-              "Satuan": "-",
+              "Operasional": hasQtyBuah ? "Qty Buah" : "-",
+              "Value Operasional": hasQtyBuah ? safeNumber(item.qty_buah) : 0,
+              "Satuan": hasQtyBuah ? "Buah" : "-",
               "Kategori Produk": safeString(item.jenis_produk || category),
               "Produk": safeString(item.product_name),
-              "Jumlah": safeNumber(item.qty),
-              "Satuan_1": safeString(item.unit || "Kg"),
+              "Jumlah": finalQty,
+              "Satuan_1": safeString(item.unit || defaultUnit),
               "Harga Satuan": safeNumber(item.unit_price),
               "Omzet": safeNumber(item.revenue)
             });
