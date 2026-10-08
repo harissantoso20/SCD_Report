@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { ResponsiveContainer, BarChart, Bar, CartesianGrid, XAxis, YAxis, Tooltip, LineChart, Line } from 'recharts';
 import useAppStore from '../../store/useAppStore';
-
 import { Zap, TrendingUp, Sparkles, Box, Recycle, Bug } from 'lucide-react';
 import { useMaggotData } from '../../hooks/programs/useMaggotData';
 import GeminiInsight from './GeminiInsight';
+import BeneficiaryPanel from './BeneficiaryPanel';
 
 // Chart Helpers
 const FilterButtons = ({ currentRange, setRange }) => (
@@ -302,6 +302,10 @@ const MaggotVisualization = React.memo(function MaggotVisualization() {
           </table>
         </div>
       </div>
+
+      {/* DATA ANGGOTA BINAAN */}
+      <BeneficiaryPanel />
+
     </div>
   );
 });

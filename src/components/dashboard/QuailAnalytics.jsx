@@ -6,6 +6,7 @@ import {
 import { useQuailData } from '../../hooks/programs/useQuailData';
 import { TrendingUp, Bird, Egg, Package, Info, Sparkles, Box } from 'lucide-react';
 import GeminiInsight from './GeminiInsight';
+import BeneficiaryPanel from './BeneficiaryPanel';
 
 const formatRupiah = (val) => new Intl.NumberFormat('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(val);
 const formatJuta = (val) => new Intl.NumberFormat('id-ID').format(val);
@@ -358,6 +359,9 @@ const QuailAnalytics = React.memo(function QuailAnalytics() {
 
           </div>
         </div>
+
+      {/* DATA ANGGOTA BINAAN */}
+      <BeneficiaryPanel />
 
       </div>
     </div>

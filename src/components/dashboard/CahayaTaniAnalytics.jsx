@@ -5,6 +5,7 @@ import {
 } from 'recharts';
 import { useCahayaTaniData } from '../../hooks/programs/useCahayaTaniData';
 import GeminiInsight from './GeminiInsight';
+import BeneficiaryPanel from './BeneficiaryPanel';
 import { Sparkles, ShoppingBag, Sprout, TrendingUp, Info } from 'lucide-react';
 
 const formatRupiah = (val) => new Intl.NumberFormat('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(val);
@@ -304,6 +305,9 @@ const CahayaTaniAnalytics = React.memo(function CahayaTaniAnalytics() {
           </table>
         </div>
       </div>
+
+      {/* DATA ANGGOTA BINAAN */}
+      <BeneficiaryPanel />
 
     </div>
   );

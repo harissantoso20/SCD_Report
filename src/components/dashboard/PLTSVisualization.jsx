@@ -3,6 +3,7 @@ import * as L from 'leaflet';
 import { Maximize, Minimize } from 'lucide-react';
 import useAppStore from '../../store/useAppStore';
 import { MapPin, Building, Zap, Users } from '../Icons';
+import BeneficiaryPanel from './BeneficiaryPanel';
 
 const PLTSVisualization = React.memo(function PLTSVisualization() {
   const pltsLocations = useAppStore((state) => state.pltsLocations);
@@ -225,6 +226,9 @@ const PLTSVisualization = React.memo(function PLTSVisualization() {
           </div>
         </div>
       </div>
+
+      {/* DATA ANGGOTA BINAAN */}
+      <BeneficiaryPanel />
     </section>
   );
 });

@@ -6,6 +6,7 @@ import {
 import { useTempeData } from '../../hooks/programs/useTempeData';
 import { Sparkles, Box, ShoppingBag } from 'lucide-react';
 import GeminiInsight from './GeminiInsight';
+import BeneficiaryPanel from './BeneficiaryPanel';
 
 const formatRupiah = (val) => new Intl.NumberFormat('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(val);
 const formatJuta = (val) => new Intl.NumberFormat('id-ID').format(val);
@@ -278,6 +279,9 @@ const TempeAnalytics = React.memo(function TempeAnalytics() {
           headerAction={<FilterButtons currentRange={timeFilter} setRange={setTimeFilter} />}
         />
       </div>
+
+      {/* DATA ANGGOTA BINAAN */}
+      <BeneficiaryPanel />
 
     </div>
   );

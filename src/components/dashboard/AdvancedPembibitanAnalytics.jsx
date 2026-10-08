@@ -7,6 +7,7 @@ import { usePembibitanData } from '../../hooks/programs/usePembibitanData';
 import { TrendingUp, AlertTriangle } from '../Icons';
 import { Sparkles, ShoppingBag, Sprout } from 'lucide-react';
 import GeminiInsight from './GeminiInsight';
+import BeneficiaryPanel from './BeneficiaryPanel';
 
 const formatRupiah = (val) => new Intl.NumberFormat('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(val);
 const formatJuta = (val) => new Intl.NumberFormat('id-ID').format(val);
@@ -399,6 +400,9 @@ const AdvancedPembibitanAnalytics = React.memo(function AdvancedPembibitanAnalyt
         </div>
 
       </div>
+
+      {/* DATA ANGGOTA BINAAN */}
+      <BeneficiaryPanel />
 
     </div>
   );

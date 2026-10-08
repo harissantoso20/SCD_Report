@@ -3,6 +3,7 @@ import { ResponsiveContainer, LineChart, Line, CartesianGrid, XAxis, YAxis, Tool
 
 import { TrendingUp, FileImage } from '../Icons';
 import { useSharedDashboard } from '../../hooks/useSharedDashboard';
+import BeneficiaryPanel from './BeneficiaryPanel';
 
 export default React.memo(function SalesVisualization() {
   const { dynamicSalesChartData } = useSharedDashboard();
@@ -10,7 +11,8 @@ export default React.memo(function SalesVisualization() {
   const formatRupiahChart = useCallback((value) => new Intl.NumberFormat('id-ID').format(value), []);
 
   return (
-    <section className="bg-white rounded-md shadow-sm border border-gray-200 p-5 md:p-6">
+    <div className="flex flex-col gap-6">
+      <section className="bg-white rounded-md shadow-sm border border-gray-200 p-5 md:p-6">
       <h2 className="text-[14px] font-bold text-[#25326a] uppercase tracking-wider border-b border-gray-200 pb-2 mb-5 flex items-center gap-2">
         <TrendingUp size={18} className="text-[#1e3a8a]" />
         OVERVIEW
@@ -61,5 +63,9 @@ export default React.memo(function SalesVisualization() {
         </div>
       </div>
     </section>
+
+      {/* DATA ANGGOTA BINAAN */}
+      <BeneficiaryPanel />
+    </div>
   );
 });

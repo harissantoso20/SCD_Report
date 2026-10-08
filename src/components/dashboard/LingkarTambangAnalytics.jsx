@@ -5,6 +5,7 @@ import {
 } from 'recharts';
 import { useLingkarTambangData } from '../../hooks/programs/useLingkarTambangData';
 import GeminiInsight from './GeminiInsight';
+import BeneficiaryPanel from './BeneficiaryPanel';
 import {
   Sprout, ShoppingBag, TrendingUp, Scale, DollarSign, Layers, Activity,
   PieChart as PieIcon, BarChart2
@@ -386,6 +387,9 @@ const LingkarTambangAnalytics = React.memo(function LingkarTambangAnalytics() {
           </table>
         </div>
       </section>
+
+      {/* ── ROW 6: DATA ANGGOTA BINAAN ── */}
+      <BeneficiaryPanel />
 
     </div>
   );

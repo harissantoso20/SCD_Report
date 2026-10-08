@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { AreaChart, Area, BarChart, Bar, ComposedChart, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, LabelList } from 'recharts';
 import { useEcogrowData } from '../../hooks/programs/useEcogrowData';
 import GeminiInsight from './GeminiInsight';
+import BeneficiaryPanel from './BeneficiaryPanel';
 import { TrendingUp, TrendingDown, PieChart as PieChartIcon, Sparkles } from 'lucide-react';
 
 // Helpers
@@ -336,6 +337,9 @@ const EcogrowAnalytics = () => {
           </table>
         </div>
       </div>
+
+      {/* DATA ANGGOTA BINAAN */}
+      <BeneficiaryPanel />
 
     </div>
   );

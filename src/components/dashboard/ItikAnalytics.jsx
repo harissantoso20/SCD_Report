@@ -6,6 +6,7 @@ import {
 import { useItikData } from '../../hooks/programs/useItikData';
 import { Sparkles, Package, Activity, Info } from 'lucide-react';
 import GeminiInsight from './GeminiInsight';
+import BeneficiaryPanel from './BeneficiaryPanel';
 
 const formatRupiah = (val) => new Intl.NumberFormat('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(val);
 const formatJuta = (val) => new Intl.NumberFormat('id-ID').format(val);
@@ -301,6 +302,9 @@ const ItikAnalytics = React.memo(function ItikAnalytics() {
           </table>
         </div>
       </div>
+
+      {/* DATA ANGGOTA BINAAN */}
+      <BeneficiaryPanel />
 
     </div>
   );

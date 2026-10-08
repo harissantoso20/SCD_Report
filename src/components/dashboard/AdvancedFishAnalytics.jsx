@@ -4,8 +4,9 @@ import {
   BarChart, Bar, LineChart, Line, CartesianGrid, XAxis, YAxis, LabelList
 } from 'recharts';
 import { useFisheryData } from '../../hooks/programs/useFisheryData';
-import { Sparkles, Package, ShoppingBag } from 'lucide-react'; // icons imported
+import { Sparkles, Package, ShoppingBag } from 'lucide-react';
 import GeminiInsight from './GeminiInsight';
+import BeneficiaryPanel from './BeneficiaryPanel';
 
 const formatRupiah = (val) => new Intl.NumberFormat('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(val);
 const formatJuta = (val) => new Intl.NumberFormat('id-ID').format(val);
@@ -479,6 +480,9 @@ const AdvancedFishAnalytics = React.memo(function AdvancedFishAnalytics() {
         </div>
 
       </div>
+
+      {/* DATA ANGGOTA BINAAN */}
+      <BeneficiaryPanel />
 
     </div>
   );

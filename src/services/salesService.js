@@ -1,6 +1,6 @@
 import { supabase } from '../lib/supabaseClient';
 
-import { safeNumber, safeString } from '../utils/sanitize';
+import { safeNumber, safeInteger, safeString } from '../utils/sanitize';
 
 export const salesService = {
   fetchSalesData: async (fuzzyKeyword, globalProgram, targetYear, targetMonth) => {
@@ -113,7 +113,7 @@ export const salesService = {
           "Bulan": targetMonth,
           "Tahun": targetYear,
           "Operasional": safeString(field),
-          "Value Operasional": safeNumber(value),
+          "Value Operasional": safeInteger(value),
           "Satuan": opSatuan,
           "Kategori Produk": "-",
           "Produk": "-",
@@ -140,15 +140,15 @@ export const salesService = {
                 "Satuan": "-",
                 "Kategori Produk": "operasional",
                 "Produk": safeString(item.item_pengeluaran),
-                "Jumlah": safeNumber(item.qty),
+                "Jumlah": safeInteger(item.qty),
                 "Satuan_1": safeString(item.satuan),
-                "Harga Satuan": safeNumber(item.harga_satuan),
-                "Omzet": safeNumber(item.total_harga)
+                "Harga Satuan": safeInteger(item.harga_satuan),
+                "Omzet": safeInteger(item.total_harga)
               });
             }
           } else if (item.product_name) {
             const hasQtyBuah = item.qty_buah !== undefined && item.qty_buah !== null && item.qty_buah !== '';
-            const finalQty = item.qty_kg !== undefined && item.qty_kg !== '' ? safeNumber(item.qty_kg) : safeNumber(item.qty);
+            const finalQty = item.qty_kg !== undefined && item.qty_kg !== '' ? safeInteger(item.qty_kg) : safeInteger(item.qty);
 
             const defaultUnit = category.includes('pembesaran') 
               ? (category.includes('batang') ? 'Batang' : 'Ekor') 
@@ -159,14 +159,14 @@ export const salesService = {
               "Bulan": targetMonth,
               "Tahun": targetYear,
               "Operasional": hasQtyBuah ? "Qty Buah" : "-",
-              "Value Operasional": hasQtyBuah ? safeNumber(item.qty_buah) : 0,
+              "Value Operasional": hasQtyBuah ? safeInteger(item.qty_buah) : 0,
               "Satuan": hasQtyBuah ? "Buah" : "-",
               "Kategori Produk": safeString(item.jenis_produk || category),
               "Produk": safeString(item.product_name),
-              "Jumlah": finalQty,
+              "Jumlah": safeInteger(finalQty),
               "Satuan_1": safeString(item.unit || defaultUnit),
-              "Harga Satuan": safeNumber(item.unit_price),
-              "Omzet": safeNumber(item.revenue)
+              "Harga Satuan": safeInteger(item.unit_price),
+              "Omzet": safeInteger(item.revenue)
             });
           }
         });

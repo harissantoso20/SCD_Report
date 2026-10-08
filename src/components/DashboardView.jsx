@@ -14,6 +14,7 @@ import ItikAnalytics from './dashboard/ItikAnalytics';
 import LingkarTambangAnalytics from './dashboard/LingkarTambangAnalytics';
 import RasSystemAnalytics from './dashboard/RasSystemAnalytics';
 import ProgramSummary from './dashboard/ProgramSummary';
+import BeneficiaryPanel from './dashboard/BeneficiaryPanel';
 import { useSharedDashboard } from '../hooks/useSharedDashboard';
 import { FileText, FileImage } from './Icons';
 
@@ -59,18 +60,21 @@ export default function DashboardView() {
       ) : isSalesProgram ? (
         <SalesVisualization />
       ) : (
-        <section className="bg-white rounded-md shadow-sm border border-gray-200 p-5 md:p-6">
-          <h2 className="text-[14px] font-bold text-[#25326a] uppercase tracking-wider border-b border-gray-200 pb-2 mb-5 flex items-center gap-2">
-            <FileText size={18} className="text-[#1e3a8a]" />
-            OVERVIEW INFOGRAFIS
-          </h2>
-          <div className="w-full flex flex-col border border-indigo-100 rounded-md bg-indigo-50/30 items-center justify-center min-h-[400px] p-6 text-center shadow-inner relative overflow-hidden group cursor-help">
-            <div className="absolute inset-0 bg-[#1e3a8a]/5 group-hover:bg-[#1e3a8a]/10 transition-colors"></div>
-            <FileImage size={48} className="text-indigo-300 mb-3 relative z-10" />
-            <p className="text-indigo-800/60 font-semibold text-sm relative z-10 uppercase tracking-widest">Placement Infografis Laporan</p>
-            <p className="text-indigo-800/40 text-xs mt-2 relative z-10 max-w-md">Program ini tidak bersifat kuantitatif secara langsung. Area ini digunakan untuk meletakkan poster infografis kualitatif.</p>
-          </div>
-        </section>
+        <div className="flex flex-col gap-6">
+          <section className="bg-white rounded-md shadow-sm border border-gray-200 p-5 md:p-6">
+            <h2 className="text-[14px] font-bold text-[#25326a] uppercase tracking-wider border-b border-gray-200 pb-2 mb-5 flex items-center gap-2">
+              <FileText size={18} className="text-[#1e3a8a]" />
+              OVERVIEW INFOGRAFIS
+            </h2>
+            <div className="w-full flex flex-col border border-indigo-100 rounded-md bg-indigo-50/30 items-center justify-center min-h-[400px] p-6 text-center shadow-inner relative overflow-hidden group cursor-help">
+              <div className="absolute inset-0 bg-[#1e3a8a]/5 group-hover:bg-[#1e3a8a]/10 transition-colors"></div>
+              <FileImage size={48} className="text-indigo-300 mb-3 relative z-10" />
+              <p className="text-indigo-800/60 font-semibold text-sm relative z-10 uppercase tracking-widest">Placement Infografis Laporan</p>
+              <p className="text-indigo-800/40 text-xs mt-2 relative z-10 max-w-md">Program ini tidak bersifat kuantitatif secara langsung. Area ini digunakan untuk meletakkan poster infografis kualitatif.</p>
+            </div>
+          </section>
+          <BeneficiaryPanel />
+        </div>
       )}
 
       {/* RINGKASAN PROGRAM (Level 4) */}

@@ -2,17 +2,31 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 
 /**
  * Default Gemini model for Google AI Studio Free Tier.
- * gemini-2.5-flash offers generous free tier limits with zero billing requirements.
+ * Uses canonical alias "gemini-flash-latest" (always points to latest stable Flash).
+ * Fallbacks: gemini-3.5-flash, gemini-3.5-flash-lite, gemini-flash-lite-latest, gemini-3.8-flash.
  */
-export const DEFAULT_GEMINI_MODEL = import.meta.env.VITE_GEMINI_MODEL || "gemini-2.5-flash";
+const RETIRED_MODELS = [
+  "gemini-2.0-flash",
+  "gemini-2.5-flash",
+  "gemini-2.5-flash-lite",
+  "gemini-3.6-flash",
+  "gemini-3.7-flash"
+];
+
+const envModel = (import.meta.env.VITE_GEMINI_MODEL || "").trim();
+export const DEFAULT_GEMINI_MODEL = (envModel && !RETIRED_MODELS.includes(envModel)) 
+  ? envModel 
+  : "gemini-flash-latest";
 
 // Fallback models if primary model hits rate-limits or temporary service issues
 const FALLBACK_MODELS = [
   DEFAULT_GEMINI_MODEL,
-  "gemini-2.5-flash",
-  "gemini-2.0-flash",
-  "gemini-3.5-flash-lite"
-].filter((m, i, self) => self.indexOf(m) === i);
+  "gemini-flash-latest",
+  "gemini-3.5-flash",
+  "gemini-3.5-flash-lite",
+  "gemini-flash-lite-latest",
+  "gemini-3.8-flash"
+].filter((m, i, self) => self.indexOf(m) === i && !RETIRED_MODELS.includes(m));
 
 // In-memory cache fallback
 const memoryCache = new Map();
@@ -176,19 +190,21 @@ export const generateText = async (prompt, preferredModel = DEFAULT_GEMINI_MODEL
       } catch (error) {
         lastError = error;
         const errMsg = error?.message || "";
-        const isRateLimit =
+        const isTemporary =
           errMsg.includes("429") ||
+          errMsg.includes("503") ||
+          errMsg.includes("high demand") ||
           errMsg.includes("RESOURCE_EXHAUSTED") ||
           errMsg.includes("Quota exceeded");
 
-        // If rate limited on attempt 1, wait 2 seconds before retry
-        if (isRateLimit && attempt === 1) {
-          console.warn(`[Gemini Free Tier] Rate limit on ${modelName}, waiting 2s before retry...`);
-          await sleep(2000);
+        // If temporary issue on attempt 1, wait 1.5s before retry
+        if (isTemporary && attempt === 1) {
+          console.warn(`[Gemini Free Tier] Temporary issue on ${modelName}, waiting 1.5s before retry...`);
+          await sleep(1500);
           continue;
         }
 
-        // If it's not a rate limit or second attempt failed, break to next candidate model
+        // If retired (404) or failed, proceed to next candidate model immediately
         break;
       }
     }
@@ -212,7 +228,13 @@ export const generateText = async (prompt, preferredModel = DEFAULT_GEMINI_MODEL
 
   if (rawMsg.includes("429") || rawMsg.includes("RESOURCE_EXHAUSTED") || rawMsg.includes("Quota exceeded")) {
     throw new Error(
-      "Batas Kuota Gratis Tercapai (429): Google AI Studio membatasi 15 request/menit untuk tier gratis. Silakan tunggu sekitar 1 menit, lalu klik tombol muat ulang."
+      "Batas Kuota Gratis Tercapai (429): Google AI Studio membatasi 15 request/menit untuk tier gratis. Silakan tunggu sekitar 1 menit, lalu klik tombol 'Coba Lagi'."
+    );
+  }
+
+  if (rawMsg.includes("503") || rawMsg.includes("high demand")) {
+    throw new Error(
+      "Server Gemini Sedang Sibuk (503): Server Google sedang mengalami lonjakan beban sementara. Silakan klik tombol 'Coba Lagi' dalam beberapa detik."
     );
   }
 

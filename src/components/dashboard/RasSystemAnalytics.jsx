@@ -5,6 +5,7 @@ import {
 } from 'recharts';
 import { useRasSystemData } from '../../hooks/programs/useRasSystemData';
 import GeminiInsight from './GeminiInsight';
+import BeneficiaryPanel from './BeneficiaryPanel';
 import {
   Fish, Leaf, DollarSign, TrendingUp, Layers, Activity, BarChart2,
   PieChart as PieIcon
@@ -413,6 +414,9 @@ const RasSystemAnalytics = React.memo(function RasSystemAnalytics() {
           </table>
         </div>
       </section>
+
+      {/* DATA ANGGOTA BINAAN */}
+      <BeneficiaryPanel />
 
     </div>
   );
