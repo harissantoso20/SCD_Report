@@ -275,7 +275,7 @@ export default function MapSearchBar({
             setIsOpen(true);
           }}
           onFocus={() => setIsOpen(true)}
-          placeholder="Cari program atau lokasi (ala Google Maps)..."
+          placeholder="Cari program atau lokasi..."
           className="w-full py-2 pl-2.5 pr-16 text-xs text-slate-800 placeholder-slate-400 font-medium bg-transparent focus:outline-hidden"
         />
 
