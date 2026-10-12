@@ -41,3 +41,49 @@ export const PROGRAMS = [
   "Poktan Cahaya Tani", "Budidaya Itik Petelur", "Suscomdev Lingkar Tambang", "Suscomdev Sirah Pulau", 
   "Suscomdev Prabumenang", "Budidaya Ikan RAS System", "BA-MAXI", "PROKLIM", "Revitalisasi Taman Kehati"
 ];
+
+/**
+ * Maps a raw program name (e.g. from Ring 1 UPTE or Map Locations) and desa to the active dashboard program name.
+ * Returns null if the program is not yet active / does not have a dedicated dashboard (e.g. Persiapan...).
+ */
+export function getDashboardProgram(rawName, desa = '', programList = []) {
+  if (!rawName || typeof rawName !== 'string') return null;
+  const p = rawName.toLowerCase().trim();
+  const d = (desa || '').toLowerCase().trim();
+
+  // Exclude programs that are still in preparation or not yet implemented
+  if (p.startsWith('persiapan') || p.includes('belum ada program')) {
+    return null;
+  }
+
+  let targetKey = null;
+  if (p.includes('plts') || p.includes('irigasi')) targetKey = 'plts';
+  else if (p.includes('maggot') || p.includes('sampah organik')) targetKey = 'maggot';
+  else if (p.includes('ras system') || (p.includes('kolam pangan') && p.includes('ras'))) targetKey = 'ras system';
+  else if (p.includes('ikan air tawar') || p.includes('bara agro')) targetKey = 'ikan air tawar';
+  else if (p.includes('siba') || p.includes('pembibitan') || p.includes('santri agro')) targetKey = 'siba';
+  else if (p.includes('puyuh')) {
+    if (d.includes('seleman') || p.includes('seleman')) targetKey = 'seleman';
+    else targetKey = 'darmo';
+  }
+  else if (p.includes('ecogrow') || p.includes('mom utun') || p.includes('mom utum')) targetKey = 'ecogrow';
+  else if (p.includes('cahaya tani')) targetKey = 'cahaya tani';
+  else if (p.includes('itik') || p.includes('telur omega')) targetKey = 'itik';
+  else if (p.includes('lingkar tambang') || p.includes('melon') || p.includes('smart green house')) targetKey = 'lingkar tambang';
+  else if (p.includes('prabumenang') || p.includes('tempe') || p.includes('co-elevation')) targetKey = 'prabumenang';
+  else if (p.includes('ba-maxi') || p.includes('bamaxi')) targetKey = 'ba-maxi';
+  else if (p.includes('sirah pulau')) targetKey = 'sirah pulau';
+  else if (p.includes('proklim')) targetKey = 'proklim';
+  else if (p.includes('taman kehati') || p.includes('bedegung')) targetKey = 'kehati';
+
+  if (!targetKey) return null;
+
+  // Search in programList first (to match case from database if available)
+  const candidateList = Array.isArray(programList) && programList.length > 0 ? programList : PROGRAMS;
+  const matched = candidateList.find(prog => prog.toLowerCase().includes(targetKey));
+  
+  if (matched) return matched;
+
+  // Fallback to default PROGRAMS
+  return PROGRAMS.find(prog => prog.toLowerCase().includes(targetKey)) || null;
+}

@@ -6,18 +6,50 @@ import { Maximize, Minimize, X, Info } from 'lucide-react';
 import logoSDGs from '../assets/logo/logo-sdgs.png';
 import { generateText } from '../lib/geminiClient';
 import ReactMarkdown from 'react-markdown';
+import { getDashboardProgram } from '../utils/programAssets';
+import MapSearchBar from './MapSearchBar';
 
 const INDO_MONTHS = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
 
 export default function HomeView() {
-  const { homeData, isHomeLoading, isReportLoading, fetchHomeData, error, globalDate, setGlobalDate } = useAppStore();
+  const { 
+    homeData, 
+    isHomeLoading, 
+    isReportLoading, 
+    fetchHomeData, 
+    error, 
+    globalDate, 
+    setGlobalDate,
+    setGlobalProgram,
+    setActiveTab,
+    programList
+  } = useAppStore();
   const mapRef = useRef(null);
   const mapInstance = useRef(null);
+  const initialBoundsRef = useRef(null);
+  const [markersList, setMarkersList] = useState([]);
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [aiReportStatement, setAiReportStatement] = useState('');
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [aiError, setAiError] = useState(null);
   const [modalConfig, setModalConfig] = useState(null);
+
+  const handleNavigateToProgram = (targetProg) => {
+    if (!targetProg) return;
+    setGlobalProgram(targetProg);
+    setActiveTab('Dashboard');
+    if (modalConfig) setModalConfig(null);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    window.__navigateToProgram = (prog) => {
+      handleNavigateToProgram(prog);
+    };
+    return () => {
+      delete window.__navigateToProgram;
+    };
+  }, [setGlobalProgram, setActiveTab, modalConfig]);
 
   useEffect(() => {
     fetchHomeData();
@@ -57,8 +89,9 @@ export default function HomeView() {
 
     const bounds = L.latLngBounds([]);
     let hasValidCoords = false;
+    const markersArr = [];
 
-    homeData.mapData.forEach((loc) => {
+    homeData.mapData.forEach((loc, idx) => {
       const lat = parseFloat(loc.Latitude);
       const lng = parseFloat(loc.Longitude);
       
@@ -67,6 +100,11 @@ export default function HomeView() {
         bounds.extend([lat, lng]);
         
         const programName = loc['Program PPM'] || loc.Program || '-';
+        const desaName = loc['Desa/Kelurahan'] || loc.Desa || '';
+        const kecamatan = loc.Kecamatan || '';
+        const kabupaten = loc.Kabupaten || '';
+        const sektor = loc.Sektor || '-';
+        const targetProg = getDashboardProgram(programName, desaName, programList);
         const googleMapsUrl = loc.map_link || `https://www.google.com/maps?q=${lat},${lng}`;
         
         const marker = L.marker([lat, lng]).addTo(map);
@@ -95,21 +133,53 @@ export default function HomeView() {
 
         marker.bindPopup(`
           <div class="text-xs p-1.5 min-w-[170px]">
-            <b class="text-[#1e3a8a] text-sm block border-b border-gray-100 pb-1 mb-1">${programName}</b>
+            ${targetProg ? `
+              <button onclick="window.__navigateToProgram('${targetProg}')" 
+                 class="text-left font-bold text-[#1e3a8a] hover:underline cursor-pointer border-none bg-transparent p-0 text-sm block border-b border-gray-100 pb-1 mb-1 w-full"
+                 title="Buka dashboard ${targetProg}">
+                ${programName}
+              </button>
+            ` : `
+              <b class="text-[#1e3a8a] text-sm block border-b border-gray-100 pb-1 mb-1">${programName}</b>
+            `}
             <span class="text-gray-600 font-medium">${loc['Desa/Kelurahan'] || loc.Desa}, ${loc.Kecamatan}, ${loc.Kabupaten}</span><br/>
             <div class="mt-1.5 inline-block bg-blue-100 text-blue-800 px-2 py-0.5 rounded text-[10px] font-bold">
               Sektor: ${loc.Sektor || '-'}
             </div>
-            <div class="mt-2.5 pt-2 border-t border-gray-200">
+            <div class="mt-2.5 pt-2 border-t border-gray-200 flex flex-col gap-1.5">
+              ${targetProg ? `
+                <button onclick="window.__navigateToProgram('${targetProg}')" 
+                   class="flex items-center justify-center gap-1.5 w-full bg-[#1e3a8a] hover:bg-blue-800 text-white px-3 py-1.5 rounded text-[11px] font-bold transition-colors no-underline shadow-sm cursor-pointer border-none">
+                  📊 Buka Dashboard ↗
+                </button>
+              ` : ''}
               <a href="${googleMapsUrl}" target="_blank" rel="noopener noreferrer" 
-                 class="flex items-center justify-center gap-1.5 w-full bg-[#1e3a8a] text-white px-3 py-1.5 rounded text-[11px] font-bold hover:bg-blue-800 transition-colors no-underline shadow-sm">
+                 class="flex items-center justify-center gap-1.5 w-full bg-gray-100 hover:bg-gray-200 text-gray-800 px-3 py-1 rounded text-[10.5px] font-bold transition-colors no-underline">
                 📍 Buka di Google Maps ↗
               </a>
             </div>
           </div>
         `);
+
+        markersArr.push({
+          id: `${lat}-${lng}-${idx}`,
+          marker,
+          lat,
+          lng,
+          programName,
+          desaName,
+          kecamatan,
+          kabupaten,
+          sektor,
+          targetProg,
+          googleMapsUrl,
+          raw: loc
+        });
       }
     });
+
+    setMarkersList(markersArr);
+    initialBoundsRef.current = bounds;
 
     if (hasValidCoords) {
       map.fitBounds(bounds, { padding: [50, 50], maxZoom: 13 });
@@ -260,12 +330,28 @@ Instruksi:
               <h4 className="font-bold text-gray-700 bg-gray-100 px-3 py-2 rounded-md mb-3">{region}</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {Object.entries(desaObj).map(([desa, programs], vIdx) => (
-                  <div key={vIdx} className="border border-gray-200 rounded p-3 bg-gray-50 hover:bg-blue-50 transition-colors">
+                  <div key={vIdx} className="border border-gray-200 rounded p-3 bg-gray-50 hover:bg-blue-50/60 transition-colors">
                     <p className="font-bold text-blue-700 mb-2">{desa}</p>
-                    <ul className="flex flex-col gap-1.5 pl-4 list-disc marker:text-gray-400">
-                      {programs.map((prog, pIdx) => (
-                        <li key={pIdx} className="text-sm text-gray-700 leading-tight">{prog}</li>
-                      ))}
+                    <ul className="flex flex-col gap-2 pl-4 list-disc marker:text-gray-400">
+                      {programs.map((prog, pIdx) => {
+                        const targetProg = getDashboardProgram(prog, desa, programList);
+                        return (
+                          <li key={pIdx} className="text-sm text-gray-700 leading-tight">
+                            {targetProg ? (
+                              <button
+                                type="button"
+                                onClick={() => handleNavigateToProgram(targetProg)}
+                                className="text-left text-slate-800 hover:text-[#1e3a8a] hover:underline underline-offset-2 font-medium transition-colors cursor-pointer"
+                                title={`Buka dashboard ${targetProg}`}
+                              >
+                                {prog}
+                              </button>
+                            ) : (
+                              <span className="text-slate-600">{prog}</span>
+                            )}
+                          </li>
+                        );
+                      })}
                     </ul>
                   </div>
                 ))}
@@ -284,13 +370,29 @@ Instruksi:
               <h4 className="font-bold text-gray-700 bg-gray-100 px-3 py-2 rounded-md mb-3">{region}</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {Object.entries(desaObj).map(([desa, programs], vIdx) => (
-                  <div key={vIdx} className="border border-gray-200 rounded p-3 bg-gray-50 hover:bg-blue-50 transition-colors">
+                  <div key={vIdx} className="border border-gray-200 rounded p-3 bg-gray-50 hover:bg-blue-50/60 transition-colors">
                     <p className="font-bold text-blue-700 mb-2">{desa}</p>
                     {programs.length > 0 ? (
-                      <ul className="flex flex-col gap-1.5 pl-4 list-disc marker:text-gray-400">
-                        {programs.map((prog, pIdx) => (
-                          <li key={pIdx} className="text-sm text-gray-700 leading-tight">{prog}</li>
-                        ))}
+                      <ul className="flex flex-col gap-2 pl-4 list-disc marker:text-gray-400">
+                        {programs.map((prog, pIdx) => {
+                          const targetProg = getDashboardProgram(prog, desa, programList);
+                          return (
+                            <li key={pIdx} className="text-sm text-gray-700 leading-tight">
+                              {targetProg ? (
+                                <button
+                                  type="button"
+                                  onClick={() => handleNavigateToProgram(targetProg)}
+                                  className="text-left text-slate-800 hover:text-[#1e3a8a] hover:underline underline-offset-2 font-medium transition-colors cursor-pointer"
+                                  title={`Buka dashboard ${targetProg}`}
+                                >
+                                  {prog}
+                                </button>
+                              ) : (
+                                <span className="text-slate-600">{prog}</span>
+                              )}
+                            </li>
+                          );
+                        })}
                       </ul>
                     ) : (
                       <p className="text-sm text-gray-400 italic flex items-center gap-1.5">
@@ -336,14 +438,31 @@ Instruksi:
                 {sectorIcons[sektor] || '📦'} {sektor}
               </h4>
               <div className="flex flex-col gap-3">
-                {Object.entries(progObj).map(([prog, desaSet], pIdx) => (
-                  <div key={pIdx} className="border-l-4 border-[#1e3a8a]/40 pl-3 py-1 hover:border-[#1e3a8a] transition-colors">
-                    <p className="font-bold text-gray-800">{prog}</p>
-                    <p className="text-sm text-gray-500 mt-1">
-                      <span className="font-medium">Lokasi:</span> {Array.from(desaSet).join(', ') || '-'}
-                    </p>
-                  </div>
-                ))}
+                {Object.entries(progObj).map(([prog, desaSet], pIdx) => {
+                  const desaFirst = Array.from(desaSet)[0] || '';
+                  const targetProg = getDashboardProgram(prog, desaFirst, programList);
+                  return (
+                    <div key={pIdx} className="border-l-4 border-[#1e3a8a]/40 pl-3 py-1 hover:border-[#1e3a8a] transition-colors">
+                      <div className="flex items-center gap-2">
+                        {targetProg ? (
+                          <button
+                            type="button"
+                            onClick={() => handleNavigateToProgram(targetProg)}
+                            className="text-left font-bold text-gray-800 hover:text-[#1e3a8a] hover:underline underline-offset-2 transition-colors cursor-pointer"
+                            title={`Buka dashboard ${targetProg}`}
+                          >
+                            {prog}
+                          </button>
+                        ) : (
+                          <p className="font-bold text-gray-800">{prog}</p>
+                        )}
+                      </div>
+                      <p className="text-sm text-gray-500 mt-1">
+                        <span className="font-medium">Lokasi:</span> {Array.from(desaSet).join(', ') || '-'}
+                      </p>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           ))}
@@ -354,24 +473,40 @@ Instruksi:
     if (modalConfig.type === 'LUAR_RING_1') {
       return (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {homeData.luarRing1Programs.map((prog, i) => (
-            <div key={i} className="border border-gray-200 rounded p-3 bg-gray-50 flex flex-col gap-2 hover:bg-orange-50 transition-colors">
-              <div className="flex items-start gap-3">
-                <span className="text-orange-500 text-lg leading-none">☀️</span>
-                <span className="text-sm font-bold text-[#1e3a8a] leading-snug">{prog.title}</span>
-              </div>
-              <div className="pl-8 text-xs text-gray-600 font-medium">
-                Desa {prog.desa}, Kec. {prog.kecamatan}, Kab. {prog.kabupaten}, {prog.provinsi}
-              </div>
-              {prog.map_link && (
-                <div className="pl-8 mt-1">
-                  <a href={prog.map_link} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 bg-[#1e3a8a] text-white hover:bg-blue-800 px-3 py-1.5 rounded text-[11px] font-bold transition-colors no-underline shadow-sm">
-                    📍 Buka di Google Maps ↗
-                  </a>
+          {homeData.luarRing1Programs.map((prog, i) => {
+            const targetProg = getDashboardProgram(prog.title, prog.desa, programList);
+            return (
+              <div key={i} className="border border-gray-200 rounded p-3 bg-gray-50 flex flex-col gap-2 hover:bg-orange-50 transition-colors">
+                <div className="flex items-start gap-3">
+                  <span className="text-orange-500 text-lg leading-none">☀️</span>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {targetProg ? (
+                      <button
+                        type="button"
+                        onClick={() => handleNavigateToProgram(targetProg)}
+                        className="text-sm font-bold text-[#1e3a8a] hover:underline underline-offset-2 leading-snug text-left cursor-pointer transition-colors"
+                        title={`Buka dashboard ${targetProg}`}
+                      >
+                        {prog.title}
+                      </button>
+                    ) : (
+                      <span className="text-sm font-bold text-[#1e3a8a] leading-snug">{prog.title}</span>
+                    )}
+                  </div>
                 </div>
-              )}
-            </div>
-          ))}
+                <div className="pl-8 text-xs text-gray-600 font-medium">
+                  Desa {prog.desa}, Kec. {prog.kecamatan}, Kab. {prog.kabupaten}, {prog.provinsi}
+                </div>
+                {prog.map_link && (
+                  <div className="pl-8 mt-1">
+                    <a href={prog.map_link} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 bg-[#1e3a8a] text-white hover:bg-blue-800 px-3 py-1.5 rounded text-[11px] font-bold transition-colors no-underline shadow-sm">
+                      📍 Buka di Google Maps ↗
+                    </a>
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       );
     }
@@ -383,44 +518,59 @@ Instruksi:
     <div className="flex flex-col gap-6 -mt-4 md:-mt-6 lg:-mx-auto -mx-4 md:-mx-6 lg:max-w-none">
       
       {/* MAP WRAPPER (FULL BLEED / FULL SCREEN CONDITIONAL) */}
-      <div className={isFullScreen ? "fixed inset-0 z-[9999] bg-slate-900 p-4 md:p-8 flex flex-col" : "relative w-full h-[500px] md:h-[650px] bg-slate-200 overflow-hidden shadow-sm border-b border-gray-300"}>
+      <div className={isFullScreen ? "fixed inset-0 z-[9999] bg-slate-900 p-4 md:p-6 flex flex-col" : "relative w-full h-[540px] md:h-[680px] bg-slate-200 overflow-hidden shadow-sm border-b border-gray-300"}>
         
         {isFullScreen && (
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-bold text-white flex items-center gap-2">
-              <MapPin size={24} className="text-white" />
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-3 bg-slate-900/90 backdrop-blur-md p-3 rounded-xl border border-slate-700">
+            <h2 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+              <MapPin size={22} className="text-blue-400" />
               SEBARAN LOKASI RING 1 (FULL SCREEN)
             </h2>
-            <button 
-              onClick={() => setIsFullScreen(false)}
-              className="bg-red-500 text-white hover:bg-red-600 px-4 py-2 rounded-md font-bold flex items-center gap-2 transition-colors shadow-sm"
-            >
-              <Minimize size={18} /> Tutup
-            </button>
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <MapSearchBar
+                mapInstance={mapInstance.current}
+                markersList={markersList}
+                initialBounds={initialBoundsRef.current}
+                onNavigateToProgram={handleNavigateToProgram}
+                isFullScreen={true}
+              />
+              <button 
+                onClick={() => setIsFullScreen(false)}
+                className="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-xl font-bold flex items-center gap-1.5 transition-colors shadow-xs cursor-pointer text-xs shrink-0"
+              >
+                <Minimize size={16} /> Tutup
+              </button>
+            </div>
           </div>
         )}
 
         <div className="relative w-full h-full rounded overflow-hidden shadow-sm" style={{ flex: isFullScreen ? 1 : 'unset' }}>
-          <div className="absolute top-2 right-2 z-[500]">
-            {!isFullScreen && (
-              <button 
-                onClick={() => setIsFullScreen(true)}
-                className="bg-white hover:bg-slate-50 text-slate-700 p-2 rounded shadow-md border border-slate-200 transition-colors cursor-pointer"
-                title="Lihat Peta Penuh"
-              >
-                <Maximize size={18} />
-              </button>
-            )}
-          </div>
-          
           <div ref={mapRef} className="w-full h-full z-0"></div>
           
-          {/* MAP TITLE OVERLAY (Top Left) */}
+          {/* MAP TITLE & SEARCH OVERLAY (Top) */}
           {!isFullScreen && (
             <div className="absolute top-0 left-0 right-0 z-[400] pointer-events-none">
-              <div className="bg-white/90 backdrop-blur-sm p-4 md:p-6 shadow-sm border-b-4 border-[#1e3a8a] w-full pointer-events-auto">
-                <h1 className="text-2xl font-extrabold text-[#1e3a8a] tracking-tight">Sebaran Lokasi Ring 1</h1>
-                <h2 className="text-lg font-bold text-gray-500">Tanjung Enim Minning Site PT Bukit Asam (Persero) Tbk</h2>
+              <div className="bg-white/95 backdrop-blur-md p-3 sm:p-4 md:p-5 shadow-sm border-b-4 border-[#1e3a8a] w-full pointer-events-auto flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                <div>
+                  <h1 className="text-xl sm:text-2xl font-extrabold text-[#1e3a8a] tracking-tight">Sebaran Lokasi Ring 1</h1>
+                  <h2 className="text-xs sm:text-sm font-semibold text-gray-500">Tanjung Enim Mining Site PT Bukit Asam (Persero) Tbk</h2>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <MapSearchBar
+                    mapInstance={mapInstance.current}
+                    markersList={markersList}
+                    initialBounds={initialBoundsRef.current}
+                    onNavigateToProgram={handleNavigateToProgram}
+                  />
+                  <button 
+                    onClick={() => setIsFullScreen(true)}
+                    className="bg-white hover:bg-slate-50 text-slate-700 p-2.5 rounded-xl shadow-xs border border-slate-200 transition-colors cursor-pointer shrink-0"
+                    title="Lihat Peta Penuh"
+                  >
+                    <Maximize size={16} />
+                  </button>
+                </div>
               </div>
             </div>
           )}
@@ -428,7 +578,7 @@ Instruksi:
       </div>
 
       {/* 4 SUMMARY CARDS */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 -mt-16 relative z-10 px-4 md:px-6 lg:max-w-7xl lg:mx-auto w-full">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 -mt-16 relative z-10 px-4 md:px-6 max-w-[1800px] mx-auto w-full">
         
         {/* Card 1 */}
         <div 
@@ -519,7 +669,7 @@ Instruksi:
       </div>
 
       {/* LOWER SECTION */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-4 px-4 md:px-6 lg:max-w-7xl lg:mx-auto w-full mb-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-4 px-4 md:px-6 max-w-[1800px] mx-auto w-full mb-8">
         
         {/* Left Column: Report Statement */}
         <div className="lg:col-span-7 relative min-h-[500px] lg:min-h-0">
@@ -619,13 +769,27 @@ Instruksi:
                   {Object.entries(desaObj).map(([desa, programs], vIdx) => (
                     <div key={vIdx} className="pl-2 border-l-2 border-[#1e3a8a]/30">
                       <p className="text-sm font-bold text-blue-600 mb-1">{desa}</p>
-                      <ul className="flex flex-col gap-1">
-                        {programs.map((prog, pIdx) => (
-                          <li key={pIdx} className="text-[13px] text-gray-600 flex items-start gap-2">
-                            <span className="text-gray-400 mt-0.5">•</span> 
-                            <span>{prog}</span>
-                          </li>
-                        ))}
+                      <ul className="flex flex-col gap-1.5">
+                        {programs.map((prog, pIdx) => {
+                          const targetProg = getDashboardProgram(prog, desa, programList);
+                          return (
+                            <li key={pIdx} className="text-[13px] text-gray-600 flex items-start gap-2">
+                              <span className="text-gray-400 mt-1.5 shrink-0">•</span> 
+                              {targetProg ? (
+                                <button
+                                  type="button"
+                                  onClick={() => handleNavigateToProgram(targetProg)}
+                                  className="text-left text-slate-700 hover:text-[#1e3a8a] hover:underline underline-offset-2 font-medium transition-colors cursor-pointer py-0.5"
+                                  title={`Buka dashboard ${targetProg}`}
+                                >
+                                  {prog}
+                                </button>
+                              ) : (
+                                <span className="py-0.5 text-slate-500">{prog}</span>
+                              )}
+                            </li>
+                          );
+                        })}
                       </ul>
                     </div>
                   ))}
@@ -638,7 +802,7 @@ Instruksi:
       </div>
 
       {/* SDGs Footer */}
-      <div className="px-4 md:px-6 lg:max-w-7xl lg:mx-auto w-full mb-12">
+      <div className="px-4 md:px-6 max-w-[1800px] mx-auto w-full mb-12">
         <div className="flex justify-center items-center overflow-hidden">
           <img src={logoSDGs} alt="SDGs Goals" className="w-full h-auto object-contain mix-blend-multiply opacity-90 hover:opacity-100 transition-opacity cursor-pointer" title="Sustainable Development Goals" />
         </div>

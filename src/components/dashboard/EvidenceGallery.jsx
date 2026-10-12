@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import useAppStore from '../../store/useAppStore';
 import { FileImage, X, ChevronLeft, ChevronRight, ExternalLink } from '../Icons';
+import { Download } from 'lucide-react';
 
 const GDriveIcon = ({ size = 20 }) => (
   <svg viewBox="0 0 87.3 78" style={{ width: size, height: size }} className="flex-shrink-0" xmlns="http://www.w3.org/2000/svg">
@@ -28,7 +29,51 @@ function isFolderUrl(url) {
 
 export default function EvidenceGallery() {
   const evidenceData = useAppStore((state) => state.evidenceData);
+  const selectedProgram = useAppStore((state) => state.globalProgram);
   const [selectedIndex, setSelectedIndex] = useState(null);
+
+  const handleDownloadImage = async (url, idx = 0) => {
+    if (!url) return;
+    const cleanProgram = (selectedProgram || 'Program').replace(/[^a-zA-Z0-9]/g, '_');
+    const filename = `${cleanProgram}_Eviden_${idx + 1}.jpg`;
+    const displayUrl = getDisplayImageUrl(url);
+
+    try {
+      const response = await fetch(displayUrl);
+      if (!response.ok) throw new Error('Fetch failed');
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+    } catch {
+      // Fallback direct open or download
+      const link = document.createElement('a');
+      link.href = displayUrl || url;
+      link.target = '_blank';
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
+
+  const handleDownloadAll = async () => {
+    if (!evidenceData || evidenceData.length === 0) return;
+    for (let i = 0; i < evidenceData.length; i++) {
+      const ev = evidenceData[i];
+      if (ev.File_Url && !isFolderUrl(ev.File_Url)) {
+        await handleDownloadImage(ev.File_Url, i);
+        if (evidenceData.length > 1) {
+          await new Promise((r) => setTimeout(r, 400));
+        }
+      }
+    }
+  };
 
   // Keyboard navigation for image lightbox
   useEffect(() => {
@@ -54,8 +99,24 @@ export default function EvidenceGallery() {
     );
   }
 
+  const validPhotosCount = evidenceData.filter(e => !isFolderUrl(e.File_Url)).length;
+
   return (
     <>
+      {validPhotosCount > 0 && (
+        <div className="flex justify-end mb-3">
+          <button
+            type="button"
+            onClick={handleDownloadAll}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white rounded-md text-[11px] font-bold shadow-xs hover:shadow-sm transition-all cursor-pointer"
+            title="Download seluruh gambar eviden progres"
+          >
+            <Download size={13} />
+            <span>Download Semua Foto ({validPhotosCount})</span>
+          </button>
+        </div>
+      )}
+
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
         {evidenceData.map((ev, idx) => {
           const isFolder = isFolderUrl(ev.File_Url);
@@ -94,7 +155,6 @@ export default function EvidenceGallery() {
                 alt={`Evidence ${idx + 1}`} 
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 onError={(e) => {
-                  // Fallback to placeholder if thumbnail is blocked
                   e.target.onerror = null;
                 }}
               />
@@ -106,11 +166,22 @@ export default function EvidenceGallery() {
                 </div>
               )}
 
-              {/* Hover overlay */}
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
-                <span className="text-white opacity-0 group-hover:opacity-100 font-semibold text-xs bg-black/60 px-3 py-1 rounded-full drop-shadow-md transition-opacity">
+              {/* Hover overlay with action buttons */}
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/35 transition-colors flex items-center justify-center gap-2">
+                <span className="text-white opacity-0 group-hover:opacity-100 font-semibold text-xs bg-black/60 px-2.5 py-1 rounded-full drop-shadow-md transition-opacity">
                   Perbesar
                 </span>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDownloadImage(ev.File_Url, idx);
+                  }}
+                  className="text-white opacity-0 group-hover:opacity-100 bg-emerald-600 hover:bg-emerald-700 p-1.5 rounded-full drop-shadow-md transition-opacity hover:scale-110 cursor-pointer"
+                  title="Download Foto Ini"
+                >
+                  <Download size={14} />
+                </button>
               </div>
             </div>
           );
@@ -154,10 +225,21 @@ export default function EvidenceGallery() {
             />
 
             {/* Bottom Actions & Counter */}
-            <div className="mt-3 flex items-center gap-3 pointer-events-auto">
+            <div className="mt-3 flex flex-wrap items-center justify-center gap-3 pointer-events-auto">
               <span className="bg-black/60 text-white px-3.5 py-1 rounded-full text-xs font-medium tracking-wide">
                 {selectedIndex + 1} / {evidenceData.length}
               </span>
+
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDownloadImage(evidenceData[selectedIndex].File_Url, selectedIndex);
+                }}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-1 rounded-full text-xs font-medium flex items-center gap-1.5 transition-colors shadow-sm cursor-pointer"
+              >
+                <Download size={13} /> Download Foto
+              </button>
 
               {evidenceData[selectedIndex].File_Url && (
                 <a

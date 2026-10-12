@@ -124,141 +124,198 @@ const QuailAnalytics = React.memo(function QuailAnalytics() {
   };
 
   return (
-    <div className="w-full flex flex-col gap-4 font-sans text-slate-800">
+    <div className="w-full flex flex-col gap-5 font-sans text-slate-800">
       
-      {/* MAIN LAYOUT GRID (3 Kolom: 2 Kiri, 1 Kanan) */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 items-stretch">
-        
-        {/* LEFT COLUMN (Span 2) */}
-        <div className="xl:col-span-2 flex flex-col gap-4">
+      {/* ROW 1: TOP 3 KPIs */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-white p-4 md:p-5 rounded-lg shadow-sm border border-slate-200 border-t-4 border-t-blue-600 hover:-translate-y-1 hover:shadow-md transition-all duration-300 flex items-start gap-4 relative overflow-hidden group">
+          <div className="bg-blue-50/50 p-3 rounded-lg text-blue-600 border border-blue-100 relative z-10"><span className="text-xl font-bold animate-[pulse_2s_ease-in-out_infinite]">Rp</span></div>
+          <div className="flex flex-col mb-1 relative z-10">
+            <span className="text-[9px] font-bold text-slate-500 tracking-wider uppercase mb-1">Total Omzet YTD</span>
+            <span className="text-lg xl:text-xl tracking-tight font-extrabold text-[#1e3a8a]">{formatRupiah(quailYTD.total_omzet)}</span>
+          </div>
+          {/* Doodle Art */}
+          <div className="absolute -bottom-6 -right-4 text-blue-100/40 group-hover:-translate-y-2 group-hover:rotate-6 transition-transform duration-500 pointer-events-none">
+            <svg width="100" height="100" viewBox="0 0 100 100" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+              <polygon points="50,10 90,90 10,90" opacity="0.6" />
+            </svg>
+          </div>
+        </div>
+        <div className="bg-white p-4 md:p-5 rounded-lg shadow-sm border border-slate-200 border-t-4 border-t-blue-400 hover:-translate-y-1 hover:shadow-md transition-all duration-300 flex items-start gap-4 relative overflow-hidden group">
+          <div className="bg-sky-50/50 p-3 rounded-lg text-sky-600 border border-sky-100 relative z-10"><Box size={24} className="animate-[bounce_3s_ease-in-out_infinite]" /></div>
+          <div className="flex flex-col mb-1 relative z-10">
+            <span className="text-[9px] font-bold text-slate-500 tracking-wider uppercase mb-1">Vol. Penjualan Telur</span>
+            <span className="text-lg xl:text-xl tracking-tight font-extrabold text-[#1e3a8a]">{new Intl.NumberFormat('id-ID').format(quailYTD.total_qty_telur)} <span className="text-sm font-semibold text-slate-400">Butir</span></span>
+            <span className="text-xs font-semibold text-slate-500 mt-0.5">≈ {new Intl.NumberFormat('id-ID', { maximumFractionDigits: 1 }).format(quailYTD.total_qty_telur / 90)} <span className="font-medium text-slate-400">Kg</span></span>
+          </div>
+          {/* Doodle Art */}
+          <div className="absolute -bottom-4 -right-4 text-sky-100/40 group-hover:scale-110 transition-transform duration-500 pointer-events-none">
+            <svg width="100" height="100" viewBox="0 0 100 100" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+              <ellipse cx="50" cy="50" rx="30" ry="40" opacity="0.7" transform="rotate(20 50 50)" />
+            </svg>
+          </div>
+        </div>
+        <div className="bg-white p-4 md:p-5 rounded-lg shadow-sm border border-slate-200 border-t-4 border-t-blue-900 hover:-translate-y-1 hover:shadow-md transition-all duration-300 flex items-start gap-4 relative overflow-hidden group">
+          <div className="bg-indigo-50/50 p-3 rounded-lg text-indigo-600 border border-indigo-100 relative z-10"><Box size={24} className="animate-[pulse_3s_ease-in-out_infinite]" /></div>
+          <div className="flex flex-col mb-1 relative z-10">
+            <span className="text-[9px] font-bold text-slate-500 tracking-wider uppercase mb-1">Total Penjualan Kohe YTD</span>
+            <span className="text-lg xl:text-xl tracking-tight font-extrabold text-[#1e3a8a]">{new Intl.NumberFormat('id-ID').format(quailYTD.total_qty_kohe)} <span className="text-sm font-semibold text-slate-400">Kg</span></span>
+          </div>
+          {/* Doodle Art */}
+          <div className="absolute -bottom-2 -right-4 text-indigo-100/40 group-hover:translate-x-2 transition-transform duration-500 pointer-events-none">
+            <svg width="120" height="80" viewBox="0 0 100 50" fill="none" stroke="currentColor" strokeWidth="8" strokeLinecap="round" xmlns="http://www.w3.org/2000/svg">
+              <path d="M0 40 C 20 10, 40 50, 60 20 S 80 0, 100 10" />
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      {/* ROW 2: DUAL CHARTS (Telur vs Kohe) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
+        {/* Chart Telur */}
+        <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 md:p-5 flex flex-col h-[340px]">
+          <div className="flex justify-between items-center border-b border-slate-100 pb-2 mb-4">
+            <h3 className="text-[13px] font-bold text-[#1e3a8a] uppercase tracking-widest">
+              Tren Penjualan Telur Puyuh
+            </h3>
+            <div className="flex items-center gap-3 text-[10px] font-bold text-slate-500">
+              <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-sm bg-[#3b82f6]"></div> Vol (Butir)</div>
+              <div className="flex items-center gap-1"><div className="w-3 h-1 bg-[#1e3a8a] rounded-full"></div> Omzet (Rp)</div>
+            </div>
+          </div>
+          <div className="flex-1 w-full min-h-0 flex flex-col gap-1">
+            <div className="h-[45%] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={filteredOverviewData} syncId="quailTelur" margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                  <XAxis dataKey="month" hide={true} padding={{ left: 30, right: 30 }} />
+                  <YAxis hide={true} domain={[0, dataMax => Math.max(10, Math.ceil((dataMax || 0) * 1.2))]} />
+                  <Tooltip cursor={{ fill: '#f8fafc', strokeDasharray: '3 3' }} contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '11px' }} />
+                  <Line type="monotone" dataKey="omzet_telur" name="Omzet (Rp)" stroke="#1e3a8a" strokeWidth={3} dot={{ r: 3, fill: '#fff', stroke: '#1e3a8a', strokeWidth: 2 }} activeDot={{ r: 5 }} label={renderLineLabelRp} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="h-[55%] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={filteredOverviewData} syncId="quailTelur" margin={{ top: 0, right: 10, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                  <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#64748b', fontWeight: 'bold' }} dy={10} padding={{ left: 30, right: 30 }} />
+                  <YAxis hide={true} domain={[0, dataMax => Math.max(10, Math.ceil((dataMax || 0) * 1.2))]} />
+                  <Tooltip cursor={{ fill: '#f8fafc', strokeDasharray: '3 3' }} contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '11px' }} />
+                  <Bar dataKey="qty_telur" name="Vol (Butir)" fill="#3b82f6" radius={[4, 4, 0, 0]} barSize={16} label={renderLabelButir} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </div>
+
+        {/* Chart Kohe */}
+        <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 md:p-5 flex flex-col h-[340px]">
+          <div className="flex justify-between items-center border-b border-slate-100 pb-2 mb-4">
+            <h3 className="text-[13px] font-bold text-[#1e3a8a] uppercase tracking-widest">
+              Tren Penjualan Kohe
+            </h3>
+            <div className="flex items-center gap-3 text-[10px] font-bold text-slate-500">
+              <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-sm bg-[#8b5cf6]"></div> Vol (Kg)</div>
+              <div className="flex items-center gap-1"><div className="w-3 h-1 bg-[#4c1d95] rounded-full"></div> Omzet (Rp)</div>
+            </div>
+          </div>
+          <div className="flex-1 w-full min-h-0 flex flex-col gap-1">
+            <div className="h-[45%] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={filteredOverviewData} syncId="quailKohe" margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                  <XAxis dataKey="month" hide={true} padding={{ left: 30, right: 30 }} />
+                  <YAxis hide={true} domain={[0, dataMax => Math.max(10, Math.ceil((dataMax || 0) * 1.2))]} />
+                  <Tooltip cursor={{ fill: '#f8fafc', strokeDasharray: '3 3' }} contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '11px' }} />
+                  <Line type="monotone" dataKey="omzet_kohe" name="Omzet (Rp)" stroke="#4c1d95" strokeWidth={3} dot={{ r: 3, fill: '#fff', stroke: '#4c1d95', strokeWidth: 2 }} activeDot={{ r: 5 }} label={renderLineLabelRp} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="h-[55%] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={filteredOverviewData} syncId="quailKohe" margin={{ top: 0, right: 10, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                  <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#64748b', fontWeight: 'bold' }} dy={10} padding={{ left: 30, right: 30 }} />
+                  <YAxis hide={true} domain={[0, dataMax => Math.max(10, Math.ceil((dataMax || 0) * 1.2))]} />
+                  <Tooltip cursor={{ fill: '#f8fafc', strokeDasharray: '3 3' }} contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '11px' }} />
+                  <Bar dataKey="qty_kohe" name="Vol (Kg)" fill="#8b5cf6" radius={[4, 4, 0, 0]} barSize={16} label={renderLabelButir} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ROW 3: GEMINI INSIGHT & RASIO DIVERSIFIKASI */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-stretch">
+        <div className="flex flex-col min-h-[320px]">
+          <GeminiInsight 
+            programName="Budidaya Puyuh Petelur"
+            period={`${timeFilter} Bulan Terakhir (${currentYear})`}
+            quantitativeData={{
+              overview: filteredOverviewData,
+              ytdSummary: quailYTD
+            }}
+            headerAction={<FilterButtons currentRange={timeFilter} setRange={setTimeFilter} />}
+          />
+        </div>
+
+        <div className="bg-white p-4 md:p-5 rounded-lg shadow-sm border border-slate-200 flex flex-col min-h-[320px]">
+          <div className="flex justify-between items-center border-b border-slate-100 pb-2 mb-4">
+            <h3 className="text-[13px] font-bold text-[#1e3a8a] uppercase tracking-widest">
+              Rasio Diversifikasi YTD
+            </h3>
+          </div>
           
-          {/* ROW 1: TOP 3 KPIs */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-white p-4 md:p-5 rounded-lg shadow-sm border border-slate-200 border-t-4 border-t-blue-600 hover:-translate-y-1 hover:shadow-md transition-all duration-300 flex items-start gap-4 relative overflow-hidden group">
-              <div className="bg-blue-50/50 p-3 rounded-lg text-blue-600 border border-blue-100 relative z-10"><span className="text-xl font-bold animate-[pulse_2s_ease-in-out_infinite]">Rp</span></div>
-              <div className="flex flex-col mb-1 relative z-10">
-                <span className="text-[9px] font-bold text-slate-500 tracking-wider uppercase mb-1">Total Omzet YTD</span>
-                <span className="text-lg xl:text-xl tracking-tight font-extrabold text-[#1e3a8a]">{formatRupiah(quailYTD.total_omzet)}</span>
-              </div>
-              {/* Doodle Art */}
-              <div className="absolute -bottom-6 -right-4 text-blue-100/40 group-hover:-translate-y-2 group-hover:rotate-6 transition-transform duration-500 pointer-events-none">
-                <svg width="100" height="100" viewBox="0 0 100 100" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                  <polygon points="50,10 90,90 10,90" opacity="0.6" />
-                </svg>
-              </div>
-            </div>
-            <div className="bg-white p-4 md:p-5 rounded-lg shadow-sm border border-slate-200 border-t-4 border-t-blue-400 hover:-translate-y-1 hover:shadow-md transition-all duration-300 flex items-start gap-4 relative overflow-hidden group">
-              <div className="bg-sky-50/50 p-3 rounded-lg text-sky-600 border border-sky-100 relative z-10"><Box size={24} className="animate-[bounce_3s_ease-in-out_infinite]" /></div>
-              <div className="flex flex-col mb-1 relative z-10">
-                <span className="text-[9px] font-bold text-slate-500 tracking-wider uppercase mb-1">Vol. Penjualan Telur</span>
-                <span className="text-lg xl:text-xl tracking-tight font-extrabold text-[#1e3a8a]">{new Intl.NumberFormat('id-ID').format(quailYTD.total_qty_telur)} <span className="text-sm font-semibold text-slate-400">Butir</span></span>
-                <span className="text-xs font-semibold text-slate-500 mt-0.5">≈ {new Intl.NumberFormat('id-ID', { maximumFractionDigits: 1 }).format(quailYTD.total_qty_telur / 90)} <span className="font-medium text-slate-400">Kg</span></span>
-              </div>
-              {/* Doodle Art */}
-              <div className="absolute -bottom-4 -right-4 text-sky-100/40 group-hover:scale-110 transition-transform duration-500 pointer-events-none">
-                <svg width="100" height="100" viewBox="0 0 100 100" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                  <ellipse cx="50" cy="50" rx="30" ry="40" opacity="0.7" transform="rotate(20 50 50)" />
-                </svg>
-              </div>
-            </div>
-            <div className="bg-white p-4 md:p-5 rounded-lg shadow-sm border border-slate-200 border-t-4 border-t-blue-900 hover:-translate-y-1 hover:shadow-md transition-all duration-300 flex items-start gap-4 relative overflow-hidden group">
-              <div className="bg-indigo-50/50 p-3 rounded-lg text-indigo-600 border border-indigo-100 relative z-10"><Box size={24} className="animate-[pulse_3s_ease-in-out_infinite]" /></div>
-              <div className="flex flex-col mb-1 relative z-10">
-                <span className="text-[9px] font-bold text-slate-500 tracking-wider uppercase mb-1">Total Penjualan Kohe YTD</span>
-                <span className="text-lg xl:text-xl tracking-tight font-extrabold text-[#1e3a8a]">{new Intl.NumberFormat('id-ID').format(quailYTD.total_qty_kohe)} <span className="text-sm font-semibold text-slate-400">Kg</span></span>
-              </div>
-              {/* Doodle Art */}
-              <div className="absolute -bottom-2 -right-4 text-indigo-100/40 group-hover:translate-x-2 transition-transform duration-500 pointer-events-none">
-                <svg width="120" height="80" viewBox="0 0 100 50" fill="none" stroke="currentColor" strokeWidth="8" strokeLinecap="round" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M0 40 C 20 10, 40 50, 60 20 S 80 0, 100 10" />
-                </svg>
-              </div>
+          <div className="flex-1 flex flex-col relative justify-center">
+            <h4 className="text-[11px] font-bold text-slate-500 text-center mb-2 uppercase tracking-wider">Komposisi Pendapatan</h4>
+            <div className="flex-1 w-full min-h-0 relative">
+              {pieData.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={pieData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius="45%"
+                      outerRadius="75%"
+                      paddingAngle={2}
+                      dataKey="value"
+                      stroke="none"
+                    >
+                      {pieData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(val) => formatRupiah(val)} contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '11px' }} />
+                    <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: '11px' }} />
+                  </PieChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="flex items-center justify-center h-full">
+                  <p className="text-slate-400 text-xs italic">Belum ada data pendapatan</p>
+                </div>
+              )}
+              {pieData.length > 0 && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none mt-[-15px]">
+                  <span className="text-xs text-slate-500 font-bold uppercase tracking-widest mb-1">Total</span>
+                  <span className="text-lg xl:text-xl font-black text-[#1e3a8a]">{formatJuta(quailYTD.total_omzet)}</span>
+                </div>
+              )}
             </div>
           </div>
+        </div>
+      </div>
 
-          {/* ROW 2: DUAL CHARTS (Telur vs Kohe) */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
-            {/* Chart Telur */}
-            <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 md:p-5 flex flex-col h-[340px]">
-              <div className="flex justify-between items-center border-b border-slate-100 pb-2 mb-4">
-                <h3 className="text-[13px] font-bold text-[#1e3a8a] uppercase tracking-widest">
-                  Tren Penjualan Telur Puyuh
-                </h3>
-                <div className="flex items-center gap-3 text-[10px] font-bold text-slate-500">
-                  <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-sm bg-[#3b82f6]"></div> Vol (Butir)</div>
-                  <div className="flex items-center gap-1"><div className="w-3 h-1 bg-[#1e3a8a] rounded-full"></div> Omzet (Rp)</div>
-                </div>
-              </div>
-              <div className="flex-1 w-full min-h-0 flex flex-col gap-1">
-                <div className="h-[45%] w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={filteredOverviewData} syncId="quailTelur" margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                      <XAxis dataKey="month" hide={true} padding={{ left: 30, right: 30 }} />
-                      <YAxis hide={true} domain={[0, dataMax => Math.max(10, Math.ceil((dataMax || 0) * 1.2))]} />
-                      <Tooltip cursor={{ fill: '#f8fafc', strokeDasharray: '3 3' }} contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '11px' }} />
-                      <Line type="monotone" dataKey="omzet_telur" name="Omzet (Rp)" stroke="#1e3a8a" strokeWidth={3} dot={{ r: 3, fill: '#fff', stroke: '#1e3a8a', strokeWidth: 2 }} activeDot={{ r: 5 }} label={renderLineLabelRp} />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
-                <div className="h-[55%] w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={filteredOverviewData} syncId="quailTelur" margin={{ top: 0, right: 10, left: -20, bottom: 0 }}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                      <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#64748b', fontWeight: 'bold' }} dy={10} padding={{ left: 30, right: 30 }} />
-                      <YAxis hide={true} domain={[0, dataMax => Math.max(10, Math.ceil((dataMax || 0) * 1.2))]} />
-                      <Tooltip cursor={{ fill: '#f8fafc', strokeDasharray: '3 3' }} contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '11px' }} />
-                      <Bar dataKey="qty_telur" name="Vol (Butir)" fill="#3b82f6" radius={[4, 4, 0, 0]} barSize={16} label={renderLabelButir} />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-            </div>
-
-            {/* Chart Kohe */}
-            <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 md:p-5 flex flex-col h-[340px]">
-              <div className="flex justify-between items-center border-b border-slate-100 pb-2 mb-4">
-                <h3 className="text-[13px] font-bold text-[#1e3a8a] uppercase tracking-widest">
-                  Tren Penjualan Kohe
-                </h3>
-                <div className="flex items-center gap-3 text-[10px] font-bold text-slate-500">
-                  <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-sm bg-[#8b5cf6]"></div> Vol (Kg)</div>
-                  <div className="flex items-center gap-1"><div className="w-3 h-1 bg-[#4c1d95] rounded-full"></div> Omzet (Rp)</div>
-                </div>
-              </div>
-              <div className="flex-1 w-full min-h-0 flex flex-col gap-1">
-                <div className="h-[45%] w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={filteredOverviewData} syncId="quailKohe" margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                      <XAxis dataKey="month" hide={true} padding={{ left: 30, right: 30 }} />
-                      <YAxis hide={true} domain={[0, dataMax => Math.max(10, Math.ceil((dataMax || 0) * 1.2))]} />
-                      <Tooltip cursor={{ fill: '#f8fafc', strokeDasharray: '3 3' }} contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '11px' }} />
-                      <Line type="monotone" dataKey="omzet_kohe" name="Omzet (Rp)" stroke="#4c1d95" strokeWidth={3} dot={{ r: 3, fill: '#fff', stroke: '#4c1d95', strokeWidth: 2 }} activeDot={{ r: 5 }} label={renderLineLabelRp} />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
-                <div className="h-[55%] w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={filteredOverviewData} syncId="quailKohe" margin={{ top: 0, right: 10, left: -20, bottom: 0 }}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                      <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#64748b', fontWeight: 'bold' }} dy={10} padding={{ left: 30, right: 30 }} />
-                      <YAxis hide={true} domain={[0, dataMax => Math.max(10, Math.ceil((dataMax || 0) * 1.2))]} />
-                      <Tooltip cursor={{ fill: '#f8fafc', strokeDasharray: '3 3' }} contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '11px' }} />
-                      <Bar dataKey="qty_kohe" name="Vol (Kg)" fill="#8b5cf6" radius={[4, 4, 0, 0]} barSize={16} label={renderLabelButir} />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* ROW 3: REKAPITULASI YTD */}
-          <div className="bg-white p-4 md:p-5 rounded-lg shadow-sm border border-slate-200 flex flex-col flex-1">
+      {/* ROW 4: REKAPITULASI YTD & DATA ANGGOTA BINAAN (BERDAMPINGAN) */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-5 items-stretch">
+        <div className="bg-white p-4 md:p-5 rounded-lg shadow-sm border border-slate-200 flex flex-col justify-between">
+          <div>
             <h3 className="text-[13px] font-bold text-[#1e3a8a] uppercase tracking-widest border-b border-slate-100 pb-2 mb-4">
               Rekapitulasi Year to Date (YTD)
             </h3>
-            <div className="w-full overflow-x-auto minimal-scrollbar flex-1 flex flex-col justify-center">
+            <div className="w-full overflow-x-auto minimal-scrollbar">
               <table className="w-full text-xs md:text-sm border-collapse border border-slate-100 rounded-lg overflow-hidden">
                 <thead>
                   <tr className="bg-slate-50">
@@ -268,7 +325,7 @@ const QuailAnalytics = React.memo(function QuailAnalytics() {
                     <th className="p-3 md:p-4 text-center font-bold text-[#1e3a8a] uppercase tracking-wider border-b border-slate-200">Persentase YoY</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-slate-100">
                   {YTD_TABLE_DATA.map((row, idx) => {
                     const isPositive = row.percent.startsWith('+');
                     const isZero = row.percent === '0.0%' || row.percent === '-';
@@ -291,78 +348,11 @@ const QuailAnalytics = React.memo(function QuailAnalytics() {
               </table>
             </div>
           </div>
-          
         </div>
 
-        <div className="xl:col-span-1 flex flex-col relative min-h-[600px] xl:min-h-0">
-          <div className="xl:absolute xl:inset-0 flex flex-col gap-4 h-full w-full">
-          
-          {/* INSIGHT ANALITIK */}
-          <div className="flex flex-col flex-1 min-h-0">
-            <GeminiInsight 
-              programName="Budidaya Puyuh Petelur"
-              period={`${timeFilter} Bulan Terakhir (${currentYear})`}
-              quantitativeData={{
-                overview: filteredOverviewData,
-                ytdSummary: quailYTD
-              }}
-              headerAction={<FilterButtons currentRange={timeFilter} setRange={setTimeFilter} />}
-            />
-          </div>
-
-          {/* RASIO DIVERSIFIKASI */}
-          <div className="bg-white p-4 md:p-5 rounded-lg shadow-sm border border-slate-200 flex flex-col flex-1 min-h-[300px]">
-            <div className="flex justify-between items-center border-b border-slate-100 pb-2 mb-4">
-              <h3 className="text-[13px] font-bold text-[#1e3a8a] uppercase tracking-widest">
-                Rasio Diversifikasi YTD
-              </h3>
-            </div>
-            
-            <div className="flex-1 flex flex-col relative">
-              <h4 className="text-[11px] font-bold text-slate-500 text-center mb-2 uppercase tracking-wider">Komposisi Pendapatan</h4>
-              <div className="flex-1 w-full min-h-0 relative">
-                {pieData.length > 0 ? (
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={pieData}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius="45%"
-                        outerRadius="75%"
-                        paddingAngle={2}
-                        dataKey="value"
-                        stroke="none"
-                      >
-                        {pieData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <Tooltip formatter={(val) => formatRupiah(val)} contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '11px' }} />
-                      <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: '11px' }} />
-                    </PieChart>
-                  </ResponsiveContainer>
-                ) : (
-                  <div className="flex items-center justify-center h-full">
-                    <p className="text-slate-400 text-xs italic">Belum ada data pendapatan</p>
-                  </div>
-                )}
-                {pieData.length > 0 && (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none mt-[-15px]">
-                    <span className="text-xs text-slate-500 font-bold uppercase tracking-widest mb-1">Total</span>
-                    <span className="text-lg xl:text-xl font-black text-[#1e3a8a]">{formatJuta(quailYTD.total_omzet)}</span>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          </div>
+        <div className="flex flex-col">
+          <BeneficiaryPanel />
         </div>
-
-      {/* DATA ANGGOTA BINAAN */}
-      <BeneficiaryPanel />
-
       </div>
     </div>
   );

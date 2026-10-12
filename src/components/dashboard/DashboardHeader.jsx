@@ -1,11 +1,14 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import useAppStore from '../../store/useAppStore';
 import { PROGRAMS, PROGRAM_IMAGES } from '../../utils/programAssets';
 import { ChevronDown } from '../Icons';
+import { FileText } from 'lucide-react';
+import ExecutiveReportModal from './ExecutiveReportModal';
 
 const INDO_MONTHS = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
 
 export default function DashboardHeader() {
+  const [isReportOpen, setIsReportOpen] = useState(false);
   const selectedProgram = useAppStore((state) => state.globalProgram);
   const setSelectedProgram = useAppStore((state) => state.setGlobalProgram);
   const selectedDate = useAppStore((state) => state.globalDate);
@@ -119,12 +122,31 @@ export default function DashboardHeader() {
             </select>
             <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-white/80 pointer-events-none" size={18} strokeWidth={2.5} />
           </div>
+
+          {/* Tombol Laporan Bulanan (PDF) */}
+          <button
+            type="button"
+            onClick={() => setIsReportOpen(true)}
+            className="flex items-center gap-2 px-4 py-2.5 bg-rose-600 hover:bg-rose-700 active:scale-95 text-white font-bold text-[13px] rounded-lg shadow-sm transition-all cursor-pointer whitespace-nowrap"
+            title="Download & Cetak Laporan Eksekutif Bulanan (PDF)"
+          >
+            <FileText size={16} />
+            <span>Laporan Bulanan (PDF)</span>
+          </button>
         </div>
       </div>
 
       <div className="lg:w-1/2 rounded-md overflow-hidden border border-gray-200 shadow-sm relative min-h-[220px] lg:min-h-0">
         <img src={bannerImage} alt={`Banner ${selectedProgram}`} className="absolute inset-0 w-full h-full object-cover object-center" />
       </div>
+
+      {/* Modal Laporan Eksekutif Bulanan (PDF) */}
+      {isReportOpen && (
+        <ExecutiveReportModal 
+          isOpen={isReportOpen} 
+          onClose={() => setIsReportOpen(false)} 
+        />
+      )}
     </div>
   );
 }

@@ -89,50 +89,52 @@ export default function App() {
   return (
     <GlobalErrorBoundary>
       <div className="min-h-screen bg-[#f8f9fa] flex flex-col w-full">
-        <header className="bg-white border-b border-gray-200 sticky top-0 px-4 md:px-6 py-3 md:py-4 flex flex-col md:flex-row items-center justify-between gap-3 md:gap-0 shadow-sm w-full z-50">
-          <div className="flex items-center gap-3">
-            <img src={logoPTBA} alt="Logo PTBA" className="h-12 md:h-16 w-auto object-contain" />
-          </div>
-          <nav className="flex items-center gap-4 md:gap-6 font-bold text-xs md:text-sm uppercase tracking-wide">
-            <button 
-              onClick={() => setActiveTab("Home")}
-              className={`transition-colors ${activeTab === "Home" ? "text-[#1e3a8a] border-b-2 border-[#1e3a8a] pb-1" : "text-gray-400 hover:text-[#1e3a8a]"}`}
-            >
-              Home
-            </button>
-            <button 
-              onClick={() => setActiveTab("Dashboard")}
-              className={`transition-colors ${activeTab === "Dashboard" ? "text-[#1e3a8a] border-b-2 border-[#1e3a8a] pb-1" : "text-gray-400 hover:text-[#1e3a8a]"}`}
-            >
-              Dashboard
-            </button>
-            {!isViewOnly && (
-              <button 
-                onClick={() => setActiveTab("Data Entry")}
-                className={`transition-colors ${activeTab === "Data Entry" ? "text-[#1e3a8a] border-b-2 border-[#1e3a8a] pb-1" : "text-gray-400 hover:text-[#1e3a8a]"}`}
-              >
-                Data Entry
-              </button>
-            )}
-            <div className="w-[1px] h-6 bg-gray-300 mx-1 hidden md:block"></div>
-            <div className="hidden lg:flex items-center gap-1.5 text-xs text-gray-500 font-normal normal-case">
-              <span className="truncate max-w-[180px] text-gray-600 font-medium">{user.email}</span>
-              {user.user_metadata?.program && (
-                <span className="text-[10px] bg-blue-50 text-[#1e3a8a] border border-blue-200 px-2 py-0.5 rounded font-bold uppercase">
-                  {user.user_metadata.program}
-                </span>
-              )}
+        <header className="bg-white border-b border-gray-200 sticky top-0 px-4 md:px-6 lg:px-8 xl:px-10 py-3 md:py-4 shadow-sm w-full z-50">
+          <div className="w-full max-w-[1800px] mx-auto flex flex-col md:flex-row items-center justify-between gap-3 md:gap-0">
+            <div className="flex items-center gap-3">
+              <img src={logoPTBA} alt="Logo PTBA" className="h-12 md:h-16 w-auto object-contain" />
             </div>
-            <button 
-              onClick={logout}
-              className="text-red-600 hover:text-red-800 transition-colors font-bold"
-            >
-              Logout
-            </button>
-          </nav>
+            <nav className="flex items-center gap-4 md:gap-6 font-bold text-xs md:text-sm uppercase tracking-wide">
+              <button 
+                onClick={() => setActiveTab("Home")}
+                className={`transition-colors ${activeTab === "Home" ? "text-[#1e3a8a] border-b-2 border-[#1e3a8a] pb-1" : "text-gray-400 hover:text-[#1e3a8a]"}`}
+              >
+                Home
+              </button>
+              <button 
+                onClick={() => setActiveTab("Dashboard")}
+                className={`transition-colors ${activeTab === "Dashboard" ? "text-[#1e3a8a] border-b-2 border-[#1e3a8a] pb-1" : "text-gray-400 hover:text-[#1e3a8a]"}`}
+              >
+                Dashboard
+              </button>
+              {!isViewOnly && (
+                <button 
+                  onClick={() => setActiveTab("Data Entry")}
+                  className={`transition-colors ${activeTab === "Data Entry" ? "text-[#1e3a8a] border-b-2 border-[#1e3a8a] pb-1" : "text-gray-400 hover:text-[#1e3a8a]"}`}
+                >
+                  Data Entry
+                </button>
+              )}
+              <div className="w-[1px] h-6 bg-gray-300 mx-1 hidden md:block"></div>
+              <div className="hidden lg:flex items-center gap-1.5 text-xs text-gray-500 font-normal normal-case">
+                <span className="truncate max-w-[180px] text-gray-600 font-medium">{user.email}</span>
+                {user.user_metadata?.program && (
+                  <span className="text-[10px] bg-blue-50 text-[#1e3a8a] border border-blue-200 px-2 py-0.5 rounded font-bold uppercase">
+                    {user.user_metadata.program}
+                  </span>
+                )}
+              </div>
+              <button 
+                onClick={logout}
+                className="text-red-600 hover:text-red-800 transition-colors font-bold"
+              >
+                Logout
+              </button>
+            </nav>
+          </div>
         </header>
 
-        <main className="flex-1 w-full p-4 md:p-6 lg:max-w-7xl lg:mx-auto">
+        <main className="flex-1 w-full p-4 md:p-6 lg:px-8 xl:px-10 max-w-[1800px] mx-auto">
           <Suspense fallback={
             <div className="flex items-center justify-center h-64">
               <div className="w-8 h-8 border-4 border-[#1e3a8a] border-t-transparent rounded-full animate-spin"></div>

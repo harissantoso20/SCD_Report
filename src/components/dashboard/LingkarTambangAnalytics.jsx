@@ -91,26 +91,47 @@ const LingkarTambangAnalytics = React.memo(function LingkarTambangAnalytics() {
 
   const [filter1, setFilter1] = useState(12); // Panen & Penjualan
   const [filter2, setFilter2] = useState(12); // Finansial
-  const [pieMode, setPieMode] = useState('omzet');
-
   const prevYear = Number(currentYear) - 1;
 
   const filteredData1 = useMemo(() => lingkarTambangOverviewData.slice(-filter1), [lingkarTambangOverviewData, filter1]);
   const filteredData2 = useMemo(() => lingkarTambangOverviewData.slice(-filter2), [lingkarTambangOverviewData, filter2]);
 
-  // Pie data
-  const pieChartData = useMemo(() => {
+  // Dual Pie Data: Omzet & Volume
+  const omzetPieData = useMemo(() => {
     if (!lingkarTambangYTD.product_mix || lingkarTambangYTD.product_mix.length === 0) {
       return [{ name: 'Melon Inthanon', value: 1, fill: '#10b981' }];
     }
     return lingkarTambangYTD.product_mix
       .map((item, idx) => ({
         name: item.name,
-        value: pieMode === 'omzet' ? (item.omzet || 0) : (item.panen_kg || item.penjualan_kg || 0),
+        value: item.omzet || 0,
         fill: VARIETY_COLORS[idx % VARIETY_COLORS.length]
       }))
       .filter(d => d.value > 0);
-  }, [lingkarTambangYTD.product_mix, pieMode]);
+  }, [lingkarTambangYTD.product_mix]);
+
+  const volumePieData = useMemo(() => {
+    if (!lingkarTambangYTD.product_mix || lingkarTambangYTD.product_mix.length === 0) {
+      return [{ name: 'Melon Inthanon', value: 1, fill: '#10b981' }];
+    }
+    return lingkarTambangYTD.product_mix
+      .map((item, idx) => ({
+        name: item.name,
+        value: item.panen_kg || item.penjualan_kg || 0,
+        fill: VARIETY_COLORS[idx % VARIETY_COLORS.length]
+      }))
+      .filter(d => d.value > 0);
+  }, [lingkarTambangYTD.product_mix]);
+
+  const legendItems = useMemo(() => {
+    if (!lingkarTambangYTD.product_mix || lingkarTambangYTD.product_mix.length === 0) {
+      return [{ name: 'Melon Inthanon', fill: '#10b981' }];
+    }
+    return lingkarTambangYTD.product_mix.map((item, idx) => ({
+      name: item.name,
+      fill: VARIETY_COLORS[idx % VARIETY_COLORS.length]
+    }));
+  }, [lingkarTambangYTD.product_mix]);
 
   // Gauge
   const rate = Number(lingkarTambangYTD.sell_through_rate) || 0;
@@ -196,110 +217,164 @@ const LingkarTambangAnalytics = React.memo(function LingkarTambangAnalytics() {
         </div>
       </div>
 
-      {/* ── ROW 2: GRAFIK 1 — PRODUKSI PANEN VS PENJUALAN ── */}
-      <ChartCard
-        title="Tren Produksi Panen vs Volume Penjualan"
-        icon={Activity}
-        iconColor="text-emerald-600"
-        filterRange={filter1}
-        setFilterRange={setFilter1}
-      >
-        <div className="flex items-center gap-4 text-[11px] font-semibold text-slate-600 mb-3 flex-wrap">
-          <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-sm bg-emerald-500" /> Produksi Panen (Kg)</div>
-          <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-sm bg-blue-600" /> Volume Terjual (Kg)</div>
-          <div className="flex items-center gap-1.5"><div className="w-3 h-1 bg-amber-500 rounded-full" /> Serapan Pasar (%)</div>
-        </div>
-        <ResponsiveContainer width="100%" height="85%">
-          <ComposedChart data={filteredData1} margin={{ top: 10, right: 30, left: 10, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-            <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#64748b', fontWeight: 600 }} dy={8} />
-            <YAxis yAxisId="left" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#64748b' }} unit=" kg" domain={[0, 'auto']} />
-            <YAxis yAxisId="right" orientation="right" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#f59e0b' }} unit="%" domain={[0, 100]} />
-            <Tooltip
-              contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgb(0 0 0/0.1)' }}
-              formatter={(val, name) => [name === 'Serapan Pasar' ? `${val}%` : `${formatNumber(val)} Kg`, name]}
-            />
-            <Bar yAxisId="left" dataKey="panen_kg" name="Produksi Panen" fill="#10b981" radius={[4, 4, 0, 0]} maxBarSize={38}>
-              <LabelList dataKey="panen_kg" position="top" style={{ fontSize: '10px', fill: '#059669', fontWeight: 'bold' }} formatter={(v) => v > 0 ? formatNumber(v) : ''} />
-            </Bar>
-            <Bar yAxisId="left" dataKey="penjualan_kg" name="Volume Terjual" fill="#2563eb" radius={[4, 4, 0, 0]} maxBarSize={38}>
-              <LabelList dataKey="penjualan_kg" position="top" style={{ fontSize: '10px', fill: '#1d4ed8', fontWeight: 'bold' }} formatter={(v) => v > 0 ? formatNumber(v) : ''} />
-            </Bar>
-            <Line yAxisId="right" type="monotone" dataKey="absorption_rate" name="Serapan Pasar" stroke="#f59e0b" strokeWidth={3} dot={{ r: 4, fill: '#f59e0b', strokeWidth: 2, stroke: '#fff' }} />
-          </ComposedChart>
-        </ResponsiveContainer>
-      </ChartCard>
+      {/* ── ROW 2 & 3: DUAL CHARTS LANDSCAPE (PRODUKSI VS PENJUALAN & FINANSIAL) ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <ChartCard
+          title="Tren Produksi Panen vs Volume Penjualan"
+          icon={Activity}
+          iconColor="text-emerald-600"
+          filterRange={filter1}
+          setFilterRange={setFilter1}
+        >
+          <div className="flex items-center gap-4 text-[11px] font-semibold text-slate-600 mb-3 flex-wrap">
+            <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-sm bg-emerald-500" /> Produksi Panen (Kg)</div>
+            <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-sm bg-blue-600" /> Volume Terjual (Kg)</div>
+            <div className="flex items-center gap-1.5"><div className="w-3 h-1 bg-amber-500 rounded-full" /> Serapan Pasar (%)</div>
+          </div>
+          <ResponsiveContainer width="100%" height="85%">
+            <ComposedChart data={filteredData1} margin={{ top: 10, right: 30, left: 10, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+              <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#64748b', fontWeight: 600 }} dy={8} />
+              <YAxis yAxisId="left" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#64748b' }} unit=" kg" domain={[0, 'auto']} />
+              <YAxis yAxisId="right" orientation="right" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#f59e0b' }} unit="%" domain={[0, 100]} />
+              <Tooltip
+                contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgb(0 0 0/0.1)' }}
+                formatter={(val, name) => [name === 'Serapan Pasar' ? `${val}%` : `${formatNumber(val)} Kg`, name]}
+              />
+              <Bar yAxisId="left" dataKey="panen_kg" name="Produksi Panen" fill="#10b981" radius={[4, 4, 0, 0]} maxBarSize={32}>
+                <LabelList dataKey="panen_kg" position="top" style={{ fontSize: '10px', fill: '#059669', fontWeight: 'bold' }} formatter={(v) => v > 0 ? formatNumber(v) : ''} />
+              </Bar>
+              <Bar yAxisId="left" dataKey="penjualan_kg" name="Volume Terjual" fill="#2563eb" radius={[4, 4, 0, 0]} maxBarSize={32}>
+                <LabelList dataKey="penjualan_kg" position="top" style={{ fontSize: '10px', fill: '#1d4ed8', fontWeight: 'bold' }} formatter={(v) => v > 0 ? formatNumber(v) : ''} />
+              </Bar>
+              <Line yAxisId="right" type="monotone" dataKey="absorption_rate" name="Serapan Pasar" stroke="#f59e0b" strokeWidth={3} dot={{ r: 4, fill: '#f59e0b', strokeWidth: 2, stroke: '#fff' }} />
+            </ComposedChart>
+          </ResponsiveContainer>
+        </ChartCard>
 
-      {/* ── ROW 3: GRAFIK 2 — ANALISIS FINANSIAL ── */}
-      <ChartCard
-        title="Analisis Finansial: Omzet vs Biaya Operasional"
-        icon={BarChart2}
-        iconColor="text-blue-600"
-        filterRange={filter2}
-        setFilterRange={setFilter2}
-      >
-        <div className="flex items-center gap-4 text-[11px] font-semibold text-slate-600 mb-3 flex-wrap">
-          <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-sm bg-blue-600" /> Omzet Penjualan</div>
-          <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-sm bg-rose-400" /> Biaya Operasional</div>
-          <div className="flex items-center gap-1.5"><div className="w-3 h-1 bg-emerald-500 rounded-full" /> Laba Bersih</div>
-        </div>
-        <ResponsiveContainer width="100%" height="85%">
-          <ComposedChart data={filteredData2} margin={{ top: 10, right: 20, left: 15, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-            <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#64748b', fontWeight: 600 }} dy={8} />
-            <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#64748b' }} tickFormatter={formatJuta} domain={[0, 'auto']} />
-            <Tooltip
-              contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgb(0 0 0/0.1)' }}
-              formatter={(val, name) => [`Rp ${formatRupiah(val)}`, name]}
-            />
-            <Bar dataKey="omzet" name="Omzet Penjualan" fill="#2563eb" radius={[4, 4, 0, 0]} maxBarSize={38}>
-              <LabelList dataKey="omzet" position="top" style={{ fontSize: '10px', fill: '#1d4ed8', fontWeight: 'bold' }} formatter={(v) => v > 0 ? formatJuta(v) : ''} />
-            </Bar>
-            <Bar dataKey="biaya_operasional" name="Biaya Operasional" fill="#fb7185" radius={[4, 4, 0, 0]} maxBarSize={38}>
-              <LabelList dataKey="biaya_operasional" position="top" style={{ fontSize: '10px', fill: '#e11d48', fontWeight: 'bold' }} formatter={(v) => v > 0 ? formatJuta(v) : ''} />
-            </Bar>
-            <Line type="monotone" dataKey="laba_bersih" name="Laba Bersih" stroke="#10b981" strokeWidth={3} dot={{ r: 4, fill: '#10b981', strokeWidth: 2, stroke: '#fff' }} />
-          </ComposedChart>
-        </ResponsiveContainer>
-      </ChartCard>
+        <ChartCard
+          title="Analisis Finansial: Omzet vs Biaya Operasional"
+          icon={BarChart2}
+          iconColor="text-blue-600"
+          filterRange={filter2}
+          setFilterRange={setFilter2}
+        >
+          <div className="flex items-center gap-4 text-[11px] font-semibold text-slate-600 mb-3 flex-wrap">
+            <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-sm bg-blue-600" /> Omzet Penjualan</div>
+            <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-sm bg-rose-400" /> Biaya Operasional</div>
+            <div className="flex items-center gap-1.5"><div className="w-3 h-1 bg-emerald-500 rounded-full" /> Laba Bersih</div>
+          </div>
+          <ResponsiveContainer width="100%" height="85%">
+            <ComposedChart data={filteredData2} margin={{ top: 10, right: 20, left: 15, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+              <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#64748b', fontWeight: 600 }} dy={8} />
+              <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#64748b' }} tickFormatter={formatJuta} domain={[0, 'auto']} />
+              <Tooltip
+                contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgb(0 0 0/0.1)' }}
+                formatter={(val, name) => [`Rp ${formatRupiah(val)}`, name]}
+              />
+              <Bar dataKey="omzet" name="Omzet Penjualan" fill="#2563eb" radius={[4, 4, 0, 0]} maxBarSize={32}>
+                <LabelList dataKey="omzet" position="top" style={{ fontSize: '10px', fill: '#1d4ed8', fontWeight: 'bold' }} formatter={(v) => v > 0 ? formatJuta(v) : ''} />
+              </Bar>
+              <Bar dataKey="biaya_operasional" name="Biaya Operasional" fill="#fb7185" radius={[4, 4, 0, 0]} maxBarSize={32}>
+                <LabelList dataKey="biaya_operasional" position="top" style={{ fontSize: '10px', fill: '#e11d48', fontWeight: 'bold' }} formatter={(v) => v > 0 ? formatJuta(v) : ''} />
+              </Bar>
+              <Line type="monotone" dataKey="laba_bersih" name="Laba Bersih" stroke="#10b981" strokeWidth={3} dot={{ r: 4, fill: '#10b981', strokeWidth: 2, stroke: '#fff' }} />
+            </ComposedChart>
+          </ResponsiveContainer>
+        </ChartCard>
+      </div>
 
-      {/* ── ROW 4: PIE CHART + GAUGE + GEMINI ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+      {/* ── ROW 4: DUAL PIE CHARTS (VARIETAS) + GAUGE + GEMINI ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
 
-        {/* Pie — Komposisi Varietas */}
-        <div className="bg-white p-4 md:p-5 rounded-lg shadow-sm border border-slate-200 flex flex-col h-[340px]">
+        {/* Pie — Komposisi Varietas (Omzet & Volume) */}
+        <div className="bg-white p-4 md:p-5 rounded-lg shadow-sm border border-slate-200 flex flex-col h-[350px] lg:col-span-12 xl:col-span-5">
           <div className="flex justify-between items-center border-b border-slate-100 pb-2 mb-2">
             <h3 className="text-[12px] font-bold text-[#1e3a8a] uppercase tracking-wider flex items-center gap-1.5">
               <PieIcon size={16} className="text-emerald-600" />
               Komposisi Varietas
             </h3>
-            <div className="flex bg-slate-100 p-0.5 rounded text-[10px] font-bold">
-              <button type="button" onClick={() => setPieMode('omzet')}
-                className={`px-2 py-0.5 rounded ${pieMode === 'omzet' ? 'bg-white text-emerald-700 shadow-sm' : 'text-slate-500'}`}>
+            <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
+              Omzet & Volume
+            </span>
+          </div>
+
+          <div className="flex-1 grid grid-cols-2 gap-2 min-h-0 pt-1">
+            {/* Donut 1: Omzet */}
+            <div className="flex flex-col items-center h-full min-h-0">
+              <span className="text-[11px] font-bold text-[#1e3a8a] bg-blue-50/70 border border-blue-100 px-2.5 py-0.5 rounded-full mb-1">
                 Omzet (Rp)
-              </button>
-              <button type="button" onClick={() => setPieMode('volume')}
-                className={`px-2 py-0.5 rounded ${pieMode === 'volume' ? 'bg-white text-emerald-700 shadow-sm' : 'text-slate-500'}`}>
+              </span>
+              <div className="w-full flex-1 min-h-0">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={omzetPieData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius="40%"
+                      outerRadius="75%"
+                      dataKey="value"
+                      stroke="#fff"
+                      strokeWidth={2}
+                      labelLine={false}
+                      label={renderPieLabel}
+                    >
+                      {omzetPieData.map((entry, idx) => (
+                        <Cell key={`omzet-cell-${idx}`} fill={entry.fill} />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(v) => [`Rp ${formatRupiah(v)}`, 'Omzet']} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            {/* Donut 2: Volume */}
+            <div className="flex flex-col items-center h-full min-h-0">
+              <span className="text-[11px] font-bold text-emerald-800 bg-emerald-50/70 border border-emerald-100 px-2.5 py-0.5 rounded-full mb-1">
                 Volume (Kg)
-              </button>
+              </span>
+              <div className="w-full flex-1 min-h-0">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={volumePieData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius="40%"
+                      outerRadius="75%"
+                      dataKey="value"
+                      stroke="#fff"
+                      strokeWidth={2}
+                      labelLine={false}
+                      label={renderPieLabel}
+                    >
+                      {volumePieData.map((entry, idx) => (
+                        <Cell key={`vol-cell-${idx}`} fill={entry.fill} />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(v) => [`${formatNumber(v)} Kg`, 'Volume']} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
             </div>
           </div>
-          <div className="flex-1 w-full min-h-0">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie data={pieChartData} cx="50%" cy="50%" innerRadius="42%" outerRadius="78%"
-                  dataKey="value" stroke="#fff" strokeWidth={2} labelLine={false} label={renderPieLabel}>
-                  {pieChartData.map((entry, idx) => <Cell key={`cell-${idx}`} fill={entry.fill} />)}
-                </Pie>
-                <Tooltip formatter={(v) => pieMode === 'omzet' ? `Rp ${formatRupiah(v)}` : `${formatNumber(v)} Kg`} />
-                <Legend wrapperStyle={{ fontSize: '11px', fontWeight: 600 }} />
-              </PieChart>
-            </ResponsiveContainer>
+
+          {/* Shared Legend at bottom */}
+          <div className="flex flex-wrap items-center justify-center gap-4 pt-2 border-t border-slate-50 mt-1">
+            {legendItems.map((entry, idx) => (
+              <div key={idx} className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-600">
+                <span className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ backgroundColor: entry.fill }} />
+                <span>{entry.name}</span>
+              </div>
+            ))}
           </div>
         </div>
 
         {/* Gauge — Serapan Pasar */}
-        <div className="bg-white p-4 md:p-5 rounded-lg shadow-sm border border-slate-200 flex flex-col h-[340px]">
+        <div className="bg-white p-4 md:p-5 rounded-lg shadow-sm border border-slate-200 flex flex-col h-[350px] lg:col-span-6 xl:col-span-3">
           <div className="border-b border-slate-100 pb-2 mb-2">
             <h3 className="text-[12px] font-bold text-[#1e3a8a] uppercase tracking-wider flex items-center gap-1.5">
               <TrendingUp size={16} className="text-blue-600" />
@@ -329,7 +404,7 @@ const LingkarTambangAnalytics = React.memo(function LingkarTambangAnalytics() {
         </div>
 
         {/* Gemini Insight */}
-        <div className="h-[340px] flex flex-col">
+        <div className="h-[350px] flex flex-col lg:col-span-6 xl:col-span-4">
           <GeminiInsight
             programName="Suscomdev Lingkar Tambang (Smart Green House Melon)"
             period={`Tahun ${currentYear}`}
@@ -352,44 +427,49 @@ const LingkarTambangAnalytics = React.memo(function LingkarTambangAnalytics() {
         </div>
       </div>
 
-      {/* ── ROW 5: YTD COMPARISON TABLE ── */}
-      <section className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 md:p-5">
-        <h3 className="text-[13px] font-bold text-[#1e3a8a] uppercase tracking-wider border-b border-slate-100 pb-3 mb-4 flex items-center gap-2">
-          <Layers size={18} className="text-emerald-600" />
-          Evaluasi Kinerja Kumulatif (YTD Perbandingan {prevYear} vs {currentYear})
-        </h3>
-        <div className="overflow-x-auto minimal-scrollbar">
-          <table className="w-full text-[12px] text-left border-collapse">
-            <thead className="bg-slate-50 text-slate-700 uppercase font-bold text-[11px]">
-              <tr>
-                <th className="px-4 py-3 border-b border-slate-200">Indikator Kinerja</th>
-                <th className="px-4 py-3 border-b border-slate-200 text-right">YTD {prevYear}</th>
-                <th className="px-4 py-3 border-b border-slate-200 text-right">YTD {currentYear}</th>
-                <th className="px-4 py-3 border-b border-slate-200 text-center">Pertumbuhan</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {YTD_ROWS.map((row, idx) => (
-                <tr key={idx} className="hover:bg-slate-50/80 transition-colors">
-                  <td className="px-4 py-3 font-semibold text-slate-800">{row.label} {row.unit && <span className="text-slate-400 font-normal">({row.unit})</span>}</td>
-                  <td className="px-4 py-3 text-right font-medium text-slate-500">
-                    {row.isCurrency ? `Rp ${formatRupiah(row.prev)}` : `${formatNumber(row.prev)} ${row.unit}`}
-                  </td>
-                  <td className="px-4 py-3 text-right font-bold text-[#1e3a8a]">
-                    {row.isCurrency ? `Rp ${formatRupiah(row.curr)}` : `${formatNumber(row.curr)} ${row.unit}`}
-                  </td>
-                  <td className="px-4 py-3 text-center">
-                    <GrowthBadge curr={Number(row.curr)} prev={Number(row.prev)} />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
+      {/* ── ROW 5 & 6 (LANDSCAPE DUAL PANELS): YTD TABLE & DATA ANGGOTA BINAAN ── */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-5 items-stretch">
+        <section className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 md:p-5 flex flex-col justify-between">
+          <div>
+            <h3 className="text-[13px] font-bold text-[#1e3a8a] uppercase tracking-wider border-b border-slate-100 pb-3 mb-4 flex items-center gap-2">
+              <Layers size={18} className="text-emerald-600" />
+              Evaluasi Kinerja Kumulatif (YTD Perbandingan {prevYear} vs {currentYear})
+            </h3>
+            <div className="overflow-x-auto minimal-scrollbar">
+              <table className="w-full text-[12px] text-left border-collapse">
+                <thead className="bg-slate-50 text-slate-700 uppercase font-bold text-[11px]">
+                  <tr>
+                    <th className="px-3.5 py-2.5 border-b border-slate-200">Indikator Kinerja</th>
+                    <th className="px-3.5 py-2.5 border-b border-slate-200 text-right">YTD {prevYear}</th>
+                    <th className="px-3.5 py-2.5 border-b border-slate-200 text-right">YTD {currentYear}</th>
+                    <th className="px-3.5 py-2.5 border-b border-slate-200 text-center">Pertumbuhan</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {YTD_ROWS.map((row, idx) => (
+                    <tr key={idx} className="hover:bg-slate-50/80 transition-colors">
+                      <td className="px-3.5 py-2.5 font-semibold text-slate-800">{row.label} {row.unit && <span className="text-slate-400 font-normal">({row.unit})</span>}</td>
+                      <td className="px-3.5 py-2.5 text-right font-medium text-slate-500">
+                        {row.isCurrency ? `Rp ${formatRupiah(row.prev)}` : `${formatNumber(row.prev)} ${row.unit}`}
+                      </td>
+                      <td className="px-3.5 py-2.5 text-right font-bold text-[#1e3a8a]">
+                        {row.isCurrency ? `Rp ${formatRupiah(row.curr)}` : `${formatNumber(row.curr)} ${row.unit}`}
+                      </td>
+                      <td className="px-3.5 py-2.5 text-center">
+                        <GrowthBadge curr={Number(row.curr)} prev={Number(row.prev)} />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
 
-      {/* ── ROW 6: DATA ANGGOTA BINAAN ── */}
-      <BeneficiaryPanel />
+        <div className="flex flex-col">
+          <BeneficiaryPanel />
+        </div>
+      </div>
 
     </div>
   );

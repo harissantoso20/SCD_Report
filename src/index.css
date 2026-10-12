@@ -25,3 +25,89 @@ header { z-index: 9999 !important; }
 .leaflet-tooltip.custom-infographic-tooltip::before {
   display: none !important;
 }
+
+/* Executive Report Print Styles */
+@media print {
+  #root {
+    display: none !important;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+    overflow: visible !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  header, nav, aside, .print\:hidden {
+    display: none !important;
+  }
+
+  .executive-modal-backdrop {
+    position: static !important;
+    inset: auto !important;
+    background: white !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    display: block !important;
+    width: 100% !important;
+    z-index: auto !important;
+  }
+
+  #executive-report-document,
+  #beneficiary-report-document {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    background: white !important;
+  }
+
+  /* Memaksa layout grid di hasil print sama persis dengan tampilan preview */
+  .print-grid-2 {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .print-grid-3 {
+    display: grid !important;
+    grid-template-columns: 2fr 1fr !important;
+  }
+
+  .print-grid-2-1 {
+    display: grid !important;
+    grid-template-columns: 2fr 1fr !important;
+  }
+
+  .print-grid-1-2 {
+    display: grid !important;
+    grid-template-columns: 1fr 2fr !important;
+  }
+
+  .print-grid-4 {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  }
+
+  .recharts-responsive-container {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .page-break-inside-avoid {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  @page {
+    size: A4 portrait;
+    margin: 8mm 10mm;
+  }
+}
+

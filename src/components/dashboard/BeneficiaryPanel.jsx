@@ -1,11 +1,15 @@
 import React, { useState, useMemo } from 'react';
 import useAppStore from '../../store/useAppStore';
-import { Users, Search, UserCheck, GraduationCap, Briefcase, Baby } from 'lucide-react';
+import { Users, Search, UserCheck, GraduationCap, Briefcase, Baby, Download, FileText } from 'lucide-react';
+import * as XLSX from 'xlsx';
+import BeneficiaryPdfModal from './BeneficiaryPdfModal';
 
 const BeneficiaryPanel = React.memo(function BeneficiaryPanel() {
   const beneficiariesList = useAppStore((state) => state.beneficiariesList) || [];
+  const selectedProgram = useAppStore((state) => state.globalProgram);
   const [search, setSearch] = useState('');
   const [activeFilter, setActiveFilter] = useState('Semua');
+  const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
 
   const genderCounts = useMemo(() => {
     const counts = { Semua: beneficiariesList.length };
@@ -38,6 +42,42 @@ const BeneficiaryPanel = React.memo(function BeneficiaryPanel() {
   const totalLaki = beneficiariesList.filter((b) => (b.jenis_kelamin || 'Laki-laki') === 'Laki-laki').length;
   const totalPerempuan = beneficiariesList.filter((b) => b.jenis_kelamin === 'Perempuan').length;
   const totalTanggungan = beneficiariesList.reduce((s, b) => s + (Number(b.jumlah_tanggungan) || 0), 0);
+
+  const handleDownloadDataAnggota = () => {
+    if (!beneficiariesList || beneficiariesList.length === 0) return;
+
+    const dataToExport = filtered.length > 0 ? filtered : beneficiariesList;
+    const rows = dataToExport.map((b, idx) => ({
+      'No': idx + 1,
+      'Nama Anggota': b.nama || '-',
+      'Tempat / Tgl Lahir': b.ttl || '-',
+      'NIK': b.nik ? `'${b.nik}` : '-',
+      'Jenis Kelamin': b.jenis_kelamin || 'Laki-laki',
+      'Pendidikan Terakhir': b.pendidikan || '-',
+      'Pekerjaan Sebelumnya': b.pekerjaan_sebelumnya || '-',
+      'Pekerjaan Sekarang': b.pekerjaan_sekarang || '-',
+      'Jumlah Tanggungan': Number(b.jumlah_tanggungan) || 0
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(rows);
+    ws['!cols'] = [
+      { wch: 5 },
+      { wch: 25 },
+      { wch: 22 },
+      { wch: 22 },
+      { wch: 14 },
+      { wch: 18 },
+      { wch: 22 },
+      { wch: 22 },
+      { wch: 18 },
+    ];
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Data Anggota');
+
+    const cleanName = (selectedProgram || 'Program').replace(/[^a-zA-Z0-9]/g, '_');
+    XLSX.writeFile(wb, `Data_Anggota_${cleanName}.xlsx`);
+  };
 
   if (totalAnggota === 0) {
     return (
@@ -73,23 +113,46 @@ const BeneficiaryPanel = React.memo(function BeneficiaryPanel() {
             {totalAnggota} Orang
           </span>
         </h3>
-        <div className="relative">
-          <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
-          <input
-            type="text"
-            placeholder="Cari nama, NIK, pekerjaan..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-7 pr-7 py-1 text-[12px] border border-slate-200 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-400 bg-slate-50 w-52"
-          />
-          {search && (
-            <button
-              onClick={() => setSearch('')}
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs font-bold"
-            >
-              ✕
-            </button>
-          )}
+        
+        <div className="flex items-center gap-2 flex-wrap">
+          <div className="relative">
+            <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Cari nama, NIK, pekerjaan..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-7 pr-7 py-1 text-[12px] border border-slate-200 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-400 bg-slate-50 w-40 sm:w-48"
+            />
+            {search && (
+              <button
+                onClick={() => setSearch('')}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs font-bold"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+
+          <button
+            type="button"
+            onClick={handleDownloadDataAnggota}
+            className="flex items-center gap-1.5 px-3 py-1 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-md text-[11px] font-bold shadow-xs hover:shadow-sm transition-all cursor-pointer whitespace-nowrap"
+            title="Download data anggota ke format Excel (.xlsx)"
+          >
+            <Download size={13} />
+            <span>Download XLSX</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setIsPdfModalOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-1 bg-rose-600 hover:bg-rose-700 active:scale-95 text-white rounded-md text-[11px] font-bold shadow-xs hover:shadow-sm transition-all cursor-pointer whitespace-nowrap"
+            title="Download & Cetak data anggota ke format PDF"
+          >
+            <FileText size={13} />
+            <span>Download PDF</span>
+          </button>
         </div>
       </div>
 
@@ -129,9 +192,9 @@ const BeneficiaryPanel = React.memo(function BeneficiaryPanel() {
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto minimal-scrollbar rounded-md border border-slate-100">
+      <div className="overflow-x-auto max-h-[360px] overflow-y-auto minimal-scrollbar rounded-md border border-slate-100">
         <table className="w-full text-[12px] text-left border-collapse">
-          <thead className="bg-slate-50 text-slate-600 uppercase text-[10.5px] font-bold tracking-wider">
+          <thead className="bg-slate-50 text-slate-600 uppercase text-[10.5px] font-bold tracking-wider sticky top-0 z-10 shadow-sm">
             <tr>
               <th className="px-3 py-2.5 border-b border-slate-200 w-6 text-center">#</th>
               <th className="px-3 py-2.5 border-b border-slate-200">
@@ -197,6 +260,15 @@ const BeneficiaryPanel = React.memo(function BeneficiaryPanel() {
         <p className="text-[11px] text-slate-400 mt-2 text-right">
           Menampilkan {filtered.length} dari {totalAnggota} anggota
         </p>
+      )}
+
+      {/* Modal Laporan PDF Khusus Data Anggota */}
+      {isPdfModalOpen && (
+        <BeneficiaryPdfModal
+          isOpen={isPdfModalOpen}
+          onClose={() => setIsPdfModalOpen(false)}
+          data={filtered.length > 0 ? filtered : beneficiariesList}
+        />
       )}
     </section>
   );

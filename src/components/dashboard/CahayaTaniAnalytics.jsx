@@ -168,7 +168,7 @@ const CahayaTaniAnalytics = React.memo(function CahayaTaniAnalytics() {
       {/* Main Grid: Layout Adjustment */}
       <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 items-stretch">
         
-        {/* Left Column */}
+        {/* Left Column (Span 3) */}
         <div className="xl:col-span-3 flex flex-col gap-4">
           
           <section className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 md:p-5 flex flex-col h-[380px]">
@@ -216,46 +216,8 @@ const CahayaTaniAnalytics = React.memo(function CahayaTaniAnalytics() {
             </div>
           </section>
 
-          {/* Bottom section: PieChart & GaugeChart */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            
-            {/* Komposisi Omzet Pie Chart */}
-            <div className="bg-white p-4 md:p-5 rounded-lg shadow-sm border border-slate-200 flex flex-col h-[220px] relative overflow-hidden">
-              <h3 className="text-[11px] font-bold text-[#1e3a8a] uppercase tracking-widest border-b border-slate-100 pb-2 mb-2">Komposisi Omzet (YTD)</h3>
-              <div className="flex-1 w-full relative">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={[
-                        { name: 'Sawit', value: cahayaTaniYTD.sawit_omzet, fill: '#f59e0b' },
-                        { name: 'Kayu Putih', value: cahayaTaniYTD.kayu_putih_omzet, fill: '#10b981' },
-                        { name: 'Lainnya', value: cahayaTaniYTD.lainnya_omzet, fill: '#8b5cf6' }
-                      ].filter(d => d.value > 0)}
-                      cx="50%" cy="50%" innerRadius="40%" outerRadius="80%" dataKey="value" stroke="#fff" strokeWidth={2}
-                      labelLine={false} label={renderPieLabel}
-                    >
-                    </Pie>
-                    <Tooltip formatter={(value) => formatRupiah(value)} />
-                    <Legend wrapperStyle={{ fontSize: '10px', fontWeight: 600 }} />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-
-            {/* Ratio Stock to Sale Gauge Chart */}
-            <div className="bg-white p-4 md:p-5 rounded-lg shadow-sm border border-slate-200 flex flex-col h-[220px]">
-              <h3 className="text-[11px] font-bold text-[#1e3a8a] uppercase tracking-widest border-b border-slate-100 pb-2 mb-2">Ratio Stock to Sale</h3>
-              <div className="flex-1 w-full relative">
-                {renderGaugeChart()}
-              </div>
-            </div>
-            
-          </div>
-        </div>
-
-        {/* Right Column: Insight Analitik */}
-        <div className="xl:col-span-1 flex flex-col relative min-h-[300px] xl:min-h-0">
-          <div className="xl:absolute xl:inset-0 flex flex-col h-full">
+          {/* Insight Analitik */}
+          <div className="flex flex-col min-h-[280px]">
             <GeminiInsight 
               programName="Cahaya Tani"
               period={`${timeFilter} Bulan Terakhir (${currentYear})`}
@@ -267,47 +229,89 @@ const CahayaTaniAnalytics = React.memo(function CahayaTaniAnalytics() {
               headerAction={<FilterButtons currentRange={timeFilter} setRange={setTimeFilter} />}
             />
           </div>
+
+        </div>
+
+        {/* Right Column: Komposisi Omzet & Ratio Stock to Sale (Span 1) */}
+        <div className="xl:col-span-1 flex flex-col gap-4">
+          
+          {/* Komposisi Omzet Pie Chart */}
+          <div className="bg-white p-4 md:p-5 rounded-lg shadow-sm border border-slate-200 flex flex-col h-[325px] relative overflow-hidden">
+            <h3 className="text-[11px] font-bold text-[#1e3a8a] uppercase tracking-widest border-b border-slate-100 pb-2 mb-2">Komposisi Omzet (YTD)</h3>
+            <div className="flex-1 w-full relative">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={[
+                      { name: 'Sawit', value: cahayaTaniYTD.sawit_omzet, fill: '#f59e0b' },
+                      { name: 'Kayu Putih', value: cahayaTaniYTD.kayu_putih_omzet, fill: '#10b981' },
+                      { name: 'Lainnya', value: cahayaTaniYTD.lainnya_omzet, fill: '#8b5cf6' }
+                    ].filter(d => d.value > 0)}
+                    cx="50%" cy="50%" innerRadius="40%" outerRadius="80%" dataKey="value" stroke="#fff" strokeWidth={2}
+                    labelLine={false} label={renderPieLabel}
+                  >
+                  </Pie>
+                  <Tooltip formatter={(value) => formatRupiah(value)} />
+                  <Legend wrapperStyle={{ fontSize: '10px', fontWeight: 600 }} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* Ratio Stock to Sale Gauge Chart */}
+          <div className="bg-white p-4 md:p-5 rounded-lg shadow-sm border border-slate-200 flex flex-col h-[325px]">
+            <h3 className="text-[11px] font-bold text-[#1e3a8a] uppercase tracking-widest border-b border-slate-100 pb-2 mb-2">Ratio Stock to Sale</h3>
+            <div className="flex-1 w-full relative">
+              {renderGaugeChart()}
+            </div>
+          </div>
+          
         </div>
 
       </div>
 
-      {/* Row: Rekapitulasi YTD Table */}
-      <div className="bg-white p-4 md:p-5 rounded-lg shadow-sm border border-slate-200">
-        <h3 className="text-[13px] font-bold text-[#1e3a8a] uppercase tracking-widest border-b border-slate-100 pb-4 mb-4">
-          Rekapitulasi Year to Date (YTD)
-        </h3>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-slate-600">
-            <thead className="text-[11px] uppercase bg-slate-50 text-[#1e3a8a] font-extrabold tracking-wider">
-              <tr>
-                <th className="px-6 py-4 rounded-tl-lg">Variabel</th>
-                <th className="px-6 py-4 text-right">{prevYear}</th>
-                <th className="px-6 py-4 text-right">{currentYear}</th>
-                <th className="px-6 py-4 text-right rounded-tr-lg">Persentase YoY</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {YTD_TABLE_DATA.map((row, idx) => (
-                <tr key={idx} className="hover:bg-slate-50/50 transition-colors">
-                  <td className="px-6 py-4 font-medium text-slate-700">{row.variabel}</td>
-                  <td className="px-6 py-4 text-right text-slate-500">
-                    {row.isCurrency ? formatRupiah(row.prevYearData) : formatNumber(row.prevYearData)}
-                  </td>
-                  <td className="px-6 py-4 text-right font-bold text-[#1e3a8a]">
-                    {row.isCurrency ? formatRupiah(row.currYearData) : formatNumber(row.currYearData)}
-                  </td>
-                  <td className="px-6 py-4 text-right font-bold">
-                    {row.percent}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {/* Row: Rekapitulasi YTD Table & Data Anggota Binaan (Berdampingan) */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-5 items-stretch">
+        <div className="bg-white p-4 md:p-5 rounded-lg shadow-sm border border-slate-200 flex flex-col justify-between">
+          <div>
+            <h3 className="text-[13px] font-bold text-[#1e3a8a] uppercase tracking-widest border-b border-slate-100 pb-4 mb-4">
+              Rekapitulasi Year to Date (YTD)
+            </h3>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm text-slate-600">
+                <thead className="text-[11px] uppercase bg-slate-50 text-[#1e3a8a] font-extrabold tracking-wider">
+                  <tr>
+                    <th className="px-6 py-4 rounded-tl-lg">Variabel</th>
+                    <th className="px-6 py-4 text-right">{prevYear}</th>
+                    <th className="px-6 py-4 text-right">{currentYear}</th>
+                    <th className="px-6 py-4 text-right rounded-tr-lg">Persentase YoY</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {YTD_TABLE_DATA.map((row, idx) => (
+                    <tr key={idx} className="hover:bg-slate-50/50 transition-colors">
+                      <td className="px-6 py-4 font-medium text-slate-700">{row.variabel}</td>
+                      <td className="px-6 py-4 text-right text-slate-500">
+                        {row.isCurrency ? formatRupiah(row.prevYearData) : formatNumber(row.prevYearData)}
+                      </td>
+                      <td className="px-6 py-4 text-right font-bold text-[#1e3a8a]">
+                        {row.isCurrency ? formatRupiah(row.currYearData) : formatNumber(row.currYearData)}
+                      </td>
+                      <td className="px-6 py-4 text-right font-bold">
+                        {row.percent}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-col">
+          <BeneficiaryPanel />
         </div>
       </div>
-
-      {/* DATA ANGGOTA BINAAN */}
-      <BeneficiaryPanel />
 
     </div>
   );
