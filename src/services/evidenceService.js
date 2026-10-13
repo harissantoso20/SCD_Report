@@ -1,6 +1,6 @@
 import { supabase } from '../lib/supabaseClient';
 
-const GDRIVE_UPLOAD_URL = import.meta.env.VITE_GDRIVE_UPLOAD_URL || 'https://script.google.com/macros/s/AKfycbwPzltqJZXhXu6A_Sq4BHeUDSuQ6fFOHhMEMq5SWGBOEUT_q5CJPMqG505MyuD68YhU_w/exec';
+const GDRIVE_UPLOAD_URL = import.meta.env.VITE_GDRIVE_UPLOAD_URL || 'https://script.google.com/macros/s/AKfycbzKzKzzgmhga0NZFLDe7MoL_QX6zzujZQk7xzq5Im77M7lLajFq9xgeXHxxpfqynVrb/exec';
 
 // Helper: convert File to base64
 function fileToBase64(file) {

@@ -48,6 +48,7 @@ class GlobalErrorBoundary extends React.Component {
 const HomeView = lazy(() => import('./components/HomeView'));
 const DashboardView = lazy(() => import('./components/DashboardView'));
 const DataEntryView = lazy(() => import('./components/DataEntryView'));
+const MonitoringView = lazy(() => import('./components/MonitoringView'));
 import LoginView from './components/LoginView';
 
 export default function App() {
@@ -107,6 +108,12 @@ export default function App() {
               >
                 Dashboard
               </button>
+              <button 
+                onClick={() => setActiveTab("Monitoring")}
+                className={`transition-colors ${activeTab === "Monitoring" ? "text-[#1e3a8a] border-b-2 border-[#1e3a8a] pb-1" : "text-gray-400 hover:text-[#1e3a8a]"}`}
+              >
+                Monitoring
+              </button>
               {!isViewOnly && (
                 <button 
                   onClick={() => setActiveTab("Data Entry")}
@@ -142,6 +149,7 @@ export default function App() {
           }>
             {activeTab === "Home" && <HomeView />}
             {activeTab === "Dashboard" && <DashboardView />}
+            {activeTab === "Monitoring" && <MonitoringView />}
             {activeTab === "Data Entry" && !isViewOnly && <DataEntryView />}
             {activeTab === "Data Entry" && isViewOnly && (
               <div className="flex flex-col items-center justify-center h-64 text-center">
