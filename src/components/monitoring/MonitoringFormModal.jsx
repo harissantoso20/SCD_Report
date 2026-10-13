@@ -479,7 +479,19 @@ export default function MonitoringFormModal({ initialData, onClose, onSave }) {
                       return (
                         <div key={pIdx} className="relative group rounded-lg overflow-hidden border border-gray-200 aspect-square bg-gray-100">
                           {imgSrc ? (
-                            <img src={imgSrc} alt={photo.name || 'Eviden'} className="w-full h-full object-cover" />
+                            <img 
+                              src={imgSrc} 
+                              alt={photo.name || 'Eviden'} 
+                              className="w-full h-full object-cover" 
+                              referrerPolicy="no-referrer"
+                              onError={(e) => {
+                                const match = String(rawSrc).match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || String(rawSrc).match(/[?&]id=([a-zA-Z0-9_-]+)/);
+                                if (match && match[1] && !e.currentTarget.dataset.retried) {
+                                  e.currentTarget.dataset.retried = 'true';
+                                  e.currentTarget.src = `https://lh3.googleusercontent.com/d/${match[1]}`;
+                                }
+                              }}
+                            />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-[10px] text-gray-400">
                               <ImageIcon className="w-4 h-4" />

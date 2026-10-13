@@ -7,6 +7,25 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { generateText, DEFAULT_GEMINI_MODEL } from '../../lib/geminiClient';
 
+/**
+ * Helper to strip any introductory memorandum/letterhead preamble from AI output.
+ * Ensures output starts directly at "1. 🔍 Diagnosis Akar Masalah..."
+ */
+export function stripEvaluationPreamble(text) {
+  if (!text || typeof text !== 'string') return '';
+  // Find start of diagnosis heading
+  const match = text.search(/(?:^|\n)\s*(?:#{1,4}\s*(?:1[\.\)]\s*)?.*?(?:diagnos|akar masalah)|(?:\*\*1[\.\)]\s*.*?(?:diagnos|akar masalah)\*\*))/i);
+  if (match !== -1) {
+    return text.substring(match).trim();
+  }
+  // Fallback: start from the first heading
+  const headingMatch = text.search(/(?:^|\n)\s*#{1,4}\s+/);
+  if (headingMatch !== -1) {
+    return text.substring(headingMatch).trim();
+  }
+  return text.trim();
+}
+
 export default function MonitoringAIEvaluation({ selectedRecord = null }) {
   // Store evaluations keyed by record ID so switching back and forth preserves previous AI outputs
   const [evaluationsCache, setEvaluationsCache] = useState({});
@@ -15,7 +34,8 @@ export default function MonitoringAIEvaluation({ selectedRecord = null }) {
   const [errorMsg, setErrorMsg] = useState('');
 
   const recordId = selectedRecord?.id || 'none';
-  const currentAnalysisText = evaluationsCache[recordId] || '';
+  const rawAnalysisText = evaluationsCache[recordId] || '';
+  const currentAnalysisText = stripEvaluationPreamble(rawAnalysisText);
 
   const runEvaluation = async () => {
     if (!selectedRecord) {
@@ -57,7 +77,9 @@ RINCIAN TEMUAN MONITORING:
 ${itemsContext}
 --- AKHIR DATA ---
 
-Mohon susun laporan "Evaluasi Tahap Pertama Hasil Monitoring" dalam format Markdown resmi, terstruktur rapi, dan mudah dibaca oleh pimpinan divisi:
+ATURAN WAJIB & FORMAT LAPORAN:
+1. DILARANG KERAS menyertakan kop memorandum, surat pengantar, kata sambutan, nomor dokumen, kepada Yth, dari, tanggal evaluasi, PIC, atau teks pembuka apapun.
+2. LANGSUNG MULAI output laporan Anda pada judul heading pertama di bawah ini:
 
 ### 1. 🔍 Diagnosis Akar Masalah & Titik Kritis (Root Cause Analysis)
 - Berikan analisis tajam mengenai faktor penyebab utama dari kendala di atas (apakah aspek teknis sarana prasarana, kapasitas kelompok mitra, akses pasar, atau faktor eksternal).
@@ -79,14 +101,15 @@ Tampilkan dalam format TABEL MARKDOWN yang rapi dengan baris baru yang jelas:
 ### 4. 📌 Rekomendasi Tindakan Strategis Manajemen TJSL PTBA
 - Berikan 3 poin rekomendasi intervensi manajerial konkret (alokasi dukungan, supervisi tambahan, atau penyesuaian SOP) khusus untuk program ${selectedRecord.program}.
 
-Gunakan Bahasa Indonesia formal, lugas, profesional standar BUMN, dan jangan menggabungkan kolom tabel menjadi satu paragraf.
+Gunakan Bahasa Indonesia formal, lugas, profesional standar BUMN. JANGAN buat pengantar, LANGSUNG mulai dari "### 1. 🔍 Diagnosis Akar Masalah & Titik Kritis".
 `;
 
     try {
       const response = await generateText(prompt, DEFAULT_GEMINI_MODEL, true);
+      const cleaned = stripEvaluationPreamble(response);
       setEvaluationsCache((prev) => ({
         ...prev,
-        [recordId]: response
+        [recordId]: cleaned
       }));
     } catch (err) {
       console.error('AI Evaluation error:', err);

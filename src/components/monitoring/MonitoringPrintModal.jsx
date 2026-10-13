@@ -259,8 +259,15 @@ export default function MonitoringPrintModal({ record, onClose }) {
                               src={src}
                               alt={`Dokumentasi ${idx + 1}`}
                               className="max-h-56 max-w-full object-contain"
-                              crossOrigin="anonymous"
+                              referrerPolicy="no-referrer"
                               loading="eager"
+                              onError={(e) => {
+                                const match = String(rawSrc).match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || String(rawSrc).match(/[?&]id=([a-zA-Z0-9_-]+)/);
+                                if (match && match[1] && !e.currentTarget.dataset.retried) {
+                                  e.currentTarget.dataset.retried = 'true';
+                                  e.currentTarget.src = `https://lh3.googleusercontent.com/d/${match[1]}`;
+                                }
+                              }}
                             />
                           </div>
                           <div className="text-[11px] font-bold text-black mt-2 text-center border-t border-gray-200 pt-1 w-full">
@@ -328,8 +335,15 @@ export default function MonitoringPrintModal({ record, onClose }) {
                               src={src}
                               alt={`Daftar Hadir ${idx + 1}`}
                               className="max-h-[750px] max-w-full object-contain"
-                              crossOrigin="anonymous"
+                              referrerPolicy="no-referrer"
                               loading="eager"
+                              onError={(e) => {
+                                const match = String(rawSrc).match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || String(rawSrc).match(/[?&]id=([a-zA-Z0-9_-]+)/);
+                                if (match && match[1] && !e.currentTarget.dataset.retried) {
+                                  e.currentTarget.dataset.retried = 'true';
+                                  e.currentTarget.src = `https://lh3.googleusercontent.com/d/${match[1]}`;
+                                }
+                              }}
                             />
                           </div>
                           <div className="text-xs font-bold text-black mt-2 text-center border-t border-gray-200 pt-1 w-full">

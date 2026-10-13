@@ -10,6 +10,7 @@ import { programService } from '../services/programService';
 import MonitoringFormModal from './monitoring/MonitoringFormModal';
 import MonitoringPrintModal from './monitoring/MonitoringPrintModal';
 import MonitoringAIEvaluation from './monitoring/MonitoringAIEvaluation';
+import EvidenceImage from './common/EvidenceImage';
 
 export default function MonitoringView() {
   const [records, setRecords] = useState([]);
@@ -506,14 +507,18 @@ ADD COLUMN IF NOT EXISTS scan_daftar_hadir JSONB DEFAULT '[]'::jsonb;`;
               ) : viewingEvidence.type === 'photos' ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {viewingEvidence.items.map((item, idx) => {
-                    const rawSrc = typeof item === 'string' ? item : (item.preview || item.url);
-                    const src = getGDriveThumbnail(rawSrc);
+                    const rawSrc = typeof item === 'string' ? item : (item.url || item.preview);
                     return (
                       <div key={idx} className="rounded-xl overflow-hidden border border-gray-200 bg-gray-50 flex flex-col items-center">
-                        <img src={src} alt={`Dokumentasi ${idx + 1}`} className="max-h-72 w-full object-contain bg-black/5" />
+                        <EvidenceImage 
+                          src={item} 
+                          alt={`Dokumentasi ${idx + 1}`} 
+                          className="max-h-72 w-full object-contain bg-black/5" 
+                          containerClassName="w-full max-h-72 min-h-[220px]"
+                        />
                         <div className="p-2 w-full text-center text-xs font-semibold text-gray-700 bg-white border-t border-gray-100 flex items-center justify-between">
                           <span>Foto #{idx + 1}</span>
-                          {rawSrc && rawSrc.startsWith('http') && (
+                          {rawSrc && String(rawSrc).startsWith('http') && (
                             <a href={rawSrc} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline flex items-center gap-1 text-[11px]">
                               Buka di GDrive <ExternalLink className="w-3 h-3" />
                             </a>
@@ -526,9 +531,8 @@ ADD COLUMN IF NOT EXISTS scan_daftar_hadir JSONB DEFAULT '[]'::jsonb;`;
               ) : (
                 <div className="space-y-4">
                   {viewingEvidence.items.map((item, idx) => {
-                    const rawSrc = typeof item === 'string' ? item : (item.preview || item.url);
+                    const rawSrc = typeof item === 'string' ? item : (item.url || item.preview);
                     const isPdf = typeof item === 'string' ? item.toLowerCase().includes('.pdf') : item.isPdf;
-                    const src = getGDriveThumbnail(rawSrc);
 
                     if (isPdf) {
                       return (
@@ -540,7 +544,7 @@ ADD COLUMN IF NOT EXISTS scan_daftar_hadir JSONB DEFAULT '[]'::jsonb;`;
                               <p className="text-xs text-gray-500">Format Dokumen PDF</p>
                             </div>
                           </div>
-                          {rawSrc && rawSrc.startsWith('http') && (
+                          {rawSrc && String(rawSrc).startsWith('http') && (
                             <a
                               href={rawSrc}
                               target="_blank"
@@ -556,10 +560,15 @@ ADD COLUMN IF NOT EXISTS scan_daftar_hadir JSONB DEFAULT '[]'::jsonb;`;
 
                     return (
                       <div key={idx} className="rounded-xl overflow-hidden border border-gray-200 bg-gray-50 flex flex-col items-center">
-                        <img src={src} alt={`Daftar Hadir ${idx + 1}`} className="max-h-96 w-full object-contain bg-black/5" />
+                        <EvidenceImage 
+                          src={item} 
+                          alt={`Daftar Hadir ${idx + 1}`} 
+                          className="max-h-96 w-full object-contain bg-black/5" 
+                          containerClassName="w-full max-h-96 min-h-[260px]"
+                        />
                         <div className="p-2 w-full text-center text-xs font-semibold text-gray-700 bg-white border-t border-gray-100 flex items-center justify-between">
                           <span>Scan Daftar Hadir #{idx + 1}</span>
-                          {rawSrc && rawSrc.startsWith('http') && (
+                          {rawSrc && String(rawSrc).startsWith('http') && (
                             <a href={rawSrc} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline flex items-center gap-1 text-[11px]">
                               Buka di GDrive <ExternalLink className="w-3 h-3" />
                             </a>

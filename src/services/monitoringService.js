@@ -93,8 +93,8 @@ export function getGDriveThumbnail(url, size = 'w1000') {
 
   const match = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
   if (match && match[1]) {
-    // lh3.googleusercontent.com/d/ID is Google's fast direct CDN for Drive images
-    return `https://lh3.googleusercontent.com/d/${match[1]}`;
+    // drive.google.com/thumbnail is Google's official thumbnail generator, best for cross-origin previews
+    return `https://drive.google.com/thumbnail?id=${match[1]}&sz=${size}`;
   }
   return url;
 }
@@ -130,7 +130,11 @@ async function processEvidenceFiles(items, meta, filePrefix = '') {
         });
 
         if (gdriveUrl && typeof gdriveUrl === 'string' && gdriveUrl.startsWith('http')) {
-          processed.push(gdriveUrl);
+          processed.push({
+            url: gdriveUrl,
+            preview: permanentDataUrl || '',
+            name: uploadFile.name
+          });
           uploadedToGDrive = true;
         }
       } catch (err) {
@@ -142,7 +146,11 @@ async function processEvidenceFiles(items, meta, filePrefix = '') {
         processed.push(permanentDataUrl);
       }
     } else if (item?.url) {
-      processed.push(item.url);
+      processed.push({
+        url: item.url,
+        preview: item.preview || '',
+        name: item.name || 'Berkas Eviden'
+      });
     } else if (item?.preview && !item.preview.startsWith('blob:')) {
       processed.push(item.preview);
     }
