@@ -68,6 +68,19 @@ export default function MonitoringView() {
     loadData();
   }, []);
 
+  // Global ESC key listener to close active modals
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        if (viewingEvidence) setViewingEvidence(null);
+        if (printRecord) setPrintRecord(null);
+        if (formModalOpen) setFormModalOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [viewingEvidence, printRecord, formModalOpen]);
+
   // Filtered records
   const filteredRecords = useMemo(() => {
     return records.filter((r) => {
@@ -487,8 +500,14 @@ ADD COLUMN IF NOT EXISTS scan_daftar_hadir JSONB DEFAULT '[]'::jsonb;`;
 
       {/* Quick Evidence Lightbox Modal */}
       {viewingEvidence && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-xs p-3 md:p-6 overflow-y-auto">
-          <div className={`relative w-full ${viewingEvidence.type === 'attendance' ? 'max-w-5xl' : 'max-w-3xl'} bg-white rounded-2xl shadow-2xl overflow-hidden my-4 border border-gray-200 transition-all duration-200 flex flex-col max-h-[92vh]`}>
+        <div 
+          className="fixed inset-0 z-[100] flex items-start justify-center bg-black/80 backdrop-blur-sm p-3 md:p-6 pt-16 md:pt-14 overflow-y-auto"
+          onClick={() => setViewingEvidence(null)}
+        >
+          <div 
+            className={`relative w-full ${viewingEvidence.type === 'attendance' ? 'max-w-5xl' : 'max-w-3xl'} bg-white rounded-2xl shadow-2xl overflow-hidden my-auto border border-gray-200 transition-all duration-200 flex flex-col max-h-[85vh]`}
+            onClick={(e) => e.stopPropagation()}
+          >
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-3.5 bg-gray-900 text-white shrink-0">
               <div className="flex items-center gap-2 min-w-0">

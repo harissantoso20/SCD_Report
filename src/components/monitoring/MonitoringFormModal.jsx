@@ -84,6 +84,15 @@ export default function MonitoringFormModal({ initialData, onClose, onSave }) {
     }
   }, [formData.tanggal]);
 
+  // Close modal on ESC key
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && !submitting) onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose, submitting]);
+
   // Load programs list
   useEffect(() => {
     const loadPrograms = async () => {
@@ -246,10 +255,16 @@ export default function MonitoringFormModal({ initialData, onClose, onSave }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 overflow-y-auto">
-      <div className="relative w-full max-w-4xl bg-white rounded-xl shadow-2xl overflow-hidden my-6 border border-gray-200">
+    <div 
+      className="fixed inset-0 z-[100] flex items-start justify-center bg-black/80 backdrop-blur-sm p-3 md:p-6 pt-16 md:pt-14 overflow-y-auto"
+      onClick={() => { if (!submitting) onClose(); }}
+    >
+      <div 
+        className="relative w-full max-w-4xl bg-white rounded-xl shadow-2xl overflow-hidden my-auto border border-gray-200 flex flex-col max-h-[85vh]"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 bg-[#1e3a8a] text-white">
+        <div className="flex items-center justify-between px-6 py-4 bg-[#1e3a8a] text-white shrink-0">
           <div>
             <h2 className="text-lg font-bold">
               {formData.id ? 'Edit Catatan Monitoring' : 'Buat Formulir Monitoring Baru'}

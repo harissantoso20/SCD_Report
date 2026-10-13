@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { Printer, X, Download, Camera, FileText, CheckSquare, Image as ImageIcon } from 'lucide-react';
 import logoPTBA from '../../assets/logo/logo-ptba.png';
 import { getGDriveThumbnail } from '../../services/monitoringService';
@@ -6,6 +6,15 @@ import { getGDriveThumbnail } from '../../services/monitoringService';
 export default function MonitoringPrintModal({ record, onClose }) {
   const printAreaRef = useRef(null);
   const [includeAttachments, setIncludeAttachments] = useState(true);
+
+  // Close on ESC key
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
 
   if (!record) return null;
 
@@ -44,10 +53,16 @@ export default function MonitoringPrintModal({ record, onClose }) {
   const hasAttachments = photos.length > 0 || attendance.length > 0;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 overflow-y-auto">
+    <div 
+      className="fixed inset-0 z-[100] flex items-start justify-center bg-black/80 backdrop-blur-sm p-3 md:p-6 pt-16 md:pt-14 overflow-y-auto"
+      onClick={onClose}
+    >
       {/* Modal Actions Bar (Hidden on print) */}
-      <div className="relative w-full max-w-4xl bg-white rounded-2xl shadow-2xl overflow-hidden my-6 border border-gray-200">
-        <div className="print:hidden flex flex-col md:flex-row md:items-center justify-between px-6 py-4 bg-gray-50 border-b border-gray-200 gap-3">
+      <div 
+        className="relative w-full max-w-4xl bg-white rounded-2xl shadow-2xl overflow-hidden my-auto border border-gray-200 flex flex-col max-h-[85vh]"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="print:hidden sticky top-0 z-20 flex flex-col md:flex-row md:items-center justify-between px-6 py-4 bg-gray-50 border-b border-gray-200 gap-3 shrink-0">
           <div>
             <h3 className="text-base font-bold text-gray-800">
               Pratinjau Formulir Monitoring & Lampiran Eviden (1:1)
