@@ -15,6 +15,7 @@ export default function EvidenceImage({
   alt = 'Eviden Dokumentasi',
   className = '',
   containerClassName = '',
+  size = 'w1000',
   onClick
 }) {
   const [loadState, setLoadState] = useState('loading'); // 'loading' | 'loaded' | 'error'
@@ -44,11 +45,11 @@ export default function EvidenceImage({
 
     if (fileId) {
       // 1. Google Drive official thumbnail endpoint (most reliable for embedding)
-      list.push(`https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`);
+      list.push(`https://drive.google.com/thumbnail?id=${fileId}&sz=${size}`);
       // 2. lh3 direct CDN
+      list.push(`https://lh3.googleusercontent.com/d/${fileId}=${size}`);
+      // 3. lh3 default
       list.push(`https://lh3.googleusercontent.com/d/${fileId}`);
-      // 3. lh3 with sizing parameter
-      list.push(`https://lh3.googleusercontent.com/d/${fileId}=w1000`);
       // 4. uc export view
       list.push(`https://drive.google.com/uc?export=view&id=${fileId}`);
     }
