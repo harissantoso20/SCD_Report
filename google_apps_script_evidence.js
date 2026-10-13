@@ -30,9 +30,9 @@ function doPost(e) {
     var fileName = data.fileName || ("eviden_" + new Date().getTime() + ".jpg");
     var mimeType = data.mimeType || "image/jpeg";
     var base64Data = data.base64;
-    var program = (data.program || "Umum").trim();
-    var year = (data.year || new Date().getFullYear().toString()).trim();
-    var month = (data.month || "Lainnya").trim();
+    var program = String(data.program || "Umum").trim();
+    var year = String(data.year || new Date().getFullYear()).trim();
+    var month = String(data.month || "Lainnya").trim();
 
     if (!base64Data) {
       return responseJSON({ success: false, error: "Data base64 file tidak ditemukan." });

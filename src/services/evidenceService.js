@@ -35,9 +35,9 @@ export const evidenceService = {
       fileName: file.name,
       mimeType: file.type || 'image/jpeg',
       base64: base64,
-      program: metadata.program || '',
-      month: metadata.month || '',
-      year: metadata.year || ''
+      program: String(metadata.program || ''),
+      month: String(metadata.month || ''),
+      year: String(metadata.year || new Date().getFullYear())
     };
 
     // Google Apps Script requires simple text/plain POST to avoid CORS preflight errors
