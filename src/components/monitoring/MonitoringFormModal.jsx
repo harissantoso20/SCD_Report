@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { programService } from '../../services/programService';
 import { getGDriveThumbnail } from '../../services/monitoringService';
+import SavingOverlay from '../common/SavingOverlay';
 
 const DAYS_ID = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
 
@@ -640,6 +641,14 @@ export default function MonitoringFormModal({ initialData, onClose, onSave }) {
           </div>
         </form>
       </div>
+
+      {/* Animated Saving Overlay Modal */}
+      {submitting && (
+        <SavingOverlay 
+          title="Menyimpan Dokumen & Mengunggah Eviden..." 
+          subtitle={`Sistem sedang mengunggah foto kegiatan & scan presensi ke Google Drive untuk program ${formData.program} dan merekam formulir fisik.`}
+        />
+      )}
     </div>
   );
 }

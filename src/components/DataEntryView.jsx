@@ -8,6 +8,7 @@ import MonthlyProgressForm from './data-entry/MonthlyProgressForm';
 import DynamicTablesManager from './data-entry/DynamicTablesManager';
 import EvidenceUpload from './data-entry/EvidenceUpload';
 import BeneficiariesTable from './data-entry/BeneficiariesTable';
+import SavingOverlay from './common/SavingOverlay';
 
 export default function DataEntryView() {
   const selectedProgram = useAppStore((state) => state.globalProgram);
@@ -201,11 +202,19 @@ export default function DataEntryView() {
       <div className="flex justify-end pt-5 border-t border-gray-200">
         <div className="flex items-center gap-3">
           {showSuccess && <span className="flex items-center text-green-600 font-medium text-xs animate-pulse"><CheckCircle size={14} className="mr-1" /> Berhasil Disimpan</span>}
-          <button onClick={handleSave} disabled={isSaving} className={`${isSaving ? 'bg-gray-400' : 'bg-[#1e3a8a] hover:bg-blue-900'} text-white font-semibold text-sm py-2 px-6 rounded-md flex items-center gap-2 shadow-sm transition-colors`}>
+          <button onClick={handleSave} disabled={isSaving} className={`${isSaving ? 'bg-gray-400' : 'bg-[#1e3a8a] hover:bg-blue-900'} text-white font-semibold text-sm py-2 px-6 rounded-md flex items-center gap-2 shadow-sm transition-colors cursor-pointer`}>
             <Save size={16} /> {isSaving ? 'Menyimpan...' : 'Simpan Progress'}
           </button>
         </div>
       </div>
+
+      {/* Animated Saving Overlay Modal */}
+      {isSaving && (
+        <SavingOverlay 
+          title="Menyimpan Laporan & Mengunggah Eviden..." 
+          subtitle={`Sistem sedang mengunggah dokumentasi ke Google Drive untuk program ${selectedProgram} dan mencatat data progres bulanan.`}
+        />
+      )}
     </div>
   );
 }
