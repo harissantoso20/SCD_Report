@@ -22,6 +22,7 @@ export default function MonitoringView() {
   // Filter & Search States
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedProgram, setSelectedProgram] = useState('all');
+  const [selectedActivity, setSelectedActivity] = useState('all');
   const [programsList, setProgramsList] = useState([]);
 
   // Selected Record for AI Evaluation (Single Checkbox Selection)
@@ -84,6 +85,10 @@ export default function MonitoringView() {
   // Filtered records
   const filteredRecords = useMemo(() => {
     return records.filter((r) => {
+      const recActivity = r.jenis_kegiatan || (r.program === 'SURVEY' ? 'SURVEY' : 'Monitoring');
+      const matchActivity = selectedActivity === 'all' || recActivity === selectedActivity;
+      if (!matchActivity) return false;
+
       const matchProgram = selectedProgram === 'all' || r.program === selectedProgram;
       if (!matchProgram) return false;
 
@@ -91,6 +96,7 @@ export default function MonitoringView() {
 
       const q = searchQuery.toLowerCase();
       const matchText = 
+        (r.jenis_kegiatan || '').toLowerCase().includes(q) ||
         (r.program || '').toLowerCase().includes(q) ||
         (r.lokasi || '').toLowerCase().includes(q) ||
         (r.keterangan || '').toLowerCase().includes(q) ||
@@ -104,7 +110,7 @@ export default function MonitoringView() {
 
       return matchText;
     });
-  }, [records, selectedProgram, searchQuery]);
+  }, [records, selectedActivity, selectedProgram, searchQuery]);
 
   // Aggregated Stats
   const stats = useMemo(() => {
@@ -149,8 +155,9 @@ export default function MonitoringView() {
     }
   };
 
-  const sqlAlterScript = `-- JALANKAN DI SUPABASE SQL EDITOR UNTUK AKTIFKAN KOLOM FOTO, SCAN PRESENSI, & TTD DIGITAL
+  const sqlAlterScript = `-- JALANKAN DI SUPABASE SQL EDITOR UNTUK AKTIFKAN KOLOM KEGIATAN, FOTO, SCAN PRESENSI, & TTD DIGITAL
 ALTER TABLE public."SCD_Report_Monitoring" 
+ADD COLUMN IF NOT EXISTS jenis_kegiatan TEXT DEFAULT 'Monitoring',
 ADD COLUMN IF NOT EXISTS foto_dokumentasi JSONB DEFAULT '[]'::jsonb,
 ADD COLUMN IF NOT EXISTS scan_daftar_hadir JSONB DEFAULT '[]'::jsonb,
 ADD COLUMN IF NOT EXISTS ttd_pic TEXT DEFAULT '',
@@ -173,10 +180,10 @@ ADD COLUMN IF NOT EXISTS ttd_penerima TEXT DEFAULT '';`;
             <span>Arsip Dokumen Fisik & Eviden</span>
           </div>
           <h1 className="text-2xl font-black text-gray-900 tracking-tight">
-            Formulir & Evaluasi Monitoring Program
+            Formulir Survey / Monitoring & Evaluasi Program
           </h1>
           <p className="text-sm text-gray-500 mt-1 max-w-2xl">
-            Pencatatan resmi dokumen monitoring lapangan sesuai formulir fisik PTBA, dilengkapi upload foto dokumentasi, scan daftar hadir, cetak PDF 1:1, dan evaluasi manajemen AI.
+            Pencatatan resmi dokumen survey dan monitoring lapangan sesuai formulir fisik PTBA, dilengkapi upload foto dokumentasi, scan daftar hadir, cetak PDF 1:1, dan evaluasi manajemen AI.
           </p>
         </div>
 
@@ -197,7 +204,7 @@ ADD COLUMN IF NOT EXISTS ttd_penerima TEXT DEFAULT '';`;
             className="flex items-center gap-2 px-5 py-2.5 bg-[#1e3a8a] hover:bg-blue-900 text-white rounded-xl text-sm font-bold shadow-md hover:shadow-lg transition-all cursor-pointer"
           >
             <Plus className="w-4 h-4" />
-            <span>Buat Form Monitoring</span>
+            <span>Buat Form Survey / Monitoring</span>
           </button>
         </div>
       </div>
@@ -256,6 +263,15 @@ ADD COLUMN IF NOT EXISTS ttd_penerima TEXT DEFAULT '';`;
 
           <div className="flex items-center gap-1.5 shrink-0">
             <Filter className="w-4 h-4 text-gray-500" />
+            <select
+              value={selectedActivity}
+              onChange={(e) => setSelectedActivity(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-lg text-xs md:text-sm bg-white font-medium focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]"
+            >
+              <option value="all">Semua Kegiatan</option>
+              <option value="Monitoring">Monitoring</option>
+              <option value="SURVEY">SURVEY</option>
+            </select>
             <select
               value={selectedProgram}
               onChange={(e) => setSelectedProgram(e.target.value)}
@@ -363,10 +379,21 @@ ADD COLUMN IF NOT EXISTS ttd_penerima TEXT DEFAULT '';`;
                       </td>
 
                       <td className="py-3 px-4">
-                        <div className="font-bold text-[#1e3a8a]">
-                          {rec.program}
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className={`px-2 py-0.5 text-[10px] font-bold rounded ${
+                            rec.jenis_kegiatan === 'SURVEY' || rec.program === 'SURVEY'
+                              ? 'bg-amber-100 text-amber-800 border border-amber-200' 
+                              : 'bg-blue-100 text-[#1e3a8a] border border-blue-200'
+                          }`}>
+                            {rec.jenis_kegiatan === 'SURVEY' || rec.program === 'SURVEY' ? 'SURVEY' : 'MONITORING'}
+                          </span>
+                          {rec.jenis_kegiatan !== 'SURVEY' && rec.program && rec.program !== 'SURVEY' && (
+                            <span className="font-bold text-[#1e3a8a]">
+                              {rec.program}
+                            </span>
+                          )}
                         </div>
-                        <div className="text-xs text-gray-500 flex items-center gap-1 mt-0.5">
+                        <div className="text-xs text-gray-500 flex items-center gap-1 mt-1">
                           <MapPin className="w-3 h-3 text-gray-400 shrink-0" />
                           <span className="truncate max-w-[200px]">{rec.lokasi || '-'}</span>
                         </div>

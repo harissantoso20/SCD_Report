@@ -1,7 +1,12 @@
 import React, { Suspense, lazy, useEffect } from 'react';
 import useAppStore from './store/useAppStore';
 import logoPTBA from './assets/logo/logo-ptba.png';
-import { version as appVersion } from '../package.json';
+
+// Dynamic compile-time metadata from Vite
+const APP_VERSION = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '2.1.0';
+const BUILD_DATE = typeof __BUILD_DATE__ !== 'undefined' ? __BUILD_DATE__ : '';
+const GIT_COMMIT = typeof __GIT_COMMIT__ !== 'undefined' ? __GIT_COMMIT__ : '';
+const GIT_COUNT = typeof __GIT_COUNT__ !== 'undefined' ? __GIT_COUNT__ : '';
 
 class GlobalErrorBoundary extends React.Component {
   constructor(props) {
@@ -112,7 +117,7 @@ export default function App() {
                 onClick={() => setActiveTab("Monitoring")}
                 className={`transition-colors ${activeTab === "Monitoring" ? "text-[#1e3a8a] border-b-2 border-[#1e3a8a] pb-1" : "text-gray-400 hover:text-[#1e3a8a]"}`}
               >
-                Monitoring
+                Survey / Monitoring & Evaluasi
               </button>
               {!isViewOnly && (
                 <button 
@@ -161,8 +166,15 @@ export default function App() {
         </main>
 
         <footer className="w-full text-center py-6 mt-auto">
-          <p className="text-gray-500 text-[13px] font-medium">© 2026 Sustainable Community Development</p>
-          <p className="text-[11px] text-gray-400 mt-1.5 font-mono">Version: v{appVersion}</p>
+          <p className="text-gray-500 text-[13px] font-medium">
+            © {new Date().getFullYear()} Sustainable Community Development
+          </p>
+          <p 
+            className="text-[11px] text-gray-400 mt-1.5 font-mono cursor-default select-none"
+            title={`Build: ${BUILD_DATE} • Commit: ${GIT_COMMIT} • Revision #${GIT_COUNT}`}
+          >
+            Version: v{APP_VERSION}
+          </p>
         </footer>
       </div>
     </GlobalErrorBoundary>

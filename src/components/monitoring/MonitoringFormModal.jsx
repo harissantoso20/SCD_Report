@@ -48,6 +48,7 @@ export default function MonitoringFormModal({ initialData, onClose, onSave }) {
   // Form State
   const [formData, setFormData] = useState({
     id: initialData?.id || null,
+    jenis_kegiatan: initialData?.jenis_kegiatan || (initialData?.program === 'SURVEY' ? 'SURVEY' : 'Monitoring'),
     tanggal: initialData?.tanggal || new Date().toISOString().split('T')[0],
     hari: initialData?.hari || '',
     program: initialData?.program || '',
@@ -232,11 +233,11 @@ export default function MonitoringFormModal({ initialData, onClose, onSave }) {
     setErrorMsg('');
 
     if (!formData.tanggal) {
-      setErrorMsg('Pilih tanggal monitoring terlebih dahulu.');
+      setErrorMsg('Pilih tanggal kegiatan terlebih dahulu.');
       return;
     }
-    if (!formData.program.trim()) {
-      setErrorMsg('Pilih atau masukkan nama program.');
+    if (formData.jenis_kegiatan === 'Monitoring' && !formData.program?.trim()) {
+      setErrorMsg('Pilih nama program TJSL terlebih dahulu.');
       return;
     }
 
@@ -298,10 +299,54 @@ export default function MonitoringFormModal({ initialData, onClose, onSave }) {
 
           {/* Section 1: Metadata Form */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
+            {/* Jenis Kegiatan */}
+            <div>
+              <label className="block text-xs font-bold text-gray-700 mb-1">
+                Jenis Kegiatan <span className="text-red-500">*</span>
+              </label>
+              <select
+                value={formData.jenis_kegiatan}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setFormData((prev) => ({
+                    ...prev,
+                    jenis_kegiatan: val,
+                    program: val === 'SURVEY' ? 'SURVEY' : (prev.program === 'SURVEY' ? (programs[0] || '') : prev.program)
+                  }));
+                }}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]"
+              >
+                <option value="Monitoring">Monitoring</option>
+                <option value="SURVEY">SURVEY</option>
+              </select>
+            </div>
+
+            {/* Program TJSL (Hanya muncul jika memilih kegiatan 'Monitoring') */}
+            {formData.jenis_kegiatan === 'Monitoring' ? (
+              <div>
+                <label className="block text-xs font-bold text-gray-700 mb-1">
+                  Program TJSL <span className="text-red-500">*</span>
+                </label>
+                <select
+                  value={formData.program}
+                  onChange={(e) => setFormData({ ...formData, program: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]"
+                  required={formData.jenis_kegiatan === 'Monitoring'}
+                >
+                  <option value="">-- Pilih Program TJSL --</option>
+                  {programs.map((p, idx) => (
+                    <option key={idx} value={p}>
+                      {p}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ) : null}
+
             {/* Tanggal & Hari */}
             <div>
               <label className="block text-xs font-bold text-gray-700 mb-1">
-                Tanggal Monitoring <span className="text-red-500">*</span>
+                Tanggal {formData.jenis_kegiatan === 'SURVEY' ? 'Survey' : 'Monitoring'} <span className="text-red-500">*</span>
               </label>
               <div className="flex gap-2">
                 <input
@@ -322,28 +367,8 @@ export default function MonitoringFormModal({ initialData, onClose, onSave }) {
               </div>
             </div>
 
-            {/* Program */}
-            <div>
-              <label className="block text-xs font-bold text-gray-700 mb-1">
-                Program TJSL <span className="text-red-500">*</span>
-              </label>
-              <select
-                value={formData.program}
-                onChange={(e) => setFormData({ ...formData, program: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]"
-                required
-              >
-                <option value="">-- Pilih Program --</option>
-                {programs.map((p, idx) => (
-                  <option key={idx} value={p}>
-                    {p}
-                  </option>
-                ))}
-              </select>
-            </div>
-
             {/* Lokasi */}
-            <div>
+            <div className={formData.jenis_kegiatan !== 'Monitoring' ? 'md:col-span-2' : ''}>
               <label className="block text-xs font-bold text-gray-700 mb-1">
                 Lokasi Pelaksanaan
               </label>
@@ -357,13 +382,13 @@ export default function MonitoringFormModal({ initialData, onClose, onSave }) {
             </div>
 
             {/* Keterangan */}
-            <div>
+            <div className="md:col-span-2">
               <label className="block text-xs font-bold text-gray-700 mb-1">
-                Keterangan / Fokus Monitoring
+                Keterangan
               </label>
               <input
                 type="text"
-                placeholder="Keterangan / fokus kegiatan monitoring"
+                placeholder="Keterangan kegiatan"
                 value={formData.keterangan}
                 onChange={(e) => setFormData({ ...formData, keterangan: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]"

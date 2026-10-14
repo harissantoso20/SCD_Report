@@ -409,7 +409,9 @@ export default function MonitoringPrintModal({ record, onClose }) {
                 </div>
                 <div className="flex-1 text-center px-2">
                   <h1 className="text-lg md:text-xl font-bold uppercase tracking-wider text-black">
-                    MONITORING PROGRAM TJSL
+                    {record.jenis_kegiatan === 'SURVEY' || record.program === 'SURVEY'
+                      ? 'SURVEY PROGRAM TJSL'
+                      : 'MONITORING PROGRAM TJSL'}
                   </h1>
                   <h2 className="text-sm md:text-base font-bold uppercase tracking-wide text-black">
                     PT BUKIT ASAM (PERSERO) TBK
@@ -429,11 +431,19 @@ export default function MonitoringPrintModal({ record, onClose }) {
                     {record.hari ? `${record.hari}, ` : ''}{formatDateIndo(record.tanggal)}
                   </span>
                 </div>
-                <div className="flex">
-                  <span className="w-32 font-bold shrink-0">Program</span>
-                  <span className="mr-2">:</span>
-                  <span className="flex-1 font-semibold">{record.program || '-'}</span>
-                </div>
+                {record.jenis_kegiatan === 'SURVEY' || record.program === 'SURVEY' ? (
+                  <div className="flex">
+                    <span className="w-32 font-bold shrink-0">Kegiatan</span>
+                    <span className="mr-2">:</span>
+                    <span className="flex-1 font-semibold">SURVEY</span>
+                  </div>
+                ) : (
+                  <div className="flex">
+                    <span className="w-32 font-bold shrink-0">Program TJSL</span>
+                    <span className="mr-2">:</span>
+                    <span className="flex-1 font-semibold">{record.program || '-'}</span>
+                  </div>
+                )}
                 <div className="flex">
                   <span className="w-32 font-bold shrink-0">Lokasi</span>
                   <span className="mr-2">:</span>

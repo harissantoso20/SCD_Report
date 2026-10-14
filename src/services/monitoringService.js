@@ -213,6 +213,7 @@ export const monitoringService = {
           scan_daftar_hadir: (Array.isArray(row.scan_daftar_hadir) && row.scan_daftar_hadir.length > 0)
             ? row.scan_daftar_hadir
             : (localMatch?.scan_daftar_hadir || []),
+          jenis_kegiatan: row.jenis_kegiatan || localMatch?.jenis_kegiatan || (row.program === 'SURVEY' ? 'SURVEY' : 'Monitoring'),
           ttd_pic: row.ttd_pic || localMatch?.ttd_pic || '',
           ttd_penerima: row.ttd_penerima || localMatch?.ttd_penerima || ''
         };
@@ -264,6 +265,7 @@ export const monitoringService = {
       tanggal: record.tanggal,
       hari: record.hari || '',
       program: record.program || '',
+      jenis_kegiatan: record.jenis_kegiatan || (record.program === 'SURVEY' ? 'SURVEY' : 'Monitoring'),
       lokasi: record.lokasi || '',
       keterangan: record.keterangan || '',
       items: Array.isArray(record.items) ? record.items : [],
@@ -296,18 +298,20 @@ export const monitoringService = {
 
       let { data, error } = await query;
 
-      // Graceful fallback if columns foto_dokumentasi / scan_daftar_hadir / ttd do not exist yet on remote schema
+      // Graceful fallback if columns foto_dokumentasi / scan_daftar_hadir / ttd / jenis_kegiatan do not exist yet on remote schema
       if (error && (
         error.message?.includes('foto_dokumentasi') || 
         error.message?.includes('scan_daftar_hadir') || 
+        error.message?.includes('jenis_kegiatan') || 
         error.message?.includes('ttd_pic') || 
         error.message?.includes('ttd_penerima') || 
         error.code === '42703'
       )) {
-        console.warn('Kolom baru belum ada di Supabase remote. Menyimpan ke Cloud dan menyimpan eviden & ttd di cache lokal...');
+        console.warn('Kolom baru belum ada di Supabase remote. Menyimpan ke Cloud dan menyimpan data lengkap di cache lokal...');
         const payloadWithoutNewCols = { ...payload };
         delete payloadWithoutNewCols.foto_dokumentasi;
         delete payloadWithoutNewCols.scan_daftar_hadir;
+        delete payloadWithoutNewCols.jenis_kegiatan;
         delete payloadWithoutNewCols.ttd_pic;
         delete payloadWithoutNewCols.ttd_penerima;
 
@@ -319,6 +323,7 @@ export const monitoringService = {
         if (!retryRes.error && retryRes.data) {
           data = {
             ...retryRes.data,
+            jenis_kegiatan: record.jenis_kegiatan || (record.program === 'SURVEY' ? 'SURVEY' : 'Monitoring'),
             foto_dokumentasi: processedPhotos,
             scan_daftar_hadir: processedAttendance,
             ttd_pic: record.ttd_pic || '',
@@ -329,10 +334,11 @@ export const monitoringService = {
       }
 
       if (!error && data) {
-        // Ensure local cache also stores the complete record with evidence and signatures
+        // Ensure local cache also stores the complete record with evidence, signatures, and jenis_kegiatan
         const local = getLocalRecords();
         const fullRecord = {
           ...data,
+          jenis_kegiatan: record.jenis_kegiatan || (record.program === 'SURVEY' ? 'SURVEY' : 'Monitoring'),
           foto_dokumentasi: processedPhotos,
           scan_daftar_hadir: processedAttendance,
           ttd_pic: record.ttd_pic || '',
