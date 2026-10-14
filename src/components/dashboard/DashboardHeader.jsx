@@ -2,8 +2,9 @@ import React, { useState, useMemo } from 'react';
 import useAppStore from '../../store/useAppStore';
 import { PROGRAMS, PROGRAM_IMAGES } from '../../utils/programAssets';
 import { ChevronDown } from '../Icons';
-import { FileText } from 'lucide-react';
+import { FileText, FileSpreadsheet } from 'lucide-react';
 import ExecutiveReportModal from './ExecutiveReportModal';
+import { exportOperationalReportXlsx } from '../../utils/operationalExcelExport';
 
 const INDO_MONTHS = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
 
@@ -16,6 +17,10 @@ export default function DashboardHeader() {
   const programListFromStore = useAppStore((state) => state.programList);
   const programContext = useAppStore((state) => state.programContext);
   const assignedProgram = useAppStore((state) => state.assignedProgram);
+  const monthlyProgress = useAppStore((state) => state.monthlyProgress);
+  const salesData = useAppStore((state) => state.salesData) || [];
+  const beneficiariesList = useAppStore((state) => state.beneficiariesList) || [];
+  const pltsLocations = useAppStore((state) => state.pltsLocations) || [];
   
   const availablePrograms = programListFromStore?.length > 0 ? programListFromStore : PROGRAMS;
   
@@ -55,6 +60,23 @@ export default function DashboardHeader() {
 
   const handleYearChange = (e) => {
     setSelectedDate(`${e.target.value}-${currentMonthStr}-01`);
+  };
+
+  const handleDownloadOperationalXlsx = () => {
+    const currentMonthIdx = Number(currentMonthStr) - 1;
+    const currentMonthName = INDO_MONTHS[currentMonthIdx] || 'Januari';
+
+    exportOperationalReportXlsx({
+      programName: selectedProgram,
+      currentMonthName,
+      currentMonthStr,
+      currentYearStr,
+      monthlyProgress,
+      salesData,
+      beneficiariesList,
+      pltsLocations,
+      programDescription: desc
+    });
   };
 
   return (
@@ -132,6 +154,17 @@ export default function DashboardHeader() {
           >
             <FileText size={16} />
             <span>Laporan Bulanan (PDF)</span>
+          </button>
+
+          {/* Tombol Laporan Operasional (XLSX) */}
+          <button
+            type="button"
+            onClick={handleDownloadOperationalXlsx}
+            className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold text-[13px] rounded-lg shadow-sm transition-all cursor-pointer whitespace-nowrap"
+            title="Download Laporan Operasional Lengkap ke Excel (.xlsx)"
+          >
+            <FileSpreadsheet size={16} />
+            <span>Laporan Operasional (XLSX)</span>
           </button>
         </div>
       </div>
