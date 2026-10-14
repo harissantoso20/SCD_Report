@@ -156,7 +156,8 @@ export default function DashboardHeader() {
             <span>Laporan Bulanan (PDF)</span>
           </button>
 
-          {/* Tombol Laporan Operasional (XLSX) */}
+          {/* Tombol Laporan Operasional (XLSX) - Disembunyikan sementara sesuai kebutuhan setup variabel tabel */}
+          {/* 
           <button
             type="button"
             onClick={handleDownloadOperationalXlsx}
@@ -166,6 +167,7 @@ export default function DashboardHeader() {
             <FileSpreadsheet size={16} />
             <span>Laporan Operasional (XLSX)</span>
           </button>
+          */}
         </div>
       </div>
 
