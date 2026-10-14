@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   X, Plus, Trash2, Save, AlertCircle, Camera, FileText, 
-  UploadCloud, Image as ImageIcon, Eye, CheckCircle2 
+  UploadCloud, Image as ImageIcon, Eye, CheckCircle2, PenTool, Check, RotateCcw
 } from 'lucide-react';
 import { programService } from '../../services/programService';
 import { getGDriveThumbnail } from '../../services/monitoringService';
 import SavingOverlay from '../common/SavingOverlay';
+import SignaturePadModal from './SignaturePadModal';
 
 const DAYS_ID = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
 
@@ -41,6 +42,9 @@ export default function MonitoringFormModal({ initialData, onClose, onSave }) {
   const photoInputRef = useRef(null);
   const attendanceInputRef = useRef(null);
 
+  // State for digital signature pad popup
+  const [signingTarget, setSigningTarget] = useState(null); // 'pic' | 'penerima' | null
+
   // Form State
   const [formData, setFormData] = useState({
     id: initialData?.id || null,
@@ -48,9 +52,11 @@ export default function MonitoringFormModal({ initialData, onClose, onSave }) {
     hari: initialData?.hari || '',
     program: initialData?.program || '',
     lokasi: initialData?.lokasi || '',
-    keterangan: initialData?.keterangan || 'Monitoring Rutin Pelaksanaan Program',
-    pic_sustainability: initialData?.pic_sustainability || 'Sensiani',
+    keterangan: initialData?.keterangan || '',
+    pic_sustainability: initialData?.pic_sustainability || '',
     penerima_manfaat: initialData?.penerima_manfaat || '',
+    ttd_pic: initialData?.ttd_pic || '',
+    ttd_penerima: initialData?.ttd_penerima || '',
     items: initialData?.items && initialData.items.length > 0
       ? initialData.items
       : [
@@ -357,7 +363,7 @@ export default function MonitoringFormModal({ initialData, onClose, onSave }) {
               </label>
               <input
                 type="text"
-                placeholder="Contoh: Monitoring Rutin Pelaksanaan Program"
+                placeholder="Keterangan / fokus kegiatan monitoring"
                 value={formData.keterangan}
                 onChange={(e) => setFormData({ ...formData, keterangan: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]"
@@ -601,26 +607,72 @@ export default function MonitoringFormModal({ initialData, onClose, onSave }) {
             </div>
           </div>
 
-          {/* Section 4: Pengesahan & Tanda Tangan */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
-            <div>
-              <label className="block text-xs font-bold text-gray-700 mb-1">
+          {/* Section 4: Pengesahan & Tanda Tangan Digital */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 bg-gray-50 p-4 rounded-xl border border-gray-200">
+            {/* PIC Sustainability */}
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-gray-700">
                 PIC Sustainability PTBA
               </label>
               <input
                 type="text"
-                placeholder="Nama PIC (contoh: Sensiani)"
+                placeholder="Nama PIC Sustainability PTBA"
                 value={formData.pic_sustainability}
                 onChange={(e) => setFormData({ ...formData, pic_sustainability: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]"
               />
-              <span className="text-[11px] text-gray-500 mt-0.5 block">
+              <span className="text-[11px] text-gray-500 block">
                 Pihak penanggung jawab monitoring PTBA
               </span>
+
+              {/* Tanda Tangan PIC */}
+              {formData.ttd_pic ? (
+                <div className="mt-2 p-2.5 bg-white border border-emerald-300 rounded-lg shadow-xs flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <img
+                      src={formData.ttd_pic}
+                      alt="TTD PIC"
+                      className="h-12 max-w-[120px] object-contain border border-slate-100 rounded bg-slate-50 p-0.5"
+                    />
+                    <div>
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded">
+                        <Check className="w-3 h-3" /> TTD Terverifikasi
+                      </span>
+                      <p className="text-[10px] text-gray-500 mt-0.5">Tanda tangan digital tersimpan</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => setSigningTarget('pic')}
+                      className="text-xs text-blue-600 hover:text-blue-800 font-bold px-2 py-1 rounded hover:bg-blue-50 transition-colors cursor-pointer"
+                    >
+                      Ubah
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setFormData((prev) => ({ ...prev, ttd_pic: '' }))}
+                      className="text-xs text-red-600 hover:text-red-800 font-bold px-2 py-1 rounded hover:bg-red-50 transition-colors cursor-pointer"
+                    >
+                      Hapus
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setSigningTarget('pic')}
+                  className="mt-2 w-full flex items-center justify-center gap-2 px-3 py-2.5 bg-white hover:bg-blue-50 text-[#1e3a8a] border-2 border-dashed border-blue-300 rounded-lg text-xs font-bold transition-all hover:border-[#1e3a8a] cursor-pointer"
+                >
+                  <PenTool className="w-4 h-4 text-[#1e3a8a]" />
+                  <span>Tanda Tangani Langsung di Layar (PIC)</span>
+                </button>
+              )}
             </div>
 
-            <div>
-              <label className="block text-xs font-bold text-gray-700 mb-1">
+            {/* Penerima Manfaat */}
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-gray-700">
                 Penerima Manfaat
               </label>
               <input
@@ -630,9 +682,53 @@ export default function MonitoringFormModal({ initialData, onClose, onSave }) {
                 onChange={(e) => setFormData({ ...formData, penerima_manfaat: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]"
               />
-              <span className="text-[11px] text-gray-500 mt-0.5 block">
+              <span className="text-[11px] text-gray-500 block">
                 Perwakilan mitra / penerima manfaat di lapangan
               </span>
+
+              {/* Tanda Tangan Penerima Manfaat */}
+              {formData.ttd_penerima ? (
+                <div className="mt-2 p-2.5 bg-white border border-emerald-300 rounded-lg shadow-xs flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <img
+                      src={formData.ttd_penerima}
+                      alt="TTD Penerima"
+                      className="h-12 max-w-[120px] object-contain border border-slate-100 rounded bg-slate-50 p-0.5"
+                    />
+                    <div>
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded">
+                        <Check className="w-3 h-3" /> TTD Terverifikasi
+                      </span>
+                      <p className="text-[10px] text-gray-500 mt-0.5">Tanda tangan digital tersimpan</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => setSigningTarget('penerima')}
+                      className="text-xs text-blue-600 hover:text-blue-800 font-bold px-2 py-1 rounded hover:bg-blue-50 transition-colors cursor-pointer"
+                    >
+                      Ubah
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setFormData((prev) => ({ ...prev, ttd_penerima: '' }))}
+                      className="text-xs text-red-600 hover:text-red-800 font-bold px-2 py-1 rounded hover:bg-red-50 transition-colors cursor-pointer"
+                    >
+                      Hapus
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setSigningTarget('penerima')}
+                  className="mt-2 w-full flex items-center justify-center gap-2 px-3 py-2.5 bg-white hover:bg-blue-50 text-[#1e3a8a] border-2 border-dashed border-blue-300 rounded-lg text-xs font-bold transition-all hover:border-[#1e3a8a] cursor-pointer"
+                >
+                  <PenTool className="w-4 h-4 text-[#1e3a8a]" />
+                  <span>Tanda Tangani Langsung di Layar (Mitra)</span>
+                </button>
+              )}
             </div>
           </div>
 
@@ -668,6 +764,35 @@ export default function MonitoringFormModal({ initialData, onClose, onSave }) {
           </div>
         </form>
       </div>
+
+      {/* Signature Pad Modal Popup */}
+      <SignaturePadModal
+        isOpen={!!signingTarget}
+        onClose={() => setSigningTarget(null)}
+        onSave={(dataUrl) => {
+          if (signingTarget === 'pic') {
+            setFormData((prev) => ({ ...prev, ttd_pic: dataUrl }));
+          } else if (signingTarget === 'penerima') {
+            setFormData((prev) => ({ ...prev, ttd_penerima: dataUrl }));
+          }
+          setSigningTarget(null);
+        }}
+        title={
+          signingTarget === 'pic'
+            ? 'Tanda Tangan Digital: PIC Sustainability PTBA'
+            : 'Tanda Tangan Digital: Penerima Manfaat'
+        }
+        roleName={
+          signingTarget === 'pic'
+            ? 'PIC Sustainability PTBA'
+            : 'Perwakilan Mitra / Penerima Manfaat'
+        }
+        signerName={
+          signingTarget === 'pic'
+            ? formData.pic_sustainability
+            : formData.penerima_manfaat
+        }
+      />
 
       {/* Animated Saving Overlay Modal */}
       {submitting && (

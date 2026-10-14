@@ -149,10 +149,12 @@ export default function MonitoringView() {
     }
   };
 
-  const sqlAlterScript = `-- JALANKAN DI SUPABASE SQL EDITOR UNTUK AKTIFKAN KOLOM FOTO & SCAN DAFTAR HADIR
+  const sqlAlterScript = `-- JALANKAN DI SUPABASE SQL EDITOR UNTUK AKTIFKAN KOLOM FOTO, SCAN PRESENSI, & TTD DIGITAL
 ALTER TABLE public."SCD_Report_Monitoring" 
 ADD COLUMN IF NOT EXISTS foto_dokumentasi JSONB DEFAULT '[]'::jsonb,
-ADD COLUMN IF NOT EXISTS scan_daftar_hadir JSONB DEFAULT '[]'::jsonb;`;
+ADD COLUMN IF NOT EXISTS scan_daftar_hadir JSONB DEFAULT '[]'::jsonb,
+ADD COLUMN IF NOT EXISTS ttd_pic TEXT DEFAULT '',
+ADD COLUMN IF NOT EXISTS ttd_penerima TEXT DEFAULT '';`;
 
   const copySqlScript = () => {
     navigator.clipboard.writeText(sqlAlterScript);

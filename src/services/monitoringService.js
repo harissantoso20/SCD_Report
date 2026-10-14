@@ -212,7 +212,9 @@ export const monitoringService = {
             : (localMatch?.foto_dokumentasi || []),
           scan_daftar_hadir: (Array.isArray(row.scan_daftar_hadir) && row.scan_daftar_hadir.length > 0)
             ? row.scan_daftar_hadir
-            : (localMatch?.scan_daftar_hadir || [])
+            : (localMatch?.scan_daftar_hadir || []),
+          ttd_pic: row.ttd_pic || localMatch?.ttd_pic || '',
+          ttd_penerima: row.ttd_penerima || localMatch?.ttd_penerima || ''
         };
       });
 
@@ -267,6 +269,8 @@ export const monitoringService = {
       items: Array.isArray(record.items) ? record.items : [],
       pic_sustainability: record.pic_sustainability || '',
       penerima_manfaat: record.penerima_manfaat || '',
+      ttd_pic: record.ttd_pic || '',
+      ttd_penerima: record.ttd_penerima || '',
       created_by: record.created_by || '',
       foto_dokumentasi: processedPhotos,
       scan_daftar_hadir: processedAttendance
@@ -292,12 +296,20 @@ export const monitoringService = {
 
       let { data, error } = await query;
 
-      // Graceful fallback if columns foto_dokumentasi / scan_daftar_hadir do not exist yet on remote schema
-      if (error && (error.message?.includes('foto_dokumentasi') || error.message?.includes('scan_daftar_hadir') || error.code === '42703')) {
-        console.warn('Kolom foto_dokumentasi belum ada di Supabase remote. Menyimpan tanpa kolom tersebut ke Cloud dan menyimpan eviden di cache lokal...');
+      // Graceful fallback if columns foto_dokumentasi / scan_daftar_hadir / ttd do not exist yet on remote schema
+      if (error && (
+        error.message?.includes('foto_dokumentasi') || 
+        error.message?.includes('scan_daftar_hadir') || 
+        error.message?.includes('ttd_pic') || 
+        error.message?.includes('ttd_penerima') || 
+        error.code === '42703'
+      )) {
+        console.warn('Kolom baru belum ada di Supabase remote. Menyimpan ke Cloud dan menyimpan eviden & ttd di cache lokal...');
         const payloadWithoutNewCols = { ...payload };
         delete payloadWithoutNewCols.foto_dokumentasi;
         delete payloadWithoutNewCols.scan_daftar_hadir;
+        delete payloadWithoutNewCols.ttd_pic;
+        delete payloadWithoutNewCols.ttd_penerima;
 
         const retryQuery = isNew
           ? supabase.from('SCD_Report_Monitoring').insert([payloadWithoutNewCols]).select().single()
@@ -308,19 +320,23 @@ export const monitoringService = {
           data = {
             ...retryRes.data,
             foto_dokumentasi: processedPhotos,
-            scan_daftar_hadir: processedAttendance
+            scan_daftar_hadir: processedAttendance,
+            ttd_pic: record.ttd_pic || '',
+            ttd_penerima: record.ttd_penerima || ''
           };
           error = null;
         }
       }
 
       if (!error && data) {
-        // Ensure local cache also stores the complete record with evidence
+        // Ensure local cache also stores the complete record with evidence and signatures
         const local = getLocalRecords();
         const fullRecord = {
           ...data,
           foto_dokumentasi: processedPhotos,
-          scan_daftar_hadir: processedAttendance
+          scan_daftar_hadir: processedAttendance,
+          ttd_pic: record.ttd_pic || '',
+          ttd_penerima: record.ttd_penerima || ''
         };
         const existingIdx = local.findIndex((r) => r.id === data.id);
         if (existingIdx >= 0) {

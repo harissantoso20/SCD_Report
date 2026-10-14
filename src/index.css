@@ -59,14 +59,55 @@ header { z-index: 9999 !important; }
   }
 
   #executive-report-document,
-  #beneficiary-report-document {
+  #executive-report-document,
+  #beneficiary-report-document,
+  #printable-monitoring-doc,
+  .monitoring-print-page,
+  .monitoring-section-form,
+  .monitoring-section-eviden,
+  .monitoring-section-attendance {
     width: 100% !important;
     max-width: 100% !important;
     margin: 0 !important;
-    padding: 0 !important;
     border: none !important;
     box-shadow: none !important;
     background: white !important;
+  }
+
+  /* Lembar 1: Form Monitoring (bisa multi-page jika tabel temuan banyak, selalu break ke lembar berikutnya) */
+  .monitoring-section-form {
+    display: block !important;
+    page-break-after: always !important;
+    break-after: page !important;
+  }
+
+  /* Lembar 2: Lampiran I (Foto Eviden) - SELALU MULAI DI LEMBAR BARU setelah Form Monitoring */
+  .monitoring-section-eviden {
+    display: block !important;
+    page-break-before: always !important;
+    break-before: page !important;
+    page-break-after: always !important;
+    break-after: page !important;
+  }
+
+  /* Lembar 3: Lampiran II (Daftar Hadir) - SELALU MULAI DI LEMBAR BARU setelah Foto Eviden */
+  .monitoring-section-attendance {
+    display: block !important;
+    page-break-before: always !important;
+    break-before: page !important;
+    page-break-after: always !important;
+    break-after: page !important;
+  }
+
+  .monitoring-section-attendance:last-child {
+    page-break-after: auto !important;
+    break-after: auto !important;
+  }
+
+  /* Cegah pemotongan tanda tangan atau baris tabel di tengah-tengah */
+  .monitoring-avoid-break {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
   }
 
   /* Memaksa layout grid di hasil print sama persis dengan tampilan preview */
