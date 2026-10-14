@@ -36,12 +36,14 @@ const useAppStore = create((set, get) => ({
 
   login: async (email, password) => {
     const { data, error } = await authService.login(email, password);
-    if (data?.user?.user_metadata?.program) {
-      const assignedProgram = data.user.user_metadata.program;
+    if (!error && data?.user) {
+      const assignedProgram = data.user.user_metadata?.program || null;
       set({ 
+        user: data.user,
         assignedProgram, 
-        globalProgram: assignedProgram,
-        activeTab: 'Data Entry'
+        isAuthLoading: false,
+        activeTab: assignedProgram ? 'Data Entry' : 'Home',
+        ...(assignedProgram ? { globalProgram: assignedProgram } : {})
       });
     }
     return { data, error };

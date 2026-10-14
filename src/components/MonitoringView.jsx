@@ -12,7 +12,7 @@ import MonitoringPrintModal from './monitoring/MonitoringPrintModal';
 import MonitoringAIEvaluation from './monitoring/MonitoringAIEvaluation';
 import EvidenceImage from './common/EvidenceImage';
 
-export default function MonitoringView() {
+export default function MonitoringView({ isViewOnly = false }) {
   const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState(true);
   const [storageSource, setStorageSource] = useState('cloud');
@@ -196,16 +196,18 @@ ADD COLUMN IF NOT EXISTS ttd_penerima TEXT DEFAULT '';`;
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
           </button>
 
-          <button
-            onClick={() => {
-              setEditingRecord(null);
-              setFormModalOpen(true);
-            }}
-            className="flex items-center gap-2 px-5 py-2.5 bg-[#1e3a8a] hover:bg-blue-900 text-white rounded-xl text-sm font-bold shadow-md hover:shadow-lg transition-all cursor-pointer"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Buat Form Survey / Monitoring</span>
-          </button>
+          {!isViewOnly && (
+            <button
+              onClick={() => {
+                setEditingRecord(null);
+                setFormModalOpen(true);
+              }}
+              className="flex items-center gap-2 px-5 py-2.5 bg-[#1e3a8a] hover:bg-blue-900 text-white rounded-xl text-sm font-bold shadow-md hover:shadow-lg transition-all cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Buat Form Survey / Monitoring</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -308,16 +310,18 @@ ADD COLUMN IF NOT EXISTS ttd_penerima TEXT DEFAULT '';`;
                 ? 'Tidak ditemukan dokumen monitoring yang sesuai dengan kata kunci atau filter yang Anda pilih.'
                 : 'Mulai buat catatan formulir monitoring fisik pertama Anda untuk menyimpan riwayat, foto eviden, scan daftar hadir, dan mencetak dokumen 1:1.'}
             </p>
-            <button
-              onClick={() => {
-                setEditingRecord(null);
-                setFormModalOpen(true);
-              }}
-              className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#1e3a8a] text-white rounded-lg text-xs font-bold hover:bg-blue-900 transition-colors cursor-pointer"
-            >
-              <Plus className="w-4 h-4" />
-              Buat Form Sekarang
-            </button>
+            {!isViewOnly && (
+              <button
+                onClick={() => {
+                  setEditingRecord(null);
+                  setFormModalOpen(true);
+                }}
+                className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#1e3a8a] text-white rounded-lg text-xs font-bold hover:bg-blue-900 transition-colors cursor-pointer"
+              >
+                <Plus className="w-4 h-4" />
+                Buat Form Sekarang
+              </button>
+            )}
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -476,26 +480,30 @@ ADD COLUMN IF NOT EXISTS ttd_penerima TEXT DEFAULT '';`;
                             <Printer className="w-4 h-4" />
                           </button>
 
-                          {/* Edit Button */}
-                          <button
-                            onClick={() => {
-                              setEditingRecord(rec);
-                              setFormModalOpen(true);
-                            }}
-                            className="p-1.5 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg transition-colors cursor-pointer"
-                            title="Edit Catatan & Eviden"
-                          >
-                            <Edit2 className="w-4 h-4" />
-                          </button>
+                          {!isViewOnly && (
+                            <>
+                              {/* Edit Button */}
+                              <button
+                                onClick={() => {
+                                  setEditingRecord(rec);
+                                  setFormModalOpen(true);
+                                }}
+                                className="p-1.5 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg transition-colors cursor-pointer"
+                                title="Edit Catatan & Eviden"
+                              >
+                                <Edit2 className="w-4 h-4" />
+                              </button>
 
-                          {/* Delete Button */}
-                          <button
-                            onClick={() => handleDeleteRecord(rec.id, rec.program)}
-                            className="p-1.5 bg-red-50 text-red-600 hover:bg-red-600 hover:text-white rounded-lg transition-colors cursor-pointer"
-                            title="Hapus Catatan"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                              {/* Delete Button */}
+                              <button
+                                onClick={() => handleDeleteRecord(rec.id, rec.program)}
+                                className="p-1.5 bg-red-50 text-red-600 hover:bg-red-600 hover:text-white rounded-lg transition-colors cursor-pointer"
+                                title="Hapus Catatan"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </>
+                          )}
                         </div>
                       </td>
                     </tr>

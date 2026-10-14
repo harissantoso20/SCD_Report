@@ -4,9 +4,6 @@ import logoPTBA from './assets/logo/logo-ptba.png';
 
 // Dynamic compile-time metadata from Vite
 const APP_VERSION = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '2.1.0';
-const BUILD_DATE = typeof __BUILD_DATE__ !== 'undefined' ? __BUILD_DATE__ : '';
-const GIT_COMMIT = typeof __GIT_COMMIT__ !== 'undefined' ? __GIT_COMMIT__ : '';
-const GIT_COUNT = typeof __GIT_COUNT__ !== 'undefined' ? __GIT_COUNT__ : '';
 
 class GlobalErrorBoundary extends React.Component {
   constructor(props) {
@@ -68,13 +65,18 @@ export default function App() {
     initializeAuth();
   }, [initializeAuth]);
 
-  // View-only users
+  // View-only / Eksekutif users (Akses: Hanya Home & Dashboard)
   const viewOnlyEmails = [
     'apurnomo@bukitasam.co.id',
-    'santoso.official03@gmail.com'
+    'santoso.official03@gmail.com',
+    'listati@bukitasam.co.id'
   ];
   
-  const isViewOnly = user && viewOnlyEmails.includes(user.email);
+  const isViewOnly = user && (
+    viewOnlyEmails.includes(user.email) ||
+    user.user_metadata?.role === 'eksekutif' ||
+    user.user_metadata?.role === 'view_only'
+  );
 
   if (isAuthLoading) {
     return (
@@ -130,6 +132,11 @@ export default function App() {
               <div className="w-[1px] h-6 bg-gray-300 mx-1 hidden md:block"></div>
               <div className="hidden lg:flex items-center gap-1.5 text-xs text-gray-500 font-normal normal-case">
                 <span className="truncate max-w-[180px] text-gray-600 font-medium">{user.email}</span>
+                {isViewOnly && (
+                  <span className="text-[10px] bg-amber-50 text-amber-800 border border-amber-200 px-2 py-0.5 rounded font-bold uppercase">
+                    Eksekutif
+                  </span>
+                )}
                 {user.user_metadata?.program && (
                   <span className="text-[10px] bg-blue-50 text-[#1e3a8a] border border-blue-200 px-2 py-0.5 rounded font-bold uppercase">
                     {user.user_metadata.program}
@@ -154,12 +161,12 @@ export default function App() {
           }>
             {activeTab === "Home" && <HomeView />}
             {activeTab === "Dashboard" && <DashboardView />}
-            {activeTab === "Monitoring" && <MonitoringView />}
+            {activeTab === "Monitoring" && <MonitoringView isViewOnly={isViewOnly} />}
             {activeTab === "Data Entry" && !isViewOnly && <DataEntryView />}
             {activeTab === "Data Entry" && isViewOnly && (
               <div className="flex flex-col items-center justify-center h-64 text-center">
                 <h2 className="text-xl font-bold text-gray-700">Akses Ditolak</h2>
-                <p className="text-gray-500 mt-2">Akun Anda hanya memiliki izin untuk melihat data (View Only).</p>
+                <p className="text-gray-500 mt-2">Akun Eksekutif hanya memiliki izin untuk melihat data (View Only).</p>
               </div>
             )}
           </Suspense>
@@ -169,10 +176,7 @@ export default function App() {
           <p className="text-gray-500 text-[13px] font-medium">
             © {new Date().getFullYear()} Sustainable Community Development
           </p>
-          <p 
-            className="text-[11px] text-gray-400 mt-1.5 font-mono cursor-default select-none"
-            title={`Build: ${BUILD_DATE} • Commit: ${GIT_COMMIT} • Revision #${GIT_COUNT}`}
-          >
+          <p className="text-[11px] text-gray-400 mt-1.5 font-mono">
             Version: v{APP_VERSION}
           </p>
         </footer>
