@@ -277,7 +277,7 @@ export default function MonitoringFormModal({ initialData, onClose, onSave }) {
               {formData.id ? 'Edit Catatan Monitoring' : 'Buat Formulir Monitoring Baru'}
             </h2>
             <p className="text-xs text-blue-100">
-              Monitoring Program TJSL PT Bukit Asam (Persero) Tbk
+              Monitoring Program TJSL PT Bukit Asam (Persero) Tbk.
             </p>
           </div>
           <button

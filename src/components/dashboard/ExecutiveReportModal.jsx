@@ -254,7 +254,7 @@ export default function ExecutiveReportModal({ isOpen, onClose }) {
               {selectedProgram}
             </h1>
             <p className="text-xs font-semibold text-slate-600 mt-0.5">
-              PT Bukit Asam Tbk · Unit Pertambangan Tanjung Enim · Periode: <span className="font-extrabold text-[#1e3a8a]">{currentMonthName} {currentYearStr}</span>
+              PT Bukit Asam (Persero) Tbk. · Unit Pertambangan Tanjung Enim · Periode: <span className="font-extrabold text-[#1e3a8a]">{currentMonthName} {currentYearStr}</span>
             </p>
           </div>
           <div className="text-right flex flex-col items-end shrink-0">

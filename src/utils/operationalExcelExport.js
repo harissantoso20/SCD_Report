@@ -82,7 +82,7 @@ export function exportOperationalReportXlsx({
   // SHEET 1: RINGKASAN EKSEKUTIF & OPERASIONAL
   // =========================================================================
   const summaryRows = [
-    { "KATEGORI / PARAMETER": "LAPORAN OPERASIONAL PROGRAM TJSL", "NILAI / KETERANGAN": "PT BUKIT ASAM (PERSERO) TBK" },
+    { "KATEGORI / PARAMETER": "LAPORAN OPERASIONAL PROGRAM TJSL", "NILAI / KETERANGAN": "PT BUKIT ASAM (PERSERO) TBK." },
     { "KATEGORI / PARAMETER": "Nama Program", "NILAI / KETERANGAN": programName || "-" },
     { "KATEGORI / PARAMETER": "Periode Laporan", "NILAI / KETERANGAN": `${currentMonthLabel} ${currentYearStr}` },
     { "KATEGORI / PARAMETER": "Tanggal Unduh / Export", "NILAI / KETERANGAN": new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) },

@@ -175,7 +175,7 @@ ADD COLUMN IF NOT EXISTS ttd_penerima TEXT DEFAULT '';`;
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-2xl shadow-xs border border-gray-200">
         <div>
           <div className="flex items-center gap-2 text-xs font-bold text-[#1e3a8a] uppercase tracking-wider mb-1">
-            <span>SCD TJSL PT BUKIT ASAM</span>
+            <span>SCD TJSL PT BUKIT ASAM (PERSERO) TBK.</span>
             <span>•</span>
             <span>Arsip Dokumen Fisik & Eviden</span>
           </div>

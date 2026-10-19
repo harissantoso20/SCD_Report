@@ -1,6 +1,6 @@
 # SCD Analytics Dashboard (Sistem Pelaporan Suscomdev)
 
-SCD Analytics Dashboard adalah aplikasi pelaporan dan analisis data berbasis web modern yang dikembangkan secara khusus untuk memudahkan pemantauan dan pengelolaan program *Sustainable Community Development* (SCD) atau *Corporate Social Responsibility* (CSR) PT Bukit Asam Tbk. 
+SCD Analytics Dashboard adalah aplikasi pelaporan dan analisis data berbasis web modern yang dikembangkan secara khusus untuk memudahkan pemantauan dan pengelolaan program *Sustainable Community Development* (SCD) atau *Corporate Social Responsibility* (CSR) PT Bukit Asam (Persero) Tbk.
 
 Aplikasi ini menaungi manajemen berbagai program unggulan, termasuk Siba Pembibitan, Siba Maggot, Cahaya Tani, Suscomdev Prabumenang, Siba Itik, Siba Puyuh, Budidaya Ikan Air Tawar, hingga Siba Ecogrow.
 

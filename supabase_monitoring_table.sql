@@ -1,5 +1,5 @@
 -- ==============================================================================
--- SKRIP SQL PEMBUATAN TABEL MONITORING PROGRAM TJSL PT BUKIT ASAM TBK
+-- SKRIP SQL PEMBUATAN TABEL MONITORING PROGRAM TJSL PT BUKIT ASAM (PERSERO) TBK.
 -- Jalankan skrip ini di: Supabase Dashboard -> SQL Editor -> New Query -> Run
 -- ==============================================================================
 

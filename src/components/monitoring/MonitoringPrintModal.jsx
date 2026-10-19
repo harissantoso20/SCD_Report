@@ -414,7 +414,7 @@ export default function MonitoringPrintModal({ record, onClose }) {
                       : 'MONITORING PROGRAM TJSL'}
                   </h1>
                   <h2 className="text-sm md:text-base font-bold uppercase tracking-wide text-black">
-                    PT BUKIT ASAM (PERSERO) TBK
+                    PT BUKIT ASAM (PERSERO) TBK.
                   </h2>
                 </div>
                 <div className="w-24 text-right">
@@ -503,7 +503,7 @@ export default function MonitoringPrintModal({ record, onClose }) {
                 {/* Sustainability PTBA */}
                 <div className="flex flex-col justify-between items-center h-44">
                   <div className="font-bold">
-                    Sustainability PT Bukit Asam (Persero) Tbk,
+                    Sustainability PT Bukit Asam (Persero) Tbk.,
                   </div>
                   <div className="w-full flex flex-col items-center justify-end">
                     {record.ttd_pic ? (
@@ -620,7 +620,7 @@ export default function MonitoringPrintModal({ record, onClose }) {
                   Lampiran I: Dokumentasi Foto Kegiatan
                   {chunk.totalPages > 1 ? ` (Hal. ${chunk.pageNumber}/${chunk.totalPages})` : ''}
                 </span>
-                <span>{record.program} • PT Bukit Asam (Persero) Tbk</span>
+                <span>{record.program} • PT Bukit Asam (Persero) Tbk.</span>
               </div>
             </div>
           </section>
@@ -711,7 +711,7 @@ export default function MonitoringPrintModal({ record, onClose }) {
                   {/* Footer Lampiran II */}
                   <div className="pt-4 border-t border-gray-300 text-[10px] text-gray-500 flex justify-between mt-6">
                     <span>Lampiran II: Scan Daftar Hadir</span>
-                    <span>{record.program} • PT Bukit Asam (Persero) Tbk</span>
+                    <span>{record.program} • PT Bukit Asam (Persero) Tbk.</span>
                   </div>
                 </div>
               </section>

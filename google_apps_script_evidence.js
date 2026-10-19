@@ -1,6 +1,6 @@
 /**
  * ==============================================================================
- * GOOGLE APPS SCRIPT - SERVICE UPLOAD EVIDEN SCD REPORT PT BUKIT ASAM TBK
+ * GOOGLE APPS SCRIPT - SERVICE UPLOAD EVIDEN SCD REPORT PT BUKIT ASAM (PERSERO) TBK.
  * ==============================================================================
  * Skrip ini berfungsi sebagai backend webhook untuk mengunggah foto dokumentasi &
  * scan presensi langsung ke Google Drive terpusat secara otomatis dan terorganisir.
@@ -91,7 +91,7 @@ function doPost(e) {
 function doGet(e) {
   return responseJSON({
     status: "online",
-    message: "Google Apps Script Webhook SCD Report PT Bukit Asam is Active & Ready!",
+    message: "Google Apps Script Webhook SCD Report PT Bukit Asam (Persero) Tbk. is Active & Ready!",
     timestamp: new Date().toISOString()
   });
 }

@@ -553,7 +553,7 @@ Instruksi:
               <div className="bg-white/95 backdrop-blur-md p-3 sm:p-4 md:p-5 shadow-sm border-b-4 border-[#1e3a8a] w-full pointer-events-auto flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                 <div>
                   <h1 className="text-xl sm:text-2xl font-extrabold text-[#1e3a8a] tracking-tight">Sebaran Lokasi Ring 1</h1>
-                  <h2 className="text-xs sm:text-sm font-semibold text-gray-500">Tanjung Enim Mining Site PT Bukit Asam (Persero) Tbk</h2>
+                  <h2 className="text-xs sm:text-sm font-semibold text-gray-500">Tanjung Enim Mining Site PT Bukit Asam (Persero) Tbk.</h2>
                 </div>
 
                 <div className="flex items-center gap-2">

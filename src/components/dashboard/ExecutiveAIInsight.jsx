@@ -22,7 +22,7 @@ export default function ExecutiveAIInsight({
 Pada periode ${currentMonthName} ${currentYearStr}, program **${selectedProgram}** menunjukkan stabilitas perputaran output pada komoditas bibit tanaman dan media tanam polybag. Aktivitas pembesaran dan penyaluran bibit ke areal reklamasi berjalan sesuai target berkala, dengan penyerapan pasar yang solid pada varietas tanaman kayu keras dan kaliandra.
 
 **Rekomendasi Strategis & Mitigasi:**
-1. Lakukan kalkulasi berkala terhadap kebutuhan bibit revegetasi internal PT Bukit Asam Tbk guna menjaga ritme pembibitan agar tidak melampaui usia optimal pindah tanam.
+1. Lakukan kalkulasi berkala terhadap kebutuhan bibit revegetasi internal PT Bukit Asam (Persero) Tbk. guna menjaga ritme pembibitan agar tidak melampaui usia optimal pindah tanam.
 2. Perluas kemitraan offtaker dengan instansi regional dan pelaku usaha swasta di luar wilayah tambang untuk meningkatkan kapasitas monetisasi bibit siap salur.
 3. Tingkatkan efisiensi produksi polybag dan media tanam organik mandiri guna menekan biaya input operasional.`;
     }
@@ -57,7 +57,7 @@ Pelaksanaan program **${selectedProgram}** periode ${currentMonthName} ${current
     setIsLoading(true);
 
     const prompt = `
-Kamu adalah seorang Senior Data Analyst profesional di PT Bukit Asam Tbk. Berikan "Laporan Insight Analitik & Evaluasi Kinerja Eksekutif" yang komprehensif, tajam, objektif, dan berbasis data untuk program "${selectedProgram}" periode ${currentMonthName} ${currentYearStr}.
+Kamu adalah seorang Senior Data Analyst profesional di PT Bukit Asam (Persero) Tbk. Berikan "Laporan Insight Analitik & Evaluasi Kinerja Eksekutif" yang komprehensif, tajam, objektif, dan berbasis data untuk program "${selectedProgram}" periode ${currentMonthName} ${currentYearStr}.
 
 Data Konteks Program:
 - Lokasi: ${programContext?.location || 'Tanjung Enim Mining Site'}
@@ -108,7 +108,7 @@ Instruksi Analisis:
               Catatan Analitik & Rekomendasi Strategis (AI Insight)
             </h3>
             <p className="text-[9.5px] text-slate-500 font-medium">
-              Evaluasi Berbasis Analisis Generatif Google Gemini AI · PT Bukit Asam Tbk
+              Evaluasi Berbasis Analisis Generatif Google Gemini AI · PT Bukit Asam (Persero) Tbk.
             </p>
           </div>
         </div>
