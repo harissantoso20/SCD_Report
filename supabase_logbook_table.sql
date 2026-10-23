@@ -106,3 +106,16 @@ USING (
     'listati@bukitasam.co.id'
   )
 );
+
+-- ==============================================================================
+-- PEMBERIAN HAK AKSES API (DATA API & POSTGREST GRANTS)
+-- Sesuai kebijakan keamanan Supabase (Mulai 30 Oktober):
+-- Setiap tabel baru di schema public wajib diberikan GRANT eksplisit agar
+-- API (supabase-js, PostgREST) dapat membaca dan menulis data tanpa error 'permission denied'.
+-- ==============================================================================
+GRANT USAGE ON SCHEMA public TO anon, authenticated, service_role;
+GRANT SELECT ON public."SCD_Report_Logbook" TO anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public."SCD_Report_Logbook" TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public."SCD_Report_Logbook" TO service_role;
+GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO authenticated, service_role;
+

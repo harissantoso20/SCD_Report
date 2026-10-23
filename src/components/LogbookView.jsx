@@ -243,7 +243,12 @@ ALTER TABLE public."SCD_Report_Logbook" ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow public read access on Logbook" ON public."SCD_Report_Logbook" FOR SELECT USING (true);
 CREATE POLICY "Allow authenticated insert on Logbook" ON public."SCD_Report_Logbook" FOR INSERT TO authenticated WITH CHECK (auth.jwt() ->> 'email' NOT IN ('apurnomo@bukitasam.co.id', 'santoso.official03@gmail.com', 'listati@bukitasam.co.id'));
 CREATE POLICY "Allow authenticated update on Logbook" ON public."SCD_Report_Logbook" FOR UPDATE TO authenticated USING (auth.jwt() ->> 'email' NOT IN ('apurnomo@bukitasam.co.id', 'santoso.official03@gmail.com', 'listati@bukitasam.co.id'));
-CREATE POLICY "Allow authenticated delete on Logbook" ON public."SCD_Report_Logbook" FOR DELETE TO authenticated USING (auth.jwt() ->> 'email' NOT IN ('apurnomo@bukitasam.co.id', 'santoso.official03@gmail.com', 'listati@bukitasam.co.id'));`;
+CREATE POLICY "Allow authenticated delete on Logbook" ON public."SCD_Report_Logbook" FOR DELETE TO authenticated USING (auth.jwt() ->> 'email' NOT IN ('apurnomo@bukitasam.co.id', 'santoso.official03@gmail.com', 'listati@bukitasam.co.id'));
+GRANT USAGE ON SCHEMA public TO anon, authenticated, service_role;
+GRANT SELECT ON public."SCD_Report_Logbook" TO anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public."SCD_Report_Logbook" TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public."SCD_Report_Logbook" TO service_role;
+GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO authenticated, service_role;`;
 
     navigator.clipboard.writeText(sqlText);
     setSqlCopied(true);

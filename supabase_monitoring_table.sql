@@ -50,3 +50,12 @@ CREATE POLICY "Allow public delete access"
 ON public."SCD_Report_Monitoring" 
 FOR DELETE 
 USING (true);
+
+-- ==============================================================================
+-- PEMBERIAN HAK AKSES API (DATA API & POSTGREST GRANTS)
+-- ==============================================================================
+GRANT USAGE ON SCHEMA public TO anon, authenticated, service_role;
+GRANT SELECT ON public."SCD_Report_Monitoring" TO anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public."SCD_Report_Monitoring" TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public."SCD_Report_Monitoring" TO service_role;
+GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO authenticated, service_role;
