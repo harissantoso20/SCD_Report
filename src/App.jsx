@@ -51,6 +51,7 @@ const HomeView = lazy(() => import('./components/HomeView'));
 const DashboardView = lazy(() => import('./components/DashboardView'));
 const DataEntryView = lazy(() => import('./components/DataEntryView'));
 const MonitoringView = lazy(() => import('./components/MonitoringView'));
+const LogbookView = lazy(() => import('./components/LogbookView'));
 import LoginView from './components/LoginView';
 
 export default function App() {
@@ -116,6 +117,12 @@ export default function App() {
                 Dashboard
               </button>
               <button 
+                onClick={() => setActiveTab("Log Book")}
+                className={`transition-colors ${activeTab === "Log Book" ? "text-[#1e3a8a] border-b-2 border-[#1e3a8a] pb-1" : "text-gray-400 hover:text-[#1e3a8a]"}`}
+              >
+                Log Book
+              </button>
+              <button 
                 onClick={() => setActiveTab("Monitoring")}
                 className={`transition-colors ${activeTab === "Monitoring" ? "text-[#1e3a8a] border-b-2 border-[#1e3a8a] pb-1" : "text-gray-400 hover:text-[#1e3a8a]"}`}
               >
@@ -161,6 +168,7 @@ export default function App() {
           }>
             {activeTab === "Home" && <HomeView />}
             {activeTab === "Dashboard" && <DashboardView />}
+            {activeTab === "Log Book" && <LogbookView isViewOnly={isViewOnly} />}
             {activeTab === "Monitoring" && <MonitoringView isViewOnly={isViewOnly} />}
             {activeTab === "Data Entry" && !isViewOnly && <DataEntryView />}
             {activeTab === "Data Entry" && isViewOnly && (
