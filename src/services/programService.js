@@ -49,16 +49,46 @@ export const programService = {
       if (error) throw error;
       
       if (data && data.length > 0) {
-        return data.map(p => ({
-          location_name: p.Desa,
-          capacity_kwp: Number(p.kWp) || 0,
-          area_ha: Number(p['Luas Lahan (Ha)']) || 0,
-          farmers: Number(p['Jumlah Petani']) || 0,
-          kecamatan: p.Kecamatan,
-          kabupaten: p.Kabupaten,
-          provinsi: p.Provinsi,
-          map_link: p['Link Google Map']
-        }));
+        return data.map(p => {
+          // Parse latitude & longitude from database if available
+          const rawLat = p.Latitude ?? p.latitude ?? p.Lat ?? p.lat;
+          const rawLng = p.Longitude ?? p.longitude ?? p.Lng ?? p.lng ?? p.Long ?? p.long;
+          
+          let parsedLat = (rawLat !== undefined && rawLat !== null && rawLat !== '') ? parseFloat(rawLat) : null;
+          let parsedLng = (rawLng !== undefined && rawLng !== null && rawLng !== '') ? parseFloat(rawLng) : null;
+
+          const mapLink = p['Link Google Map'] || p.map_link || p.Lokasi || '';
+
+          // Fallback parsing from Google Maps URL if lat/lng columns are not populated
+          if ((parsedLat === null || isNaN(parsedLat) || parsedLng === null || isNaN(parsedLng)) && mapLink) {
+            const matchCoord = mapLink.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/) || mapLink.match(/[?&]q=(-?\d+\.\d+),(-?\d+\.\d+)/);
+            if (matchCoord) {
+              parsedLat = parseFloat(matchCoord[1]);
+              parsedLng = parseFloat(matchCoord[2]);
+            }
+          }
+
+          const validLat = (!isNaN(parsedLat) && parsedLat !== null) ? parsedLat : null;
+          const validLng = (!isNaN(parsedLng) && parsedLng !== null) ? parsedLng : null;
+
+          return {
+            id: p.id,
+            location_name: p.Desa || p.nama_lokasi || p.location_name || '',
+            desa: p.Desa || p.nama_lokasi || p.location_name || '',
+            capacity_kwp: Number(p.kWp ?? p.capacity_kwp ?? p.kapasitas) || 0,
+            area_ha: Number(p['Luas Lahan (Ha)'] ?? p.area_ha ?? p.luas_lahan) || 0,
+            farmers: Number(p['Jumlah Petani'] ?? p.farmers ?? p.jumlah_petani) || 0,
+            kecamatan: p.Kecamatan || p.kecamatan || '',
+            kabupaten: p.Kabupaten || p.kabupaten || '',
+            provinsi: p.Provinsi || p.provinsi || '',
+            map_link: mapLink,
+            lat: validLat,
+            lng: validLng,
+            latitude: validLat,
+            longitude: validLng,
+            keterangan: p.Keterangan || p.keterangan || ''
+          };
+        });
       }
     }
     return [];

@@ -92,8 +92,8 @@ export default function HomeView() {
     const markersArr = [];
 
     homeData.mapData.forEach((loc, idx) => {
-      const lat = parseFloat(loc.Latitude);
-      const lng = parseFloat(loc.Longitude);
+      const lat = parseFloat(loc.Latitude ?? loc.latitude ?? loc.Lat ?? loc.lat);
+      const lng = parseFloat(loc.Longitude ?? loc.longitude ?? loc.Lng ?? loc.lng);
       
       if (!isNaN(lat) && !isNaN(lng)) {
         hasValidCoords = true;
@@ -105,32 +105,55 @@ export default function HomeView() {
         const kabupaten = loc.Kabupaten || '';
         const sektor = loc.Sektor || '-';
         const targetProg = getDashboardProgram(programName, desaName, programList);
-        const googleMapsUrl = loc.map_link || `https://www.google.com/maps?q=${lat},${lng}`;
+        const googleMapsUrl = loc['Link Google Map'] || loc.map_link || loc.Lokasi || `https://www.google.com/maps?q=${lat},${lng}`;
         
-        const marker = L.marker([lat, lng]).addTo(map);
+        const getSektorBadge = (sektorName) => {
+          const s = (sektorName || '').toLowerCase();
+          if (s.includes('kebun') || s.includes('tani') || s.includes('agric') || s.includes('melon')) {
+            return { icon: '🌱', bg: '#059669', border: '#10b981', darkText: '#065f46' };
+          }
+          if (s.includes('ternak') || s.includes('puyuh') || s.includes('itik') || s.includes('telur')) {
+            return { icon: '🥚', bg: '#d97706', border: '#f59e0b', darkText: '#92400e' };
+          }
+          if (s.includes('ikan') || s.includes('ras') || s.includes('air')) {
+            return { icon: '🐟', bg: '#2563eb', border: '#3b82f6', darkText: '#1e40af' };
+          }
+          if (s.includes('industri') || s.includes('maggot') || s.includes('olah') || s.includes('siba')) {
+            return { icon: '🏭', bg: '#7c3aed', border: '#8b5cf6', darkText: '#5b21b6' };
+          }
+          if (s.includes('infra') || s.includes('insfra') || s.includes('plts') || s.includes('irigasi') || s.includes('bangun')) {
+            return { icon: '⚡', bg: '#0284c7', border: '#0ea5e9', darkText: '#0369a1' };
+          }
+          return { icon: '📍', bg: '#1e3a8a', border: '#3b82f6', darkText: '#1e3a8a' };
+        };
+
+        const badge = getSektorBadge(sektor);
         
-        marker.bindTooltip(`
-          <a href="${googleMapsUrl}" target="_blank" rel="noopener noreferrer" 
-             class="block bg-white/95 hover:bg-[#1e3a8a] text-[#1e3a8a] hover:text-white p-2 rounded shadow-md border border-blue-600/30 transition-all duration-200 no-underline cursor-pointer min-w-[160px]">
-            <div class="font-extrabold text-xs flex items-center justify-between gap-2 border-b border-gray-100 pb-1 mb-1">
-              <span>📍 ${programName}</span>
-              <span class="text-[10px] opacity-75">↗</span>
+        let cleanProgramName = (programName && programName !== '-' && programName.toLowerCase() !== 'null')
+          ? programName.trim().replace(/\.+$/, '')
+          : (desaName ? `Desa ${desaName.replace(/^Desa\s+/i, '')}` : 'Titik Program');
+
+        const safeProgramName = cleanProgramName.replace(/"/g, '&quot;');
+
+        const customIcon = L.divIcon({
+          className: 'custom-program-div-icon',
+          html: `
+            <div style="position: absolute; bottom: 0; left: 0; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; cursor: pointer; pointer-events: auto;" class="group select-none" title="${safeProgramName}">
+              <div style="background: rgba(255, 255, 255, 0.95); border: 1.5px solid ${badge.border}; color: ${badge.darkText}; box-shadow: 0 4px 14px rgba(0,0,0,0.4);"
+                   class="flex items-center gap-1.5 px-2.5 py-1 rounded-full shadow-lg backdrop-blur-md transition-all duration-200 group-hover:scale-110 group-hover:bg-[#1e3a8a] group-hover:text-white group-hover:border-white group-hover:shadow-2xl">
+                <span class="text-xs shrink-0">${badge.icon}</span>
+                <span class="text-[11px] font-bold whitespace-nowrap tracking-tight max-w-[210px] truncate">${safeProgramName}</span>
+              </div>
+              <div style="width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 6px solid ${badge.border}; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.3)); margin-top: -1px;"></div>
+              <div style="width: 8px; height: 8px; border-radius: 9999px; background-color: ${badge.bg}; border: 1.5px solid #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.4); margin-top: -3px;"></div>
             </div>
-            <div class="text-[10px] text-gray-600 hover:text-blue-100 font-medium">
-              ${loc['Desa/Kelurahan'] || loc.Desa}, ${loc.Kecamatan} • Sektor: ${loc.Sektor || '-'}
-            </div>
-            <div class="text-[9px] text-blue-600 hover:text-white font-bold mt-1 flex items-center gap-1">
-              <span>Klik untuk buka Google Maps</span> ↗
-            </div>
-          </a>
-        `, {
-          permanent: false,
-          direction: 'top',
-          offset: [0, -25],
-          interactive: true,
-          className: 'custom-infographic-tooltip'
+          `,
+          iconSize: [0, 0],
+          iconAnchor: [0, 0]
         });
 
+        const marker = L.marker([lat, lng], { icon: customIcon }).addTo(map);
+        
         marker.bindPopup(`
           <div class="text-xs p-1.5 min-w-[170px]">
             ${targetProg ? `
@@ -159,7 +182,9 @@ export default function HomeView() {
               </a>
             </div>
           </div>
-        `);
+        `, {
+          offset: [0, -32]
+        });
 
         markersArr.push({
           id: `${lat}-${lng}-${idx}`,

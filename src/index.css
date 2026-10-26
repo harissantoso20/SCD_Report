@@ -37,6 +37,16 @@ header { z-index: 9999 !important; }
   display: none !important;
 }
 
+/* Custom Leaflet DivIcon for program badges */
+.leaflet-div-icon.custom-program-div-icon,
+.custom-program-div-icon,
+.leaflet-div-icon.custom-plts-div-icon,
+.custom-plts-div-icon {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
 /* Executive Report Print Styles */
 @media print {
   #root {

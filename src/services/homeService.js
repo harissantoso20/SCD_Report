@@ -118,7 +118,7 @@ export const homeService = {
         kecamatan: item.Kecamatan || '-',
         kabupaten: item.Kabupaten || '-',
         provinsi: item.Provinsi || '-',
-        map_link: item.map_link || (item.Latitude && item.Longitude ? `https://www.google.com/maps?q=${item.Latitude},${item.Longitude}` : null)
+        map_link: item['Link Google Map'] || item.map_link || item.Lokasi || ((item.Latitude || item.latitude || item.Lat || item.lat) && (item.Longitude || item.longitude || item.Lng || item.lng) ? `https://www.google.com/maps?q=${item.Latitude || item.latitude || item.Lat || item.lat},${item.Longitude || item.longitude || item.Lng || item.lng}` : null)
       }));
 
     // 5. Fetch Monthly Progress for selected period

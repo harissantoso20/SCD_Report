@@ -186,14 +186,14 @@ export function exportOperationalReportXlsx({
   if (pltsLocations.length > 0) {
     const locRows = pltsLocations.map((l, idx) => ({
       "No": idx + 1,
-      "Nama Lokasi / Desa": l.desa || l.nama_lokasi || "-",
+      "Nama Lokasi / Desa": l.desa || l.location_name || l.nama_lokasi || "-",
       "Kecamatan": l.kecamatan || "-",
       "Kabupaten": l.kabupaten || "-",
-      "Luas Lahan (Ha)": Number(l.luas_lahan) || 0,
-      "Jumlah Petani": Number(l.jumlah_petani) || 0,
-      "Latitude": l.latitude || "-",
-      "Longitude": l.longitude || "-",
-      "Kapasitas / Spesifikasi": l.kapasitas || l.spesifikasi || "-"
+      "Luas Lahan (Ha)": Number(l.area_ha ?? l.luas_lahan) || 0,
+      "Jumlah Petani": Number(l.farmers ?? l.jumlah_petani) || 0,
+      "Latitude": l.latitude ?? l.lat ?? "-",
+      "Longitude": l.longitude ?? l.lng ?? "-",
+      "Kapasitas / Spesifikasi": l.capacity_kwp ? `${l.capacity_kwp} kWp` : (l.kapasitas || l.spesifikasi || "-")
     }));
     const wsLoc = XLSX.utils.json_to_sheet(locRows);
     wsLoc['!cols'] = [

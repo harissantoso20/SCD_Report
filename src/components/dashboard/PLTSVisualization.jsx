@@ -48,14 +48,43 @@ const PLTSVisualization = React.memo(function PLTSVisualization() {
     };
 
     locs.forEach((loc, idx) => {
-      // Use real coordinate if available, otherwise fallback
-      const coords = COORDINATE_MAP[loc.location_name];
-      const markerLat = coords ? coords.lat : (loc.lat != null ? loc.lat : (baseLat + (idx * 0.1)));
-      const markerLng = coords ? coords.lng : (loc.lng != null ? loc.lng : (baseLng + (idx * 0.1)));
-      
-      bounds.extend([markerLat, markerLng]);
+      // 1. Prioritize real coordinates from Supabase database
+      const dbLat = loc.lat != null ? Number(loc.lat) : (loc.latitude != null ? Number(loc.latitude) : null);
+      const dbLng = loc.lng != null ? Number(loc.lng) : (loc.longitude != null ? Number(loc.longitude) : null);
+      const hasDbCoords = dbLat !== null && !isNaN(dbLat) && dbLng !== null && !isNaN(dbLng);
 
-      L.marker([markerLat, markerLng]).addTo(map)
+      // 2. Fallback to COORDINATE_MAP cache if database coordinate is not set
+      const coords = COORDINATE_MAP[loc.location_name] || COORDINATE_MAP[loc.desa];
+      
+      const markerLat = hasDbCoords ? dbLat : (coords ? coords.lat : (baseLat + (idx * 0.1)));
+      const markerLng = hasDbCoords ? dbLng : (coords ? coords.lng : (baseLng + (idx * 0.1)));
+      
+      const isValidCoord = typeof markerLat === 'number' && !isNaN(markerLat) && typeof markerLng === 'number' && !isNaN(markerLng);
+      if (isValidCoord) {
+        bounds.extend([markerLat, markerLng]);
+      }
+
+      const googleMapsUrl = loc.map_link || (isValidCoord ? `https://www.google.com/maps?q=${markerLat},${markerLng}` : '');
+
+      const pltsIcon = L.divIcon({
+        className: 'custom-plts-div-icon',
+        html: `
+          <div style="position: absolute; bottom: 0; left: 0; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; cursor: pointer; pointer-events: auto;" class="group select-none" title="PLTS Desa ${loc.location_name}">
+            <div style="background: rgba(255, 255, 255, 0.95); border: 1.5px solid #0284c7; color: #0369a1; box-shadow: 0 4px 14px rgba(0,0,0,0.4);"
+                 class="flex items-center gap-1.5 px-2.5 py-1 rounded-full shadow-lg backdrop-blur-md transition-all duration-200 group-hover:scale-110 group-hover:bg-[#1e3a8a] group-hover:text-white group-hover:border-white">
+              <span class="text-xs shrink-0">⚡</span>
+              <span class="text-[11px] font-bold whitespace-nowrap tracking-tight">${loc.location_name}</span>
+              ${loc.capacity_kwp ? `<span class="text-[9.5px] font-extrabold bg-sky-100 text-sky-800 px-1.5 py-0.2 rounded-full">${loc.capacity_kwp} kWp</span>` : ''}
+            </div>
+            <div style="width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 6px solid #0284c7; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.3)); margin-top: -1px;"></div>
+            <div style="width: 8px; height: 8px; border-radius: 9999px; background-color: #0284c7; border: 1.5px solid #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.4); margin-top: -3px;"></div>
+          </div>
+        `,
+        iconSize: [0, 0],
+        iconAnchor: [0, 0]
+      });
+
+      L.marker([markerLat, markerLng], { icon: pltsIcon }).addTo(map)
         .bindPopup(`
           <div class="text-xs p-1">
             <b class="text-[#1e3a8a] text-sm">${loc.location_name}</b><br/>
@@ -65,12 +94,14 @@ const PLTSVisualization = React.memo(function PLTSVisualization() {
               Luas Lahan: <b>${loc.area_ha} Ha</b><br/>
               Penerima Manfaat: <b>${loc.farmers} Petani</b>
             </div>
-            ${loc.map_link ? `<a href="${loc.map_link}" target="_blank" class="text-blue-600 font-medium hover:underline mt-2 inline-block">Buka di Google Maps ↗</a>` : ''}
+            ${googleMapsUrl ? `<a href="${googleMapsUrl}" target="_blank" rel="noopener noreferrer" class="text-blue-600 font-medium hover:underline mt-2 inline-block">Buka di Google Maps ↗</a>` : ''}
           </div>
-        `);
+        `, {
+          offset: [0, -32]
+        });
     });
 
-    if (locs.length > 0) {
+    if (locs.length > 0 && bounds.isValid()) {
       map.fitBounds(bounds, { padding: [50, 50], maxZoom: 14 });
     }
 
@@ -120,15 +151,18 @@ const PLTSVisualization = React.memo(function PLTSVisualization() {
             <div key={region} className="bg-gray-50 border border-gray-200 rounded p-3">
               <h4 className="font-bold text-[11px] text-[#1e3a8a] uppercase tracking-wide border-b border-gray-200 pb-1.5 mb-2">{region}</h4>
               <div className="flex flex-col gap-2.5">
-                {villages.map((v, i) => (
-                  <div key={i}>
-                    <a href={v.map_link || '#'} target="_blank" rel="noreferrer" className="text-[11px] font-semibold text-blue-600 hover:underline flex items-start gap-1">
-                      <MapPin size={12} className="mt-0.5 flex-shrink-0" />
-                      <span>Desa {v.location_name}</span>
-                    </a>
-                    <p className="text-[10px] text-gray-500 mt-0.5 pl-4">{v.capacity_kwp} kWp • {v.area_ha} Ha • {v.farmers} Petani</p>
-                  </div>
-                ))}
+                {villages.map((v, i) => {
+                  const villageMapUrl = v.map_link || ((v.lat || v.latitude) && (v.lng || v.longitude) ? `https://www.google.com/maps?q=${v.lat || v.latitude},${v.lng || v.longitude}` : '#');
+                  return (
+                    <div key={i}>
+                      <a href={villageMapUrl} target="_blank" rel="noreferrer" className="text-[11px] font-semibold text-blue-600 hover:underline flex items-start gap-1">
+                        <MapPin size={12} className="mt-0.5 flex-shrink-0" />
+                        <span>Desa {v.location_name}</span>
+                      </a>
+                      <p className="text-[10px] text-gray-500 mt-0.5 pl-4">{v.capacity_kwp} kWp • {v.area_ha} Ha • {v.farmers} Petani</p>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           ))}
