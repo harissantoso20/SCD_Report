@@ -67,6 +67,27 @@ const normalizeTime24OnBlur = (val) => {
   return trimmed;
 };
 
+const GDriveBadge = () => (
+  <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
+    <svg viewBox="0 0 87.3 78" className="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg">
+      <path d="m6.6 66.85 3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8h-27.5c0 1.55.4 3.1 1.2 4.5z" fill="#0066da"/>
+      <path d="m43.65 25-13.75-23.8c-1.35.8-2.5 1.9-3.3 3.3l-25.4 44a9.06 9.06 0 0 0 -1.2 4.5h27.5z" fill="#00ac47"/>
+      <path d="m73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5h-27.502l5.852 11.5z" fill="#ea4335"/>
+      <path d="m43.65 25 13.75-23.8c-1.35-.8-2.9-1.2-4.5-1.2h-18.5c-1.6 0-3.15.45-4.5 1.2z" fill="#00832d"/>
+      <path d="m59.8 53h-32.3l-13.75 23.8c1.35.8 2.9 1.2 4.5 1.2h50.8c1.6 0 3.15-.45 4.5-1.2z" fill="#2684fc"/>
+      <path d="m73.4 26.5-12.7-22c-.8-1.4-1.95-2.5-3.3-3.3l-13.75 23.8 16.15 28h27.45c0-1.55-.4-3.1-1.2-4.5z" fill="#ffba00"/>
+    </svg>
+    <span>Tersimpan di Google Drive</span>
+  </span>
+);
+
+function formatBytes(bytes) {
+  if (!bytes) return '';
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
 export default function LogbookFormModal({ initialData, onClose, onSave }) {
   const [programs, setPrograms] = useState([]);
   const [loadingPrograms, setLoadingPrograms] = useState(false);
@@ -74,6 +95,19 @@ export default function LogbookFormModal({ initialData, onClose, onSave }) {
   const [errorMsg, setErrorMsg] = useState('');
 
   const photoInputRef = useRef(null);
+  const attachmentInputRef = useRef(null);
+
+  // Attachment state (Direct upload to Google Drive)
+  const [lampiranFiles, setLampiranFiles] = useState([]);
+  const [existingLinks, setExistingLinks] = useState(() => {
+    if (!initialData?.link_lampiran) return [];
+    if (typeof initialData.link_lampiran === 'string') {
+      return initialData.link_lampiran.split(/[\n,]+/).map((s) => s.trim()).filter(Boolean);
+    }
+    return [];
+  });
+  const [manualLink, setManualLink] = useState('');
+  const [showManualUrl, setShowManualUrl] = useState(false);
 
   // Helper to normalize items
   const initialItems = (() => {
@@ -193,6 +227,31 @@ export default function LogbookFormModal({ initialData, onClose, onSave }) {
     });
   };
 
+  // Attachment Handlers (Direct Upload to Google Drive)
+  const handleAttachmentSelect = (e) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+
+    const newEntries = files.map((file) => ({
+      id: `att_${Date.now()}_${Math.random()}`,
+      file,
+      name: file.name,
+      size: file.size,
+      type: file.type
+    }));
+
+    setLampiranFiles((prev) => [...prev, ...newEntries]);
+    if (attachmentInputRef.current) attachmentInputRef.current.value = '';
+  };
+
+  const handleRemoveAttachment = (index) => {
+    setLampiranFiles((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleRemoveExistingLink = (index) => {
+    setExistingLinks((prev) => prev.filter((_, i) => i !== index));
+  };
+
   // Add, Remove, and Change dynamic item rows
   const handleAddItem = () => {
     setFormData((prev) => ({
@@ -274,13 +333,20 @@ export default function LogbookFormModal({ initialData, onClose, onSave }) {
       .filter(Boolean)
       .join('\n');
 
+    const remainingUrls = [
+      ...existingLinks,
+      ...(manualLink.trim() ? [manualLink.trim()] : [])
+    ].join('\n');
+
     const payload = {
       ...formData,
       waktu_mulai: normalizeTime24OnBlur(formData.waktu_mulai) || null,
       waktu_selesai: normalizeTime24OnBlur(formData.waktu_selesai) || null,
       output_capaian: validOutputs,
       kendala: validKendalas,
-      tindak_lanjut: validTindakLanjuts
+      tindak_lanjut: validTindakLanjuts,
+      link_lampiran: remainingUrls,
+      lampiran_files: lampiranFiles
     };
 
     setSubmitting(true);
@@ -298,8 +364,8 @@ export default function LogbookFormModal({ initialData, onClose, onSave }) {
     <>
       {submitting && (
         <SavingOverlay 
-          title="Menyimpan Log Book & Mengunggah Foto..." 
-          subtitle="Sistem sedang mengunggah dokumentasi foto kegiatan ke Google Drive dan mencatat ke database."
+          title="Menyimpan Log Book & Mengunggah Berkas..." 
+          subtitle="Sistem sedang mengunggah dokumentasi foto & berkas lampiran ke Google Drive terpusat dan menyimpan data ke database."
         />
       )}
 
@@ -691,22 +757,141 @@ export default function LogbookFormModal({ initialData, onClose, onSave }) {
                 </div>
               )}
 
-              {/* Link Lampiran Tambahan */}
-              <div className="pt-2">
-                <label className="block text-[11px] font-bold text-gray-700 uppercase tracking-wider mb-1">
-                  Tautan / Link Lampiran Dokumen (Google Drive Notulen, Berita Acara, dll.)
-                </label>
-                <div className="relative">
-                  <ExternalLink className="w-3.5 h-3.5 text-gray-400 absolute left-3 top-2.5" />
-                  <input
-                    type="url"
-                    value={formData.link_lampiran}
-                    onChange={(e) => handleChange('link_lampiran', e.target.value)}
-                    placeholder="https://drive.google.com/..."
-                    className="w-full pl-8 pr-3 py-1.5 text-xs bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                  />
+            {/* Section: Lampiran Dokumen / Berkas Kegiatan (GDrive Upload) */}
+            <div className="p-4 bg-amber-50/40 border border-amber-200/80 rounded-xl space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <FileText className="w-4 h-4 text-amber-700" />
+                    <h3 className="text-xs font-bold text-gray-800 uppercase tracking-wider">
+                      Lampiran Dokumen / Berkas (Notulen, Berita Acara, dsb.)
+                    </h3>
+                  </div>
+                  <p className="text-[11px] text-gray-500 mt-0.5">
+                    Unggah berkas dokumen (PDF, Word, Excel, Foto) langsung dari perangkat Anda. Otomatis diarsipkan ke Google Drive terpusat.
+                  </p>
                 </div>
+                <GDriveBadge />
               </div>
+
+              {/* Hidden File Input for Documents */}
+              <input
+                ref={attachmentInputRef}
+                type="file"
+                accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx,.csv,.txt"
+                multiple
+                className="hidden"
+                onChange={handleAttachmentSelect}
+              />
+
+              {/* Drop / Click Upload Button */}
+              <button
+                type="button"
+                onClick={() => attachmentInputRef.current?.click()}
+                className="w-full py-3 px-4 border-2 border-dashed border-amber-300 hover:border-amber-600 hover:bg-amber-50/80 rounded-xl transition-all flex flex-col items-center justify-center gap-1.5 text-xs text-amber-900 font-semibold cursor-pointer"
+              >
+                <UploadCloud className="w-5 h-5 text-amber-700" />
+                <span>Pilih / Unggah Berkas Lampiran</span>
+                <span className="text-[10px] text-gray-400 font-normal">
+                  Mendukung berkas PDF, Word (DOC/DOCX), Excel (XLS/XLSX), atau Gambar (Bisa pilih lebih dari satu)
+                </span>
+              </button>
+
+              {/* List of Files Selected to Upload */}
+              {lampiranFiles.length > 0 && (
+                <div className="space-y-1.5 pt-1">
+                  <div className="text-[11px] font-bold text-gray-600 uppercase tracking-wider">
+                    Berkas Siap Diunggah ({lampiranFiles.length}):
+                  </div>
+                  <div className="space-y-1.5 max-h-48 overflow-y-auto p-1.5 bg-white rounded-lg border border-amber-200">
+                    {lampiranFiles.map((att, aIdx) => (
+                      <div key={att.id || aIdx} className="flex items-center justify-between p-2 bg-amber-50/50 hover:bg-amber-50 rounded border border-amber-200 text-xs">
+                        <div className="flex items-center gap-2.5 truncate">
+                          <FileText className="w-4 h-4 text-amber-700 shrink-0" />
+                          <div className="truncate">
+                            <p className="truncate font-semibold text-gray-800">{att.name}</p>
+                            <div className="flex items-center gap-2 text-[10px] text-gray-500">
+                              <span>{formatBytes(att.size)}</span>
+                              <span className="px-1.5 py-0.2 rounded bg-amber-100 text-amber-800 font-medium">Siap diunggah ke Google Drive</span>
+                            </div>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveAttachment(aIdx)}
+                          className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded transition-colors cursor-pointer shrink-0 ml-2"
+                          title="Hapus berkas"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* List of Existing Uploaded Links */}
+              {existingLinks.length > 0 && (
+                <div className="space-y-1.5 pt-1">
+                  <div className="text-[11px] font-bold text-gray-600 uppercase tracking-wider">
+                    Lampiran Tersimpan di Google Drive ({existingLinks.length}):
+                  </div>
+                  <div className="space-y-1.5 max-h-40 overflow-y-auto p-1.5 bg-white rounded-lg border border-gray-200">
+                    {existingLinks.map((url, uIdx) => (
+                      <div key={uIdx} className="flex items-center justify-between p-2 bg-blue-50/40 rounded border border-blue-200 text-xs">
+                        <div className="flex items-center gap-2 truncate">
+                          <FileText className="w-4 h-4 text-blue-600 shrink-0" />
+                          <a
+                            href={url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="truncate text-blue-700 hover:text-blue-900 font-medium hover:underline inline-flex items-center gap-1"
+                          >
+                            <span className="truncate">{url}</span>
+                            <ExternalLink className="w-3 h-3 shrink-0" />
+                          </a>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveExistingLink(uIdx)}
+                          className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded transition-colors cursor-pointer shrink-0 ml-2"
+                          title="Hapus tautan ini"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Manual URL Input (Collapsible / Secondary) */}
+              <div className="pt-1">
+                <button
+                  type="button"
+                  onClick={() => setShowManualUrl(!showManualUrl)}
+                  className="text-[11px] font-medium text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1"
+                >
+                  <ExternalLink className="w-3 h-3" />
+                  {showManualUrl ? 'Sembunyikan Tautan Manual' : '+ Tambah Tautan Manual (Google Drive / URL Lain)'}
+                </button>
+
+                {showManualUrl && (
+                  <div className="mt-2 space-y-1.5">
+                    <input
+                      type="url"
+                      value={manualLink}
+                      onChange={(e) => setManualLink(e.target.value)}
+                      placeholder="https://drive.google.com/..."
+                      className="w-full px-3 py-1.5 text-xs bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    />
+                    <p className="text-[10px] text-gray-500">
+                      Anda juga dapat memasukkan tautan Google Drive / dokumen daring yang sudah ada secara manual.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
             </div>
 
             {/* Modal Actions */}

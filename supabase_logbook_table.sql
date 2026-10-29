@@ -32,9 +32,13 @@ CREATE TABLE IF NOT EXISTS public."SCD_Report_Logbook" (
     created_by VARCHAR(150) DEFAULT 'comdevptba@gmail.com'
 );
 
--- Kolom tambahan items jika tabel sudah pernah dibuat sebelumnya:
+-- Kolom tambahan jika tabel sudah pernah dibuat sebelumnya (Migrasi Skema):
 ALTER TABLE public."SCD_Report_Logbook" 
-ADD COLUMN IF NOT EXISTS items JSONB DEFAULT '[]'::jsonb;
+ADD COLUMN IF NOT EXISTS items JSONB DEFAULT '[]'::jsonb,
+ADD COLUMN IF NOT EXISTS kelompok_binaan VARCHAR(150),
+ADD COLUMN IF NOT EXISTS ketua_kelompok VARCHAR(150),
+ADD COLUMN IF NOT EXISTS stakeholder TEXT,
+ADD COLUMN IF NOT EXISTS jumlah_peserta INTEGER DEFAULT 0;
 
 -- ==============================================================================
 -- INDEXING UNTUK PERFORMA PENCARIAN & FILTER CEPAT
