@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import useAppStore from '../../store/useAppStore';
 import { FileImage, X, ChevronLeft, ChevronRight, ExternalLink } from '../Icons';
-import { Download } from 'lucide-react';
+import { Download, Loader2 } from 'lucide-react';
+import { downloadEvidenceImage } from '../../utils/downloadImage';
 
 const GDriveIcon = ({ size = 20 }) => (
   <svg viewBox="0 0 87.3 78" style={{ width: size, height: size }} className="flex-shrink-0" xmlns="http://www.w3.org/2000/svg">
@@ -31,47 +32,42 @@ export default function EvidenceGallery() {
   const evidenceData = useAppStore((state) => state.evidenceData);
   const selectedProgram = useAppStore((state) => state.globalProgram);
   const [selectedIndex, setSelectedIndex] = useState(null);
+  const [downloadingIdx, setDownloadingIdx] = useState(null);
+  const [downloadingAll, setDownloadingAll] = useState(false);
 
   const handleDownloadImage = async (url, idx = 0) => {
     if (!url) return;
-    const cleanProgram = (selectedProgram || 'Program').replace(/[^a-zA-Z0-9]/g, '_');
-    const filename = `${cleanProgram}_Eviden_${idx + 1}.jpg`;
-    const displayUrl = getDisplayImageUrl(url);
-
+    setDownloadingIdx(idx);
     try {
-      const response = await fetch(displayUrl);
-      if (!response.ok) throw new Error('Fetch failed');
-      const blob = await response.blob();
-      const blobUrl = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = blobUrl;
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(blobUrl);
-    } catch {
-      // Fallback direct open or download
-      const link = document.createElement('a');
-      link.href = displayUrl || url;
-      link.target = '_blank';
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      const cleanProgram = (selectedProgram || 'Program').replace(/[^a-zA-Z0-9]/g, '_');
+      const filename = `${cleanProgram}_Eviden_${idx + 1}.jpg`;
+      await downloadEvidenceImage(url, filename);
+    } catch (err) {
+      console.error('Gagal download gambar:', err);
+    } finally {
+      setDownloadingIdx(null);
     }
   };
 
   const handleDownloadAll = async () => {
-    if (!evidenceData || evidenceData.length === 0) return;
-    for (let i = 0; i < evidenceData.length; i++) {
-      const ev = evidenceData[i];
-      if (ev.File_Url && !isFolderUrl(ev.File_Url)) {
-        await handleDownloadImage(ev.File_Url, i);
-        if (evidenceData.length > 1) {
-          await new Promise((r) => setTimeout(r, 400));
+    if (!evidenceData || evidenceData.length === 0 || downloadingAll) return;
+    setDownloadingAll(true);
+    try {
+      for (let i = 0; i < evidenceData.length; i++) {
+        const ev = evidenceData[i];
+        if (ev.File_Url && !isFolderUrl(ev.File_Url)) {
+          const cleanProgram = (selectedProgram || 'Program').replace(/[^a-zA-Z0-9]/g, '_');
+          const filename = `${cleanProgram}_Eviden_${i + 1}.jpg`;
+          await downloadEvidenceImage(ev.File_Url, filename);
+          if (evidenceData.length > 1) {
+            await new Promise((r) => setTimeout(r, 600));
+          }
         }
       }
+    } catch (err) {
+      console.error('Gagal download semua eviden:', err);
+    } finally {
+      setDownloadingAll(false);
     }
   };
 
@@ -108,11 +104,18 @@ export default function EvidenceGallery() {
           <button
             type="button"
             onClick={handleDownloadAll}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white rounded-md text-[11px] font-bold shadow-xs hover:shadow-sm transition-all cursor-pointer"
-            title="Download seluruh gambar eviden progres"
+            disabled={downloadingAll}
+            className={`flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white rounded-md text-[11px] font-bold shadow-xs hover:shadow-sm transition-all cursor-pointer ${
+              downloadingAll ? 'opacity-70 cursor-not-allowed' : ''
+            }`}
+            title="Download seluruh gambar eviden progres ke perangkat"
           >
-            <Download size={13} />
-            <span>Download Semua Foto ({validPhotosCount})</span>
+            {downloadingAll ? (
+              <Loader2 size={13} className="animate-spin" />
+            ) : (
+              <Download size={13} />
+            )}
+            <span>{downloadingAll ? 'Mengunduh Semua...' : `Download Semua Foto (${validPhotosCount})`}</span>
           </button>
         </div>
       )}
@@ -173,14 +176,19 @@ export default function EvidenceGallery() {
                 </span>
                 <button
                   type="button"
+                  disabled={downloadingIdx === idx}
                   onClick={(e) => {
                     e.stopPropagation();
                     handleDownloadImage(ev.File_Url, idx);
                   }}
-                  className="text-white opacity-0 group-hover:opacity-100 bg-emerald-600 hover:bg-emerald-700 p-1.5 rounded-full drop-shadow-md transition-opacity hover:scale-110 cursor-pointer"
-                  title="Download Foto Ini"
+                  className="text-white opacity-0 group-hover:opacity-100 bg-emerald-600 hover:bg-emerald-700 p-1.5 rounded-full drop-shadow-md transition-opacity hover:scale-110 cursor-pointer disabled:opacity-50"
+                  title="Download Foto Ini ke Perangkat"
                 >
-                  <Download size={14} />
+                  {downloadingIdx === idx ? (
+                    <Loader2 size={14} className="animate-spin" />
+                  ) : (
+                    <Download size={14} />
+                  )}
                 </button>
               </div>
             </div>
@@ -232,13 +240,19 @@ export default function EvidenceGallery() {
 
               <button
                 type="button"
+                disabled={downloadingIdx === selectedIndex}
                 onClick={(e) => {
                   e.stopPropagation();
                   handleDownloadImage(evidenceData[selectedIndex].File_Url, selectedIndex);
                 }}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-1 rounded-full text-xs font-medium flex items-center gap-1.5 transition-colors shadow-sm cursor-pointer"
+                className="bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-1 rounded-full text-xs font-medium flex items-center gap-1.5 transition-colors shadow-sm cursor-pointer disabled:opacity-50"
               >
-                <Download size={13} /> Download Foto
+                {downloadingIdx === selectedIndex ? (
+                  <Loader2 size={13} className="animate-spin" />
+                ) : (
+                  <Download size={13} />
+                )}
+                {downloadingIdx === selectedIndex ? 'Mengunduh...' : 'Download Foto'}
               </button>
 
               {evidenceData[selectedIndex].File_Url && (

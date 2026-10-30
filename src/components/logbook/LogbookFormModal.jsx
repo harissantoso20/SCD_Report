@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  X, Plus, Trash2, Save, AlertCircle, Camera, UploadCloud, 
+import {
+  X, Plus, Trash2, Save, AlertCircle, Camera, UploadCloud,
   Image as ImageIcon, CheckCircle2, Clock, Calendar, MapPin, User, Users,
   Check, FileText, ExternalLink
 } from 'lucide-react';
@@ -70,12 +70,12 @@ const normalizeTime24OnBlur = (val) => {
 const GDriveBadge = () => (
   <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
     <svg viewBox="0 0 87.3 78" className="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg">
-      <path d="m6.6 66.85 3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8h-27.5c0 1.55.4 3.1 1.2 4.5z" fill="#0066da"/>
-      <path d="m43.65 25-13.75-23.8c-1.35.8-2.5 1.9-3.3 3.3l-25.4 44a9.06 9.06 0 0 0 -1.2 4.5h27.5z" fill="#00ac47"/>
-      <path d="m73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5h-27.502l5.852 11.5z" fill="#ea4335"/>
-      <path d="m43.65 25 13.75-23.8c-1.35-.8-2.9-1.2-4.5-1.2h-18.5c-1.6 0-3.15.45-4.5 1.2z" fill="#00832d"/>
-      <path d="m59.8 53h-32.3l-13.75 23.8c1.35.8 2.9 1.2 4.5 1.2h50.8c1.6 0 3.15-.45 4.5-1.2z" fill="#2684fc"/>
-      <path d="m73.4 26.5-12.7-22c-.8-1.4-1.95-2.5-3.3-3.3l-13.75 23.8 16.15 28h27.45c0-1.55-.4-3.1-1.2-4.5z" fill="#ffba00"/>
+      <path d="m6.6 66.85 3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8h-27.5c0 1.55.4 3.1 1.2 4.5z" fill="#0066da" />
+      <path d="m43.65 25-13.75-23.8c-1.35.8-2.5 1.9-3.3 3.3l-25.4 44a9.06 9.06 0 0 0 -1.2 4.5h27.5z" fill="#00ac47" />
+      <path d="m73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5h-27.502l5.852 11.5z" fill="#ea4335" />
+      <path d="m43.65 25 13.75-23.8c-1.35-.8-2.9-1.2-4.5-1.2h-18.5c-1.6 0-3.15.45-4.5 1.2z" fill="#00832d" />
+      <path d="m59.8 53h-32.3l-13.75 23.8c1.35.8 2.9 1.2 4.5 1.2h50.8c1.6 0 3.15-.45 4.5-1.2z" fill="#2684fc" />
+      <path d="m73.4 26.5-12.7-22c-.8-1.4-1.95-2.5-3.3-3.3l-13.75 23.8 16.15 28h27.45c0-1.55-.4-3.1-1.2-4.5z" fill="#ffba00" />
     </svg>
     <span>Tersimpan di Google Drive</span>
   </span>
@@ -94,8 +94,9 @@ export default function LogbookFormModal({ initialData, onClose, onSave }) {
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
-  const photoInputRef = useRef(null);
-  const attachmentInputRef = useRef(null);
+  const [photoInputRef, attachmentInputRef] = [useRef(null), useRef(null)];
+  const [isDraggingPhoto, setIsDraggingPhoto] = useState(false);
+  const [isDraggingDoc, setIsDraggingDoc] = useState(false);
 
   // Attachment state (Direct upload to Google Drive)
   const [lampiranFiles, setLampiranFiles] = useState([]);
@@ -108,31 +109,6 @@ export default function LogbookFormModal({ initialData, onClose, onSave }) {
   });
   const [manualLink, setManualLink] = useState('');
   const [showManualUrl, setShowManualUrl] = useState(false);
-
-  // Helper to normalize items
-  const initialItems = (() => {
-    if (Array.isArray(initialData?.items) && initialData.items.length > 0) {
-      return initialData.items;
-    }
-    if (initialData?.output_capaian || initialData?.kendala || initialData?.tindak_lanjut) {
-      return [
-        {
-          no: 1,
-          output_capaian: initialData.output_capaian || '',
-          kendala: initialData.kendala || '',
-          tindak_lanjut: initialData.tindak_lanjut || ''
-        }
-      ];
-    }
-    return [
-      {
-        no: 1,
-        output_capaian: '',
-        kendala: '',
-        tindak_lanjut: ''
-      }
-    ];
-  })();
 
   // Form State
   const [formData, setFormData] = useState({
@@ -152,11 +128,11 @@ export default function LogbookFormModal({ initialData, onClose, onSave }) {
     pihak_terlibat: initialData?.kelompok_binaan || initialData?.ketua_kelompok || initialData?.pihak_terlibat || '',
     jumlah_peserta: initialData?.jumlah_peserta || '',
     uraian_kegiatan: initialData?.uraian_kegiatan || '',
-    output_capaian: initialData?.output_capaian || '',
+    output_capaian: '',
     status: initialData?.status || 'Selesai',
-    kendala: initialData?.kendala || '',
-    tindak_lanjut: initialData?.tindak_lanjut || '',
-    items: initialItems,
+    kendala: '',
+    tindak_lanjut: '',
+    items: [],
     foto_dokumentasi: Array.isArray(initialData?.foto_dokumentasi) ? initialData.foto_dokumentasi : [],
     link_lampiran: initialData?.link_lampiran || '',
     created_by: initialData?.created_by || 'comdevptba@gmail.com'
@@ -196,12 +172,12 @@ export default function LogbookFormModal({ initialData, onClose, onSave }) {
     handleChange(field, normalized);
   };
 
-  // Add Photos (from device / camera)
-  const handlePhotoSelect = (e) => {
-    const files = Array.from(e.target.files || []);
-    if (!files.length) return;
+  // Add Photos (from device / camera / drag-drop)
+  const addPhotoFiles = (files) => {
+    const fileList = Array.from(files || []).filter((f) => f.type.startsWith('image/'));
+    if (!fileList.length) return;
 
-    const newItems = files.map((file) => ({
+    const newItems = fileList.map((file) => ({
       file,
       preview: URL.createObjectURL(file),
       name: file.name
@@ -211,8 +187,12 @@ export default function LogbookFormModal({ initialData, onClose, onSave }) {
       ...prev,
       foto_dokumentasi: [...prev.foto_dokumentasi, ...newItems]
     }));
+  };
 
-    // Reset input
+  const handlePhotoSelect = (e) => {
+    if (e.target.files) {
+      addPhotoFiles(e.target.files);
+    }
     if (photoInputRef.current) photoInputRef.current.value = '';
   };
 
@@ -227,12 +207,12 @@ export default function LogbookFormModal({ initialData, onClose, onSave }) {
     });
   };
 
-  // Attachment Handlers (Direct Upload to Google Drive)
-  const handleAttachmentSelect = (e) => {
-    const files = Array.from(e.target.files || []);
-    if (!files.length) return;
+  // Attachment Handlers (Direct Upload to Google Drive / drag-drop)
+  const addAttachmentFiles = (files) => {
+    const fileList = Array.from(files || []);
+    if (!fileList.length) return;
 
-    const newEntries = files.map((file) => ({
+    const newEntries = fileList.map((file) => ({
       id: `att_${Date.now()}_${Math.random()}`,
       file,
       name: file.name,
@@ -241,6 +221,12 @@ export default function LogbookFormModal({ initialData, onClose, onSave }) {
     }));
 
     setLampiranFiles((prev) => [...prev, ...newEntries]);
+  };
+
+  const handleAttachmentSelect = (e) => {
+    if (e.target.files) {
+      addAttachmentFiles(e.target.files);
+    }
     if (attachmentInputRef.current) attachmentInputRef.current.value = '';
   };
 
@@ -250,39 +236,6 @@ export default function LogbookFormModal({ initialData, onClose, onSave }) {
 
   const handleRemoveExistingLink = (index) => {
     setExistingLinks((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  // Add, Remove, and Change dynamic item rows
-  const handleAddItem = () => {
-    setFormData((prev) => ({
-      ...prev,
-      items: [
-        ...prev.items,
-        {
-          no: prev.items.length + 1,
-          output_capaian: '',
-          kendala: '',
-          tindak_lanjut: ''
-        }
-      ]
-    }));
-  };
-
-  const handleRemoveItem = (index) => {
-    if (formData.items.length <= 1) return;
-    setFormData((prev) => {
-      const filtered = prev.items.filter((_, i) => i !== index);
-      const renumbered = filtered.map((it, i) => ({ ...it, no: i + 1 }));
-      return { ...prev, items: renumbered };
-    });
-  };
-
-  const handleItemChange = (index, field, value) => {
-    setFormData((prev) => {
-      const updated = [...prev.items];
-      updated[index] = { ...updated[index], [field]: value };
-      return { ...prev, items: updated };
-    });
   };
 
   // Form Submit
@@ -301,37 +254,9 @@ export default function LogbookFormModal({ initialData, onClose, onSave }) {
       return;
     }
     if (!formData.uraian_kegiatan.trim()) {
-      setErrorMsg('Harap isi uraian ringkas kegiatan yang dilaksanakan.');
+      setErrorMsg('Harap isi uraian kegiatan yang dilaksanakan.');
       return;
     }
-
-    // Synthesize combined output, kendala, and tindak_lanjut from rows
-    const validOutputs = (formData.items || [])
-      .map((it, idx) => {
-        const text = it.output_capaian?.trim();
-        if (!text) return '';
-        return (formData.items || []).length > 1 ? `${idx + 1}. ${text}` : text;
-      })
-      .filter(Boolean)
-      .join('\n');
-
-    const validKendalas = (formData.items || [])
-      .map((it, idx) => {
-        const text = it.kendala?.trim();
-        if (!text) return '';
-        return (formData.items || []).length > 1 ? `${idx + 1}. ${text}` : text;
-      })
-      .filter(Boolean)
-      .join('\n');
-
-    const validTindakLanjuts = (formData.items || [])
-      .map((it, idx) => {
-        const text = it.tindak_lanjut?.trim();
-        if (!text) return '';
-        return (formData.items || []).length > 1 ? `${idx + 1}. ${text}` : text;
-      })
-      .filter(Boolean)
-      .join('\n');
 
     const remainingUrls = [
       ...existingLinks,
@@ -342,9 +267,10 @@ export default function LogbookFormModal({ initialData, onClose, onSave }) {
       ...formData,
       waktu_mulai: normalizeTime24OnBlur(formData.waktu_mulai) || null,
       waktu_selesai: normalizeTime24OnBlur(formData.waktu_selesai) || null,
-      output_capaian: validOutputs,
-      kendala: validKendalas,
-      tindak_lanjut: validTindakLanjuts,
+      output_capaian: '',
+      kendala: '',
+      tindak_lanjut: '',
+      items: [],
       link_lampiran: remainingUrls,
       lampiran_files: lampiranFiles
     };
@@ -363,21 +289,21 @@ export default function LogbookFormModal({ initialData, onClose, onSave }) {
   return (
     <>
       {submitting && (
-        <SavingOverlay 
-          title="Menyimpan Log Book & Mengunggah Berkas..." 
+        <SavingOverlay
+          title="Menyimpan Log Book & Mengunggah Berkas..."
           subtitle="Sistem sedang mengunggah dokumentasi foto & berkas lampiran ke Google Drive terpusat dan menyimpan data ke database."
         />
       )}
 
-      <div 
+      <div
         className="fixed inset-0 z-[100] flex items-start justify-center bg-black/75 backdrop-blur-sm p-3 md:p-6 pt-16 md:pt-14 overflow-y-auto"
         onClick={() => { if (!submitting) onClose(); }}
       >
-        <div 
+        <div
           className="relative w-full max-w-4xl bg-white rounded-2xl shadow-2xl overflow-hidden my-auto border border-gray-200 flex flex-col max-h-[85vh] animate-fadeIn"
           onClick={(e) => e.stopPropagation()}
         >
-          
+
           {/* Header */}
           <div className="px-6 py-4 bg-gradient-to-r from-[#1e3a8a] to-[#2563eb] text-white flex items-center justify-between">
             <div>
@@ -495,46 +421,19 @@ export default function LogbookFormModal({ initialData, onClose, onSave }) {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
-                    Lokasi Spesifik
-                  </label>
-                  <div className="relative">
-                    <MapPin className="w-4 h-4 text-gray-400 absolute left-3 top-2.5" />
-                    <input
-                      type="text"
-                      value={formData.lokasi}
-                      onChange={(e) => handleChange('lokasi', e.target.value)}
-                      placeholder="Contoh: Dusun IV, Desa Karang Raja"
-                      className="w-full pl-9 pr-3 py-2 text-sm bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
-                    Status Kegiatan
-                  </label>
-                  <div className="grid grid-cols-3 gap-2">
-                    {STATUS_OPTIONS.map((st) => {
-                      const isSelected = formData.status === st.value;
-                      return (
-                        <button
-                          key={st.value}
-                          type="button"
-                          onClick={() => handleChange('status', st.value)}
-                          className={`py-2 px-2 rounded-lg text-xs font-bold border transition-all text-center ${
-                            isSelected 
-                              ? `${st.color} ring-2 ring-blue-500/30 shadow-sm` 
-                              : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'
-                          }`}
-                        >
-                          {st.label}
-                        </button>
-                      );
-                    })}
-                  </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                  Lokasi Spesifik
+                </label>
+                <div className="relative">
+                  <MapPin className="w-4 h-4 text-gray-400 absolute left-3 top-2.5" />
+                  <input
+                    type="text"
+                    value={formData.lokasi}
+                    onChange={(e) => handleChange('lokasi', e.target.value)}
+                    placeholder="Contoh: Dusun IV, Desa Karang Raja"
+                    className="w-full pl-9 pr-3 py-2 text-sm bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  />
                 </div>
               </div>
             </div>
@@ -598,166 +497,111 @@ export default function LogbookFormModal({ initialData, onClose, onSave }) {
               </div>
             </div>
 
-            {/* Section 4: Deskripsi & Output */}
-            <div className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
-                  Uraian Kegiatan yang Dilakukan <span className="text-red-500">*</span>
-                </label>
-                <textarea
-                  rows={3}
-                  value={formData.uraian_kegiatan}
-                  onChange={(e) => handleChange('uraian_kegiatan', e.target.value)}
-                  placeholder="Ceritakan detail aktivitas yang dilaksanakan, proses pertemuan, langkah teknis, dll..."
-                  className="w-full px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                  required
-                />
-              </div>
-
-              {/* Tabel Capaian, Kendala & Tindak Lanjut (Dinamis / Tambah Baris) */}
-              <div className="space-y-3 pt-1">
-                <div className="flex items-center justify-between">
-                  <h4 className="text-xs font-bold text-gray-700 uppercase tracking-wider">
-                    Hasil / Capaian, Kendala, & Rencana Tindak Lanjut
-                  </h4>
-                  <button
-                    type="button"
-                    onClick={handleAddItem}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-[#1e3a8a] border border-blue-200 rounded-lg text-xs font-bold hover:bg-blue-100 transition-colors cursor-pointer shadow-xs"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    Tambah Baris
-                  </button>
-                </div>
-
-                <div className="space-y-3">
-                  {formData.items.map((item, index) => (
-                    <div
-                      key={index}
-                      className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-2 relative"
-                    >
-                      <div className="flex items-center justify-between pb-1.5 border-b border-slate-200">
-                        <span className="text-[11px] font-bold text-slate-600 uppercase">
-                          Baris #{item.no || index + 1}
-                        </span>
-                        {formData.items.length > 1 && (
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveItem(index)}
-                            className="text-red-500 hover:text-red-700 text-xs flex items-center gap-1 cursor-pointer font-medium"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" /> Hapus Baris
-                          </button>
-                        )}
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-1">
-                        <div>
-                          <label className="block text-[11px] font-bold text-gray-700 uppercase tracking-wider mb-1">
-                            HASIL / CAPAIAN (OUTPUT)
-                          </label>
-                          <textarea
-                            rows={2}
-                            value={item.output_capaian}
-                            onChange={(e) => handleItemChange(index, 'output_capaian', e.target.value)}
-                            placeholder="Contoh: Pompa beroperasi normal, debit air 2.5 L/dtk"
-                            className="w-full px-3 py-1.5 text-xs bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-[11px] font-bold text-gray-700 uppercase tracking-wider mb-1">
-                            KENDALA / ISU LAPANGAN
-                          </label>
-                          <textarea
-                            rows={2}
-                            value={item.kendala}
-                            onChange={(e) => handleItemChange(index, 'kendala', e.target.value)}
-                            placeholder="Tulis kendala yang ditemukan (jika ada)"
-                            className="w-full px-3 py-1.5 text-xs bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-[11px] font-bold text-gray-700 uppercase tracking-wider mb-1">
-                            RENCANA TINDAK LANJUT
-                          </label>
-                          <textarea
-                            rows={2}
-                            value={item.tindak_lanjut}
-                            onChange={(e) => handleItemChange(index, 'tindak_lanjut', e.target.value)}
-                            placeholder="Rencana kegiatan lanjutan berikutnya..."
-                            className="w-full px-3 py-1.5 text-xs bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+            {/* Section 4: Uraian Kegiatan */}
+            <div className="space-y-1.5">
+              <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+                Uraian Kegiatan yang Dilaksanakan <span className="text-red-500">*</span>
+              </label>
+              <textarea
+                rows={5}
+                value={formData.uraian_kegiatan}
+                onChange={(e) => handleChange('uraian_kegiatan', e.target.value)}
+                placeholder="Tuliskan uraian detail kegiatan yang dilaksanakan, proses pertemuan, langkah teknis, catatan lapangan, dsb..."
+                className="w-full px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none leading-relaxed"
+                required
+              />
             </div>
 
-            {/* Section 5: Foto Dokumentasi & Link Lampiran */}
-            <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
-              <div className="flex items-center justify-between">
+            {/* Section 5: Foto Dokumentasi Kegiatan (GDrive Upload & Drag-and-Drop) */}
+            <div className="p-4 bg-blue-50/40 border border-blue-200/80 rounded-xl space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div>
-                  <h3 className="text-xs font-bold text-gray-800 uppercase tracking-wider flex items-center gap-1.5">
-                    <Camera className="w-4 h-4 text-[#1e3a8a]" /> Foto Dokumentasi Kegiatan
-                  </h3>
-                  <p className="text-[11px] text-gray-500">
-                    Foto akan otomatis diunggah ke Google Drive terpusat di folder program & bulan terkait.
+                  <div className="flex items-center gap-2">
+                    <Camera className="w-4 h-4 text-[#1e3a8a]" />
+                    <h3 className="text-xs font-bold text-gray-800 uppercase tracking-wider">
+                      Foto Dokumentasi Kegiatan
+                    </h3>
+                  </div>
+                  <p className="text-[11px] text-gray-500 mt-0.5">
+                    Unggah foto dokumentasi kegiatan. Otomatis diarsipkan ke Google Drive terpusat di folder program & bulan terkait.
                   </p>
                 </div>
-                <div>
-                  <input
-                    ref={photoInputRef}
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    className="hidden"
-                    onChange={handlePhotoSelect}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => photoInputRef.current?.click()}
-                    className="px-3 py-1.5 text-xs font-bold bg-[#1e3a8a] text-white rounded-lg hover:bg-[#1e3a8a]/90 flex items-center gap-1.5 shadow-sm transition-all"
-                  >
-                    <Plus className="w-3.5 h-3.5" /> Tambah Foto
-                  </button>
-                </div>
+                <GDriveBadge />
+              </div>
+
+              {/* Hidden File Input for Photos */}
+              <input
+                ref={photoInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                onChange={handlePhotoSelect}
+              />
+
+              {/* Drag & Drop / Click Upload Area */}
+              <div
+                onClick={() => photoInputRef.current?.click()}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  setIsDraggingPhoto(true);
+                }}
+                onDragLeave={(e) => {
+                  e.preventDefault();
+                  setIsDraggingPhoto(false);
+                }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  setIsDraggingPhoto(false);
+                  if (e.dataTransfer?.files) {
+                    addPhotoFiles(e.dataTransfer.files);
+                  }
+                }}
+                className={`w-full py-4 px-4 border-2 border-dashed rounded-xl transition-all flex flex-col items-center justify-center gap-1.5 text-xs font-semibold cursor-pointer select-none ${isDraggingPhoto
+                    ? 'border-blue-600 bg-blue-100/70 text-blue-900 scale-[0.99]'
+                    : 'border-blue-300 hover:border-blue-600 hover:bg-blue-50/80 bg-white/60 text-[#1e3a8a]'
+                  }`}
+              >
+                <UploadCloud className="w-5 h-5 text-[#1e3a8a]" />
+                <span>Pilih / Tarik & Lepas Foto Dokumentasi ke Sini</span>
+                <span className="text-[10px] text-gray-400 font-normal">
+                  Mendukung gambar JPG, JPEG, PNG, WEBP (Bisa seret atau pilih lebih dari satu foto)
+                </span>
               </div>
 
               {/* Photo Previews */}
               {formData.foto_dokumentasi.length > 0 ? (
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
-                  {formData.foto_dokumentasi.map((photo, idx) => {
-                    const imgSrc = typeof photo === 'string' ? photo : (photo.preview || photo.url);
-                    return (
-                      <div key={idx} className="relative group rounded-lg overflow-hidden border border-gray-200 bg-gray-100 aspect-video flex items-center justify-center">
-                        <img
-                          src={imgSrc}
-                          alt={`Dokumentasi ${idx + 1}`}
-                          className="w-full h-full object-cover"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => handleRemovePhoto(idx)}
-                          className="absolute top-1.5 right-1.5 p-1 bg-red-600/90 hover:bg-red-700 text-white rounded-md shadow opacity-90 group-hover:opacity-100 transition-opacity"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    );
-                  })}
+                <div className="space-y-1.5 pt-1">
+                  <div className="text-[11px] font-bold text-gray-600 uppercase tracking-wider">
+                    Foto Dipilih ({formData.foto_dokumentasi.length}):
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    {formData.foto_dokumentasi.map((photo, idx) => {
+                      const imgSrc = typeof photo === 'string' ? photo : (photo.preview || photo.url);
+                      return (
+                        <div key={idx} className="relative group rounded-lg overflow-hidden border border-gray-200 bg-gray-100 aspect-video flex items-center justify-center shadow-xs">
+                          <img
+                            src={imgSrc}
+                            alt={`Dokumentasi ${idx + 1}`}
+                            className="w-full h-full object-cover"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleRemovePhoto(idx)}
+                            className="absolute top-1.5 right-1.5 p-1 bg-red-600/90 hover:bg-red-700 text-white rounded-md shadow opacity-90 group-hover:opacity-100 transition-opacity cursor-pointer"
+                            title="Hapus foto"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
-              ) : (
-                <div className="p-4 border border-dashed border-gray-300 rounded-lg text-center bg-white">
-                  <ImageIcon className="w-6 h-6 text-gray-400 mx-auto mb-1" />
-                  <p className="text-xs text-gray-500">Belum ada foto yang dipilih.</p>
-                </div>
-              )}
+              ) : null}
+            </div>
 
-            {/* Section: Lampiran Dokumen / Berkas Kegiatan (GDrive Upload) */}
+            {/* Section 6: Lampiran Dokumen / Berkas Kegiatan (GDrive Upload & Drag-and-Drop) */}
             <div className="p-4 bg-amber-50/40 border border-amber-200/80 rounded-xl space-y-3">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div>
@@ -784,18 +628,35 @@ export default function LogbookFormModal({ initialData, onClose, onSave }) {
                 onChange={handleAttachmentSelect}
               />
 
-              {/* Drop / Click Upload Button */}
-              <button
-                type="button"
+              {/* Drag & Drop / Click Upload Area */}
+              <div
                 onClick={() => attachmentInputRef.current?.click()}
-                className="w-full py-3 px-4 border-2 border-dashed border-amber-300 hover:border-amber-600 hover:bg-amber-50/80 rounded-xl transition-all flex flex-col items-center justify-center gap-1.5 text-xs text-amber-900 font-semibold cursor-pointer"
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  setIsDraggingDoc(true);
+                }}
+                onDragLeave={(e) => {
+                  e.preventDefault();
+                  setIsDraggingDoc(false);
+                }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  setIsDraggingDoc(false);
+                  if (e.dataTransfer?.files) {
+                    addAttachmentFiles(e.dataTransfer.files);
+                  }
+                }}
+                className={`w-full py-4 px-4 border-2 border-dashed rounded-xl transition-all flex flex-col items-center justify-center gap-1.5 text-xs font-semibold cursor-pointer select-none ${isDraggingDoc
+                    ? 'border-amber-600 bg-amber-100/70 text-amber-900 scale-[0.99]'
+                    : 'border-amber-300 hover:border-amber-600 hover:bg-amber-50/80 bg-white/60 text-amber-900'
+                  }`}
               >
                 <UploadCloud className="w-5 h-5 text-amber-700" />
-                <span>Pilih / Unggah Berkas Lampiran</span>
+                <span>Pilih / Tarik & Lepas Berkas Lampiran ke Sini</span>
                 <span className="text-[10px] text-gray-400 font-normal">
-                  Mendukung berkas PDF, Word (DOC/DOCX), Excel (XLS/XLSX), atau Gambar (Bisa pilih lebih dari satu)
+                  Mendukung berkas PDF, Word (DOC/DOCX), Excel (XLS/XLSX), atau Gambar (Bisa seret atau pilih lebih dari satu)
                 </span>
-              </button>
+              </div>
 
               {/* List of Files Selected to Upload */}
               {lampiranFiles.length > 0 && (
@@ -891,7 +752,6 @@ export default function LogbookFormModal({ initialData, onClose, onSave }) {
                   </div>
                 )}
               </div>
-            </div>
             </div>
 
             {/* Modal Actions */}

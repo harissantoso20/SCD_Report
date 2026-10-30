@@ -12,6 +12,7 @@ import { programService } from '../services/programService';
 import LogbookFormModal from './logbook/LogbookFormModal';
 import LogbookPdfModal from './logbook/LogbookPdfModal';
 import EvidenceImage from './common/EvidenceImage';
+import { downloadEvidenceImage } from '../utils/downloadImage';
 
 const CATEGORIES = [
   'Semua Kategori',
@@ -22,6 +23,22 @@ const CATEGORIES = [
   'Penanganan Masalah (Troubleshooting)',
   'Administrasi & Pelaporan',
   'Lainnya'
+];
+
+const MONTH_OPTIONS = [
+  { value: 'all', label: 'Semua Bulan' },
+  { value: '01', label: 'Januari' },
+  { value: '02', label: 'Februari' },
+  { value: '03', label: 'Maret' },
+  { value: '04', label: 'April' },
+  { value: '05', label: 'Mei' },
+  { value: '06', label: 'Juni' },
+  { value: '07', label: 'Juli' },
+  { value: '08', label: 'Agustus' },
+  { value: '09', label: 'September' },
+  { value: '10', label: 'Oktober' },
+  { value: '11', label: 'November' },
+  { value: '12', label: 'Desember' }
 ];
 
 const formatTime24 = (val) => {
@@ -54,8 +71,10 @@ export default function LogbookView({ isViewOnly = false }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedProgram, setSelectedProgram] = useState('all');
   const [selectedCategory, setSelectedCategory] = useState('Semua Kategori');
+  const [selectedPic, setSelectedPic] = useState('all');
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [selectedMonth, setSelectedMonth] = useState('all');
+  const [selectedYear, setSelectedYear] = useState('all');
   const [programsList, setProgramsList] = useState([]);
 
   // View Mode: 'feed' (Cards) or 'table' (Data Grid)
@@ -104,11 +123,14 @@ export default function LogbookView({ isViewOnly = false }) {
     return records.filter((r) => {
       if (selectedProgram !== 'all' && r.program !== selectedProgram) return false;
       if (selectedCategory !== 'Semua Kategori' && r.kategori !== selectedCategory) return false;
+      if (selectedPic !== 'all' && (r.pic_nama || '').trim() !== selectedPic) return false;
       if (selectedStatus !== 'all' && r.status !== selectedStatus) return false;
 
-      if (selectedMonth !== 'all' && r.tanggal) {
-        const itemMonth = r.tanggal.slice(0, 7); // YYYY-MM
-        if (itemMonth !== selectedMonth) return false;
+      if (r.tanggal) {
+        if (selectedYear !== 'all' && r.tanggal.slice(0, 4) !== selectedYear) return false;
+        if (selectedMonth !== 'all' && r.tanggal.slice(5, 7) !== selectedMonth) return false;
+      } else if (selectedYear !== 'all' || selectedMonth !== 'all') {
+        return false;
       }
 
       if (!searchQuery.trim()) return true;
@@ -123,28 +145,37 @@ export default function LogbookView({ isViewOnly = false }) {
         (r.lokasi || '').toLowerCase().includes(q)
       );
     });
-  }, [records, selectedProgram, selectedCategory, selectedStatus, selectedMonth, searchQuery]);
+  }, [records, selectedProgram, selectedCategory, selectedPic, selectedStatus, selectedMonth, selectedYear, searchQuery]);
 
   // Statistics
   const stats = useMemo(() => {
     const total = filteredRecords.length;
-    const selesai = filteredRecords.filter((r) => r.status === 'Selesai').length;
-    const berjalan = filteredRecords.filter((r) => r.status === 'Berjalan').length;
-    const kendala = filteredRecords.filter((r) => r.status === 'Ada Kendala').length;
+    const distinctPrograms = new Set(filteredRecords.map((r) => r.program).filter(Boolean)).size;
     const totalPhotos = filteredRecords.reduce((sum, r) => sum + (Array.isArray(r.foto_dokumentasi) ? r.foto_dokumentasi.length : 0), 0);
+    const totalLampiran = filteredRecords.filter((r) => r.link_lampiran).length;
 
-    return { total, selesai, berjalan, kendala, totalPhotos };
+    return { total, distinctPrograms, totalPhotos, totalLampiran };
   }, [filteredRecords]);
 
-  // Months available in records for month filter
-  const availableMonths = useMemo(() => {
-    const monthsSet = new Set();
+  // Available PICs for PIC filter
+  const availablePics = useMemo(() => {
+    const picsSet = new Set();
     records.forEach((r) => {
-      if (r.tanggal) {
-        monthsSet.add(r.tanggal.slice(0, 7)); // YYYY-MM
+      const pic = (r.pic_nama || '').trim();
+      if (pic) picsSet.add(pic);
+    });
+    return Array.from(picsSet).sort((a, b) => a.localeCompare(b));
+  }, [records]);
+
+  // Available Years for Year filter
+  const availableYears = useMemo(() => {
+    const yearsSet = new Set(['2023', '2024', '2025', '2026', '2027', '2028', '2029']);
+    records.forEach((r) => {
+      if (r.tanggal && r.tanggal.length >= 4) {
+        yearsSet.add(r.tanggal.slice(0, 4));
       }
     });
-    return Array.from(monthsSet).sort().reverse();
+    return Array.from(yearsSet).sort().reverse();
   }, [records]);
 
   // Actions
@@ -179,18 +210,13 @@ export default function LogbookView({ isViewOnly = false }) {
       'Waktu Mulai': formatTime24(r.waktu_mulai) || '',
       'Waktu Selesai': formatTime24(r.waktu_selesai) || '',
       'Program': r.program || '',
-      'Kategori': r.kategori || '',
-      'Judul Kegiatan': r.judul || '',
-      'Lokasi': r.lokasi || '',
       'Nama PIC Lapangan': r.pic_nama || '',
       'Kelompok Binaan': r.kelompok_binaan || r.ketua_kelompok || r.pihak_terlibat || '',
-      'Stakeholder / Pihak Lainnya': r.stakeholder || r.tim_pendamping || '',
-      'Jumlah Peserta': r.jumlah_peserta || 0,
+      'Stakeholder': r.stakeholder || r.tim_pendamping || '',
+      'Judul Kegiatan': r.judul || '',
       'Uraian Kegiatan': r.uraian_kegiatan || '',
-      'Output / Capaian': r.output_capaian || '',
-      'Status': r.status || 'Selesai',
-      'Kendala Lapangan': r.kendala || '-',
-      'Rencana Tindak Lanjut': r.tindak_lanjut || '-',
+      'Kategori': r.kategori || '',
+      'Lokasi': r.lokasi || '',
       'Link Lampiran': r.link_lampiran || ''
     }));
 
@@ -202,26 +228,28 @@ export default function LogbookView({ isViewOnly = false }) {
       { wch: 12 },  // Waktu Mulai
       { wch: 12 },  // Waktu Selesai
       { wch: 22 },  // Program
-      { wch: 22 },  // Kategori
-      { wch: 32 },  // Judul Kegiatan
-      { wch: 24 },  // Lokasi
       { wch: 20 },  // Nama PIC Lapangan
       { wch: 24 },  // Kelompok Binaan
-      { wch: 26 },  // Stakeholder
-      { wch: 14 },  // Jumlah Peserta
-      { wch: 45 },  // Uraian Kegiatan
-      { wch: 32 },  // Output
-      { wch: 12 },  // Status
-      { wch: 25 },  // Kendala
-      { wch: 25 },  // Tindak Lanjut
-      { wch: 30 }   // Link Lampiran
+      { wch: 24 },  // Stakeholder
+      { wch: 32 },  // Judul Kegiatan
+      { wch: 50 },  // Uraian Kegiatan
+      { wch: 22 },  // Kategori
+      { wch: 24 },  // Lokasi
+      { wch: 40 }   // Link Lampiran
     ];
 
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Log Book Kegiatan');
 
     const programLabel = selectedProgram !== 'all' ? selectedProgram.replace(/[^a-zA-Z0-9]/g, '_') : 'Semua_Program';
-    const fileName = `SCD_Logbook_${programLabel}_${new Date().toISOString().split('T')[0]}.xlsx`;
+    const periodLabel = selectedMonth !== 'all' && selectedYear !== 'all'
+      ? `${selectedYear}_${selectedMonth}`
+      : selectedYear !== 'all'
+        ? selectedYear
+        : selectedMonth !== 'all'
+          ? `Bulan_${selectedMonth}`
+          : 'Semua_Periode';
+    const fileName = `SCD_Logbook_${programLabel}_${periodLabel}_${new Date().toISOString().split('T')[0]}.xlsx`;
     XLSX.writeFile(workbook, fileName);
   };
 
@@ -406,7 +434,7 @@ GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO authenticated, service_role;`;
       </div>
 
       {/* KPI Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3.5">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5">
         <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-xs">
           <div className="text-gray-500 text-xs font-semibold mb-1">Total Kegiatan</div>
           <div className="text-2xl md:text-3xl font-black text-gray-900">{stats.total}</div>
@@ -414,29 +442,21 @@ GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO authenticated, service_role;`;
         </div>
 
         <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-xs">
-          <div className="text-gray-500 text-xs font-semibold mb-1">Kegiatan Selesai</div>
-          <div className="text-2xl md:text-3xl font-black text-emerald-600">{stats.selesai}</div>
-          <div className="text-[11px] text-emerald-700 mt-1 font-medium">
-            {stats.total > 0 ? `${Math.round((stats.selesai / stats.total) * 100)}% tuntas` : '0%'}
-          </div>
+          <div className="text-gray-500 text-xs font-semibold mb-1">Program Terkait</div>
+          <div className="text-2xl md:text-3xl font-black text-[#1e3a8a]">{stats.distinctPrograms}</div>
+          <div className="text-[11px] text-blue-700 mt-1 font-medium">Program SCD aktif</div>
         </div>
 
         <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-xs">
-          <div className="text-gray-500 text-xs font-semibold mb-1">Sedang Berjalan</div>
-          <div className="text-2xl md:text-3xl font-black text-amber-600">{stats.berjalan}</div>
-          <div className="text-[11px] text-amber-700 mt-1">In progress</div>
-        </div>
-
-        <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-xs">
-          <div className="text-gray-500 text-xs font-semibold mb-1">Ada Kendala</div>
-          <div className="text-2xl md:text-3xl font-black text-rose-600">{stats.kendala}</div>
-          <div className="text-[11px] text-rose-700 mt-1">Perlu tindak lanjut</div>
-        </div>
-
-        <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-xs col-span-2 md:col-span-1">
           <div className="text-gray-500 text-xs font-semibold mb-1">Foto Dokumentasi</div>
-          <div className="text-2xl md:text-3xl font-black text-[#1e3a8a]">{stats.totalPhotos}</div>
-          <div className="text-[11px] text-blue-700 mt-1">Tersimpan di GDrive</div>
+          <div className="text-2xl md:text-3xl font-black text-emerald-600">{stats.totalPhotos}</div>
+          <div className="text-[11px] text-emerald-700 mt-1">Tersimpan di GDrive</div>
+        </div>
+
+        <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-xs">
+          <div className="text-gray-500 text-xs font-semibold mb-1">Berkas Lampiran</div>
+          <div className="text-2xl md:text-3xl font-black text-amber-600">{stats.totalLampiran}</div>
+          <div className="text-[11px] text-amber-700 mt-1">Dokumen terunggah</div>
         </div>
       </div>
 
@@ -490,8 +510,8 @@ GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO authenticated, service_role;`;
 
         {/* Dropdown Filters & Download Actions (Sejajar) */}
         <div className="flex flex-col xl:flex-row items-stretch xl:items-end justify-between gap-3 pt-3 border-t border-gray-100 text-xs">
-          {/* 4 Dropdown Filters */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 flex-1">
+          {/* 5 Dropdown Filters */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 flex-1">
             <div>
               <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">
                 Program:
@@ -525,32 +545,47 @@ GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO authenticated, service_role;`;
 
             <div>
               <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">
-                Status:
+                PIC Lapangan:
               </label>
               <select
-                value={selectedStatus}
-                onChange={(e) => setSelectedStatus(e.target.value)}
+                value={selectedPic}
+                onChange={(e) => setSelectedPic(e.target.value)}
                 className="w-full px-2.5 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none font-medium cursor-pointer"
               >
-                <option value="all">Semua Status</option>
-                <option value="Selesai">Selesai</option>
-                <option value="Berjalan">Berjalan</option>
-                <option value="Ada Kendala">Ada Kendala</option>
+                <option value="all">Semua PIC ({availablePics.length})</option>
+                {availablePics.map((pic) => (
+                  <option key={pic} value={pic}>{pic}</option>
+                ))}
               </select>
             </div>
 
             <div>
               <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">
-                Bulan Kegiatan:
+                Bulan:
               </label>
               <select
                 value={selectedMonth}
                 onChange={(e) => setSelectedMonth(e.target.value)}
                 className="w-full px-2.5 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none font-medium cursor-pointer"
               >
-                <option value="all">Semua Bulan</option>
-                {availableMonths.map((m) => (
-                  <option key={m} value={m}>{m}</option>
+                {MONTH_OPTIONS.map((m) => (
+                  <option key={m.value} value={m.value}>{m.label}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">
+                Tahun:
+              </label>
+              <select
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(e.target.value)}
+                className="w-full px-2.5 py-1.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none font-medium cursor-pointer"
+              >
+                <option value="all">Semua Tahun</option>
+                {availableYears.map((y) => (
+                  <option key={y} value={y}>{y}</option>
                 ))}
               </select>
             </div>
@@ -611,10 +646,6 @@ GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO authenticated, service_role;`;
         <div className="grid grid-cols-1 gap-4">
           {filteredRecords.map((item) => {
             const hasPhotos = Array.isArray(item.foto_dokumentasi) && item.foto_dokumentasi.length > 0;
-            const statusColor =
-              item.status === 'Selesai' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
-                item.status === 'Berjalan' ? 'bg-amber-50 text-amber-700 border-amber-200' :
-                  'bg-rose-50 text-rose-700 border-rose-200';
 
             return (
               <div
@@ -630,9 +661,6 @@ GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO authenticated, service_role;`;
                       </span>
                       <span className="text-xs font-semibold text-gray-600 bg-gray-100 border border-gray-200 px-2 py-0.5 rounded-md">
                         {item.kategori}
-                      </span>
-                      <span className={`text-[11px] font-bold px-2 py-0.5 rounded-md border ${statusColor}`}>
-                        {item.status}
                       </span>
                     </div>
 
@@ -687,30 +715,6 @@ GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO authenticated, service_role;`;
                   <div className="mt-3 text-xs md:text-sm text-gray-700 leading-relaxed whitespace-pre-line">
                     {item.uraian_kegiatan}
                   </div>
-
-                  {/* Output & Kendala Badges */}
-                  {(item.output_capaian || item.kendala || item.tindak_lanjut) && (
-                    <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
-                      {item.output_capaian && (
-                        <div className="p-2.5 bg-emerald-50/70 border border-emerald-200/60 rounded-lg">
-                          <span className="font-bold text-emerald-800 block mb-0.5">Hasil / Output:</span>
-                          <span className="text-emerald-950">{item.output_capaian}</span>
-                        </div>
-                      )}
-                      {item.kendala && (
-                        <div className="p-2.5 bg-rose-50/70 border border-rose-200/60 rounded-lg">
-                          <span className="font-bold text-rose-800 block mb-0.5">Kendala:</span>
-                          <span className="text-rose-950">{item.kendala}</span>
-                        </div>
-                      )}
-                      {item.tindak_lanjut && (
-                        <div className="p-2.5 bg-blue-50/70 border border-blue-200/60 rounded-lg">
-                          <span className="font-bold text-blue-800 block mb-0.5">Tindak Lanjut:</span>
-                          <span className="text-blue-950">{item.tindak_lanjut}</span>
-                        </div>
-                      )}
-                    </div>
-                  )}
 
                   {/* Photos Grid */}
                   {hasPhotos && (
@@ -793,10 +797,9 @@ GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO authenticated, service_role;`;
                 <tr className="bg-slate-50 border-b border-gray-200 text-gray-700 font-bold uppercase tracking-wider">
                   <th className="py-3 px-3 w-10 text-center">No</th>
                   <th className="py-3 px-3">Tanggal & Program</th>
+                  <th className="py-3 px-3">PIC & Pihak Terkait</th>
                   <th className="py-3 px-4">Judul & Uraian Kegiatan</th>
-                  <th className="py-3 px-3">PIC Lapangan</th>
                   <th className="py-3 px-3">Kategori</th>
-                  <th className="py-3 px-3 text-center">Status</th>
                   <th className="py-3 px-3 text-center">Foto</th>
                   <th className="py-3 px-3 text-center">Lampiran</th>
                   {!isViewOnly && <th className="py-3 px-3 text-center">Aksi</th>}
@@ -816,10 +819,6 @@ GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO authenticated, service_role;`;
                       <div className="text-[11px] font-semibold text-[#1e3a8a]">{r.program}</div>
                       {r.lokasi && <div className="text-[10px] text-gray-400 truncate max-w-[140px]">{r.lokasi}</div>}
                     </td>
-                    <td className="py-3 px-4 max-w-sm">
-                      <div className="font-bold text-gray-900 leading-snug">{r.judul}</div>
-                      <div className="text-gray-500 text-[11px] line-clamp-2 mt-0.5">{r.uraian_kegiatan}</div>
-                    </td>
                     <td className="py-3 px-3 whitespace-nowrap font-medium text-gray-800">
                       <div className="font-bold text-gray-900">{r.pic_nama}</div>
                       {(r.kelompok_binaan || r.ketua_kelompok || r.pihak_terlibat) && (
@@ -833,17 +832,13 @@ GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO authenticated, service_role;`;
                         </div>
                       )}
                     </td>
+                    <td className="py-3 px-4 max-w-sm">
+                      <div className="font-bold text-gray-900 leading-snug">{r.judul}</div>
+                      <div className="text-gray-600 text-[11px] line-clamp-3 mt-0.5 whitespace-pre-line leading-relaxed">{r.uraian_kegiatan}</div>
+                    </td>
                     <td className="py-3 px-3 whitespace-nowrap">
                       <span className="px-2 py-0.5 bg-gray-100 rounded text-gray-700 text-[11px]">
                         {r.kategori}
-                      </span>
-                    </td>
-                    <td className="py-3 px-3 text-center whitespace-nowrap">
-                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${r.status === 'Selesai' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
-                          r.status === 'Berjalan' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
-                            'bg-rose-50 text-rose-700 border border-rose-200'
-                        }`}>
-                        {r.status}
                       </span>
                     </td>
                     <td className="py-3 px-3 text-center whitespace-nowrap">
@@ -939,12 +934,26 @@ GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO authenticated, service_role;`;
           >
             <div className="flex items-center justify-between px-5 py-3.5 bg-gray-900 text-white">
               <h4 className="text-xs md:text-sm font-bold truncate max-w-lg">{viewingPhoto.title}</h4>
-              <button
-                onClick={() => setViewingPhoto(null)}
-                className="p-1 text-gray-400 hover:text-white rounded-lg transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={async () => {
+                    const cleanTitle = (viewingPhoto.title || 'Foto_Logbook').replace(/[^a-zA-Z0-9]/g, '_');
+                    await downloadEvidenceImage(viewingPhoto.url, `${cleanTitle}.jpg`);
+                  }}
+                  className="flex items-center gap-1.5 px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition-all shadow-xs cursor-pointer"
+                  title="Download foto ke perangkat"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>Download</span>
+                </button>
+                <button
+                  onClick={() => setViewingPhoto(null)}
+                  className="p-1 text-gray-400 hover:text-white rounded-lg transition-colors cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
             </div>
             <div className="p-4 bg-slate-950 flex items-center justify-center max-h-[75vh] overflow-hidden">
               <EvidenceImage
@@ -963,8 +972,9 @@ GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO authenticated, service_role;`;
         records={filteredRecords}
         selectedProgram={selectedProgram}
         selectedCategory={selectedCategory}
-        selectedStatus={selectedStatus}
+        selectedPic={selectedPic}
         selectedMonth={selectedMonth}
+        selectedYear={selectedYear}
       />
     </div>
   );

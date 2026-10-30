@@ -3,7 +3,7 @@ import {
   FileText, Plus, Printer, Edit2, Trash2, Search, Filter, 
   Database, HardDrive, RefreshCw, AlertCircle, CheckCircle2,
   Calendar, MapPin, User, ChevronRight, Copy, Check, Camera,
-  Image as ImageIcon, Eye, X, ExternalLink, ZoomIn, ZoomOut, Maximize2
+  Image as ImageIcon, Eye, X, ExternalLink, ZoomIn, ZoomOut, Maximize2, Download
 } from 'lucide-react';
 import { monitoringService, getGDriveThumbnail } from '../services/monitoringService';
 import { programService } from '../services/programService';
@@ -11,6 +11,7 @@ import MonitoringFormModal from './monitoring/MonitoringFormModal';
 import MonitoringPrintModal from './monitoring/MonitoringPrintModal';
 import MonitoringAIEvaluation from './monitoring/MonitoringAIEvaluation';
 import EvidenceImage from './common/EvidenceImage';
+import { downloadEvidenceImage } from '../utils/downloadImage';
 
 export default function MonitoringView({ isViewOnly = false }) {
   const [records, setRecords] = useState([]);
@@ -614,11 +615,25 @@ ADD COLUMN IF NOT EXISTS ttd_penerima TEXT DEFAULT '';`;
                         />
                         <div className="p-2.5 w-full text-center text-xs font-semibold text-gray-700 bg-white border-t border-gray-100 flex items-center justify-between">
                           <span>Foto #{idx + 1}</span>
-                          {rawSrc && String(rawSrc).startsWith('http') && (
-                            <a href={rawSrc} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline flex items-center gap-1 text-[11px] font-semibold">
-                              Buka di GDrive <ExternalLink className="w-3 h-3" />
-                            </a>
-                          )}
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const prog = (viewingEvidence.title || 'Monitoring').replace(/[^a-zA-Z0-9]/g, '_');
+                                downloadEvidenceImage(rawSrc, `${prog}_Foto_${idx + 1}.jpg`);
+                              }}
+                              className="text-emerald-700 hover:text-emerald-800 flex items-center gap-1 text-[11px] font-bold bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-2.5 py-1 rounded-md transition-colors cursor-pointer"
+                              title="Download foto ke perangkat"
+                            >
+                              <Download className="w-3 h-3" />
+                              <span>Download</span>
+                            </button>
+                            {rawSrc && String(rawSrc).startsWith('http') && (
+                              <a href={rawSrc} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline flex items-center gap-1 text-[11px] font-semibold">
+                                GDrive <ExternalLink className="w-3 h-3" />
+                              </a>
+                            )}
+                          </div>
                         </div>
                       </div>
                     );
@@ -665,16 +680,30 @@ ADD COLUMN IF NOT EXISTS ttd_penerima TEXT DEFAULT '';`;
                               Ukuran Dokumen Proporsional
                             </span>
                           </div>
-                          {rawSrc && String(rawSrc).startsWith('http') && (
-                            <a
-                              href={rawSrc}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-blue-600 hover:underline flex items-center gap-1 text-[11px] font-semibold"
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const prog = (viewingEvidence.title || 'Monitoring').replace(/[^a-zA-Z0-9]/g, '_');
+                                downloadEvidenceImage(rawSrc, `${prog}_Presensi_${idx + 1}.jpg`);
+                              }}
+                              className="text-emerald-700 hover:text-emerald-800 flex items-center gap-1 text-[11px] font-bold bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-2.5 py-1 rounded-md transition-colors cursor-pointer"
+                              title="Download scan presensi ke perangkat"
                             >
-                              Buka di GDrive <ExternalLink className="w-3 h-3" />
-                            </a>
-                          )}
+                              <Download className="w-3 h-3" />
+                              <span>Download</span>
+                            </button>
+                            {rawSrc && String(rawSrc).startsWith('http') && (
+                              <a
+                                href={rawSrc}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 hover:underline flex items-center gap-1 text-[11px] font-semibold"
+                              >
+                                Buka di GDrive <ExternalLink className="w-3 h-3" />
+                              </a>
+                            )}
+                          </div>
                         </div>
 
                         {/* Canvas Kertas Dokumen (A4 Proportion, Crystal-Clear Rendering) */}
