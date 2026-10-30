@@ -106,7 +106,9 @@ export default function LogbookView({ isViewOnly = false }) {
       setStorageSource(res.source);
 
       const pList = await programService.fetchProgramList();
-      setProgramsList(pList || []);
+      const distinctFromRecords = (res.data || []).map((r) => r.program).filter(Boolean);
+      const uniqueProgs = Array.from(new Set([...(pList || []), ...distinctFromRecords])).filter((p) => p !== 'Kegiatan Lainnya');
+      setProgramsList([...uniqueProgs, 'Kegiatan Lainnya']);
     } catch (err) {
       console.error('Failed to load logbook records:', err);
     } finally {

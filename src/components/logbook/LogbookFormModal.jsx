@@ -144,12 +144,15 @@ export default function LogbookFormModal({ initialData, onClose, onSave }) {
       setLoadingPrograms(true);
       try {
         const list = await programService.fetchProgramList();
-        setPrograms(list || []);
-        if (!formData.program && list && list.length > 0) {
-          setFormData((prev) => ({ ...prev, program: list[0] }));
+        const baseList = (list && list.length > 0) ? list.filter((p) => p !== 'Kegiatan Lainnya') : [];
+        const fullList = [...baseList, 'Kegiatan Lainnya'];
+        setPrograms(fullList);
+        if (!formData.program && fullList.length > 0) {
+          setFormData((prev) => ({ ...prev, program: fullList[0] }));
         }
       } catch (err) {
         console.error('Failed to load program list:', err);
+        setPrograms(['Kegiatan Lainnya']);
       } finally {
         setLoadingPrograms(false);
       }
