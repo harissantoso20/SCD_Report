@@ -2,6 +2,7 @@ import React, { Suspense, lazy, useEffect } from 'react';
 import useAppStore from './store/useAppStore';
 import logoPTBA from './assets/logo/logo-ptba.png';
 import logoMoraFlat from './assets/logo/logo-mora-flat.png';
+import { getTabFromUrl } from './utils/routeUtils';
 
 // Dynamic compile-time metadata from Vite
 const APP_VERSION = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '2.1.0';
@@ -65,7 +66,15 @@ export default function App() {
 
   useEffect(() => {
     initializeAuth();
-  }, [initializeAuth]);
+
+    const handlePopState = () => {
+      const tab = getTabFromUrl();
+      setActiveTab(tab);
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [initializeAuth, setActiveTab]);
 
   // View-only / Eksekutif users (Akses: Hanya Home & Dashboard)
   const viewOnlyEmails = [
@@ -105,7 +114,7 @@ export default function App() {
               <img src={logoPTBA} alt="Logo PTBA" className="h-10 md:h-14 w-auto object-contain" />
               <div className="h-7 md:h-8 w-[1.5px] bg-gray-200"></div>
               <div className="flex items-center gap-2">
-                <img src={logoMoraFlat} alt="Logo MORA SCD" className="h-9 md:h-12 w-auto object-contain" />
+                <img src={logoMoraFlat} alt="Logo MORA SCD" className="h-10 md:h-14 w-auto object-contain" />
                 <span className="font-extrabold text-[#1e3a8a] text-sm md:text-base tracking-tight hidden sm:inline">MORA SCD</span>
               </div>
             </div>

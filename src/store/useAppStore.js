@@ -8,10 +8,14 @@ import { beneficiaryService } from '../services/beneficiaryService';
 import { homeService } from '../services/homeService';
 import { getMonthStrings, getYear, getIndoMonthString } from '../utils/dateUtils';
 import { getFuzzyKeyword } from '../utils/programUtils';
+import { getTabFromUrl, syncUrlWithTab } from '../utils/routeUtils';
 
 const useAppStore = create((set, get) => ({
-  activeTab: "Home",
-  setActiveTab: (tab) => set({ activeTab: tab }),
+  activeTab: getTabFromUrl(),
+  setActiveTab: (tab) => {
+    syncUrlWithTab(tab);
+    set({ activeTab: tab });
+  },
 
   // Home Data State
   homeData: null,
@@ -25,10 +29,14 @@ const useAppStore = create((set, get) => ({
     authService.initializeAuth((session) => {
       const user = session?.user ?? null;
       const assignedProgram = user?.user_metadata?.program || null;
+      const currentTab = get().activeTab || getTabFromUrl();
+      const targetTab = assignedProgram ? 'Data Entry' : currentTab;
+      syncUrlWithTab(targetTab, true);
       set({ 
         user, 
         assignedProgram, 
         isAuthLoading: false,
+        activeTab: targetTab,
         ...(assignedProgram ? { globalProgram: assignedProgram } : {})
       });
     });
@@ -38,11 +46,14 @@ const useAppStore = create((set, get) => ({
     const { data, error } = await authService.login(email, password);
     if (!error && data?.user) {
       const assignedProgram = data.user.user_metadata?.program || null;
+      const currentTab = get().activeTab || getTabFromUrl();
+      const targetTab = assignedProgram ? 'Data Entry' : (currentTab !== 'Home' ? currentTab : 'Home');
+      syncUrlWithTab(targetTab, true);
       set({ 
         user: data.user,
         assignedProgram, 
         isAuthLoading: false,
-        activeTab: assignedProgram ? 'Data Entry' : 'Home',
+        activeTab: targetTab,
         ...(assignedProgram ? { globalProgram: assignedProgram } : {})
       });
     }
@@ -51,7 +62,8 @@ const useAppStore = create((set, get) => ({
 
   logout: async () => {
     await authService.logout();
-    set({ user: null, assignedProgram: null, activeTab: 'Dashboard' }); 
+    syncUrlWithTab('Home', true);
+    set({ user: null, assignedProgram: null, activeTab: 'Home' }); 
   },
   
   globalProgram: "PLTS IRIGASI",
