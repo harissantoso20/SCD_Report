@@ -4,6 +4,8 @@ import useAppStore from '../../store/useAppStore';
 import { X, Printer, FileText } from 'lucide-react';
 import ExecutiveInfographics from './ExecutiveInfographics';
 import ExecutiveAIInsight from './ExecutiveAIInsight';
+import logoPTBA from '../../assets/logo/logo-ptba.png';
+import logoMoraFlat from '../../assets/logo/logo-mora-flat.png';
 
 const INDO_MONTHS = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
 const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
@@ -246,16 +248,20 @@ export default function ExecutiveReportModal({ isOpen, onClose }) {
       >
         {/* ── HEADER DOKUMEN LAPORAN ── */}
         <div className="border-b-2 border-[#1e3a8a] pb-3 mb-5 flex items-start justify-between gap-4">
-          <div>
-            <span className="inline-block px-2.5 py-0.5 bg-blue-50 border border-blue-200 text-[#1e3a8a] text-[9.5px] font-extrabold rounded uppercase tracking-wider mb-1.5">
-              Laporan Analitik Kinerja Eksekutif
-            </span>
-            <h1 className="text-xl sm:text-2xl font-black text-slate-900 uppercase tracking-tight">
-              {selectedProgram}
-            </h1>
-            <p className="text-xs font-semibold text-slate-600 mt-0.5">
-              PT Bukit Asam (Persero) Tbk. · Unit Pertambangan Tanjung Enim · Periode: <span className="font-extrabold text-[#1e3a8a]">{currentMonthName} {currentYearStr}</span>
-            </p>
+          <div className="flex items-center gap-3.5">
+            <img src={logoPTBA} alt="Logo PTBA" className="h-12 sm:h-14 w-auto object-contain" />
+            <img src={logoMoraFlat} alt="Logo MORA SCD" className="h-11 sm:h-13 w-auto object-contain" />
+            <div className="border-l-2 border-slate-300 pl-3">
+              <span className="inline-block px-2.5 py-0.5 bg-blue-50 border border-blue-200 text-[#1e3a8a] text-[9.5px] font-extrabold rounded uppercase tracking-wider mb-1">
+                Laporan Analitik Kinerja Eksekutif
+              </span>
+              <h1 className="text-xl sm:text-2xl font-black text-slate-900 uppercase tracking-tight">
+                {selectedProgram}
+              </h1>
+              <p className="text-xs font-semibold text-slate-600 mt-0.5">
+                MORA SCD · PT Bukit Asam (Persero) Tbk. · Unit Pertambangan Tanjung Enim · Periode: <span className="font-extrabold text-[#1e3a8a]">{currentMonthName} {currentYearStr}</span>
+              </p>
+            </div>
           </div>
           <div className="text-right flex flex-col items-end shrink-0">
             <span className="text-[10px] font-medium text-slate-400">Tanggal Cetak:</span>

@@ -2,6 +2,8 @@ import React, { useRef } from 'react';
 import { createPortal } from 'react-dom';
 import useAppStore from '../../store/useAppStore';
 import { X, Printer, FileText, Users, UserCheck, Baby } from 'lucide-react';
+import logoPTBA from '../../assets/logo/logo-ptba.png';
+import logoMoraFlat from '../../assets/logo/logo-mora-flat.png';
 
 export default function BeneficiaryPdfModal({ isOpen, onClose, data }) {
   const reportRef = useRef(null);
@@ -71,15 +73,19 @@ export default function BeneficiaryPdfModal({ isOpen, onClose, data }) {
         id="beneficiary-report-document"
         className="w-full max-w-4xl bg-white border border-slate-200 border-t-0 print:border-none rounded-b-xl print:rounded-none p-6 sm:p-8 shadow-xl print:shadow-none text-slate-800 font-sans print:p-0 print:w-full print:max-w-none"
       >
-        {/* ── HEADER DOKUMEN (TANPA KOP FORMAL) ── */}
+        {/* ── HEADER DOKUMEN ── */}
         <div className="border-b-2 border-[#1e3a8a] pb-3 mb-4 flex items-center justify-between">
-          <div>
-            <h2 className="text-base sm:text-lg font-black text-[#1e3a8a] uppercase tracking-tight">
-              Data Anggota Binaan · {selectedProgram}
-            </h2>
-            <p className="text-[11px] text-slate-500 font-medium mt-0.5">
-              Dicetak per: <span className="font-semibold text-slate-700">{currentDateFormatted}</span> · Status Terdaftar: <span className="font-extrabold text-[#1e3a8a]">{totalAnggota} Orang</span>
-            </p>
+          <div className="flex items-center gap-3">
+            <img src={logoPTBA} alt="Logo PTBA" className="h-10 w-auto object-contain" />
+            <img src={logoMoraFlat} alt="Logo MORA SCD" className="h-9 w-auto object-contain" />
+            <div className="border-l-2 border-slate-300 pl-3">
+              <h2 className="text-base sm:text-lg font-black text-[#1e3a8a] uppercase tracking-tight">
+                Data Anggota Binaan · {selectedProgram}
+              </h2>
+              <p className="text-[11px] text-slate-500 font-medium mt-0.5">
+                MORA SCD · Dicetak per: <span className="font-semibold text-slate-700">{currentDateFormatted}</span> · Terdaftar: <span className="font-extrabold text-[#1e3a8a]">{totalAnggota} Orang</span>
+              </p>
+            </div>
           </div>
           <span className="px-2.5 py-1 bg-slate-100 border border-slate-200 text-slate-700 text-[10px] font-bold rounded uppercase tracking-wider">
             Rekap Anggota

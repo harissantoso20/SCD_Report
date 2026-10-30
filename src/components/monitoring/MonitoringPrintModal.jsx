@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Printer, X, FileText, Camera, CheckSquare } from 'lucide-react';
 import logoPTBA from '../../assets/logo/logo-ptba.png';
+import logoMoraFlat from '../../assets/logo/logo-mora-flat.png';
 
 export default function MonitoringPrintModal({ record, onClose }) {
   const printAreaRef = useRef(null);
@@ -417,8 +418,12 @@ export default function MonitoringPrintModal({ record, onClose }) {
                     PT BUKIT ASAM (PERSERO) TBK.
                   </h2>
                 </div>
-                <div className="w-24 text-right">
-                  {/* Spacer */}
+                <div className="w-24 flex justify-end">
+                  <img
+                    src={logoMoraFlat}
+                    alt="Logo MORA SCD"
+                    className="h-12 w-auto object-contain"
+                  />
                 </div>
               </div>
 
@@ -605,7 +610,10 @@ export default function MonitoringPrintModal({ record, onClose }) {
                       Program: {record.program} • Lokasi: {record.lokasi || '-'} ({formatDateIndo(record.tanggal)})
                     </p>
                   </div>
-                  <img src={logoPTBA} alt="Logo PTBA" className="h-9 w-auto object-contain" />
+                  <div className="flex items-center gap-2">
+                    <img src={logoPTBA} alt="Logo PTBA" className="h-9 w-auto object-contain" />
+                    <img src={logoMoraFlat} alt="Logo MORA SCD" className="h-8 w-auto object-contain" />
+                  </div>
                 </div>
 
                 {/* Foto Grid Adaptif & Rapi */}
@@ -669,7 +677,10 @@ export default function MonitoringPrintModal({ record, onClose }) {
                           Program: {record.program} • Lokasi: {record.lokasi || '-'} ({formatDateIndo(record.tanggal)})
                         </p>
                       </div>
-                      <img src={logoPTBA} alt="Logo PTBA" className="h-9 w-auto object-contain" />
+                      <div className="flex items-center gap-2">
+                        <img src={logoPTBA} alt="Logo PTBA" className="h-9 w-auto object-contain" />
+                        <img src={logoMoraFlat} alt="Logo MORA SCD" className="h-8 w-auto object-contain" />
+                      </div>
                     </div>
 
                     {/* Scan Container */}

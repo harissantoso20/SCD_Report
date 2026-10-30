@@ -2,6 +2,7 @@ import React, { useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Printer, FileText, CheckCircle2, Clock, AlertTriangle, Users, User } from 'lucide-react';
 import logoPTBA from '../../assets/logo/logo-ptba.png';
+import logoMoraFlat from '../../assets/logo/logo-mora-flat.png';
 
 const formatTime24 = (val) => {
   if (!val) return '';
@@ -121,14 +122,15 @@ export default function LogbookPdfModal({
       >
         {/* Header Kop Dokumen */}
         <div className="border-b-2 border-[#1e3a8a] pb-4 mb-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3.5">
             <img src={logoPTBA} alt="Logo PTBA" className="h-12 md:h-14 w-auto object-contain" />
-            <div>
+            <img src={logoMoraFlat} alt="Logo MORA SCD" className="h-11 md:h-13 w-auto object-contain" />
+            <div className="border-l-2 border-slate-300 pl-3">
               <h2 className="text-sm sm:text-base font-black text-[#1e3a8a] uppercase tracking-tight">
                 JURNAL LOG BOOK KEGIATAN OPERASIONAL
               </h2>
               <p className="text-xs text-slate-600 font-bold">
-                SUSTAINABLE COMMUNITY DEVELOPMENT (SCD) · PT BUKIT ASAM (PERSERO) TBK
+                MORA SCD · SUSTAINABLE COMMUNITY DEVELOPMENT · PT BUKIT ASAM (PERSERO) TBK
               </p>
             </div>
           </div>

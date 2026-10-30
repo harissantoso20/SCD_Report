@@ -1,6 +1,7 @@
 import React, { Suspense, lazy, useEffect } from 'react';
 import useAppStore from './store/useAppStore';
 import logoPTBA from './assets/logo/logo-ptba.png';
+import logoMoraFlat from './assets/logo/logo-mora-flat.png';
 
 // Dynamic compile-time metadata from Vite
 const APP_VERSION = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '2.1.0';
@@ -100,8 +101,13 @@ export default function App() {
       <div className="min-h-screen bg-[#f8f9fa] flex flex-col w-full">
         <header className="bg-white border-b border-gray-200 sticky top-0 px-4 md:px-6 lg:px-8 xl:px-10 py-3 md:py-4 shadow-sm w-full z-50">
           <div className="w-full max-w-[1800px] mx-auto flex flex-col md:flex-row items-center justify-between gap-3 md:gap-0">
-            <div className="flex items-center gap-3">
-              <img src={logoPTBA} alt="Logo PTBA" className="h-12 md:h-16 w-auto object-contain" />
+            <div className="flex items-center gap-3 md:gap-3.5">
+              <img src={logoPTBA} alt="Logo PTBA" className="h-10 md:h-14 w-auto object-contain" />
+              <div className="h-7 md:h-8 w-[1.5px] bg-gray-200"></div>
+              <div className="flex items-center gap-2">
+                <img src={logoMoraFlat} alt="Logo MORA SCD" className="h-9 md:h-12 w-auto object-contain" />
+                <span className="font-extrabold text-[#1e3a8a] text-sm md:text-base tracking-tight hidden sm:inline">MORA SCD</span>
+              </div>
             </div>
             <nav className="flex items-center gap-4 md:gap-6 font-bold text-xs md:text-sm uppercase tracking-wide">
               <button 

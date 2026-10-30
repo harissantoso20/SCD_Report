@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import useAppStore from '../store/useAppStore';
 import logoPTBA from '../assets/logo/logo ptba putih.png';
 import logoSDGs from '../assets/logo/Logo-SDGs-bundar.png';
+import logoMoraFlat from '../assets/logo/logo-mora-flat.png';
 import { AlertTriangle } from './Icons';
 import bgLogin from '../assets/banner/background log in.png';
 
@@ -58,12 +59,16 @@ export default function LoginView() {
         <div className="w-full md:w-[420px] flex-shrink-0 flex flex-col p-8 sm:p-12 bg-black/50">
         
           <div className="flex flex-col items-center mb-8">
-            <img src={logoPTBA} alt="Logo PTBA" className="h-14 w-auto object-contain mb-6 drop-shadow-lg" />
+            <div className="flex items-center gap-3 mb-5">
+              <img src={logoPTBA} alt="Logo PTBA" className="h-12 w-auto object-contain drop-shadow-lg" />
+              <div className="h-7 w-[1.5px] bg-white/30"></div>
+              <img src={logoMoraFlat} alt="Logo MORA SCD" className="h-10 w-auto object-contain drop-shadow-lg" />
+            </div>
             <h2 className="text-3xl font-normal text-white mb-2 text-center tracking-wide">
               Welcome <span className="font-bold">back!</span>
             </h2>
             <p className="text-sm text-blue-100/80 font-medium text-center">
-              Sign in to access report
+              Sign in to access MORA SCD report
             </p>
           </div>
 
